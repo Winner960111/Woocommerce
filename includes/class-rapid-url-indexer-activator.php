@@ -43,7 +43,7 @@ class Rapid_URL_Indexer_Activator {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
 
-        // Schedule cron jobs
+        // Schedule hourly cron job to update project status
         if (!wp_next_scheduled('rui_cron_job')) {
             wp_schedule_event(time(), 'hourly', 'rui_cron_job');
         }

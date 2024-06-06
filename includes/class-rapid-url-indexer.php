@@ -53,7 +53,7 @@ class Rapid_URL_Indexer {
     }
 
     private static function define_hooks() {
-        add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs'));
+        add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs')); // Hourly cron job to update project status
         add_action('rui_process_api_request', array('Rapid_URL_Indexer', 'process_api_request'), 10, 3);
         add_action('rest_api_init', array('Rapid_URL_Indexer', 'register_rest_routes'));
     }
@@ -146,7 +146,10 @@ class Rapid_URL_Indexer {
     }
 
     public static function process_cron_jobs() {
-        // Code to process scheduled tasks like checking API status and auto refunds
+        // Update project status hourly
+        self::update_project_status();
+        
+        // Process auto refunds
         self::auto_refund();
     }
 
