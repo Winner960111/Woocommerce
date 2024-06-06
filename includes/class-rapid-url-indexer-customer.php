@@ -4,9 +4,32 @@ class Rapid_URL_Indexer_Customer {
         add_action('init', array(__CLASS__, 'customer_menu'));
         add_shortcode('rui_credits_display', array(__CLASS__, 'credits_display'));
         add_shortcode('rui_project_submission', array(__CLASS__, 'project_submission'));
+        add_shortcode('rui_api_key_display', array(__CLASS__, 'api_key_display'));
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
         add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
         add_action('woocommerce_order_status_completed', array(__CLASS__, 'handle_order_completed'));
+        add_action('user_register', array(__CLASS__, 'generate_api_key'));
+    }
+
+    public static function generate_api_key($user_id) {
+        $api_key = wp_generate_password(32, false);
+        update_user_meta($user_id, 'rui_api_key', $api_key);
+    }
+
+    public static function api_key_display() {
+        if (!is_user_logged_in()) {
+            return;
+        }
+
+        $user_id = get_current_user_id();
+        $api_key = get_user_meta($user_id, 'rui_api_key', true);
+
+        if (!$api_key) {
+            $api_key = wp_generate_password(32, false);
+            update_user_meta($user_id, 'rui_api_key', $api_key);
+        }
+
+        return '<div class="rui-api-key-display">Your API Key: <code>' . esc_html($api_key) . '</code></div>';
     }
 
     public static function handle_order_completed($order_id) {

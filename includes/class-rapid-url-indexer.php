@@ -63,6 +63,89 @@ class Rapid_URL_Indexer {
     private static function define_hooks() {
         add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs'));
         add_action('rui_process_api_request', array('Rapid_URL_Indexer', 'process_api_request'), 10, 3);
+        add_action('rest_api_init', array('Rapid_URL_Indexer', 'register_rest_routes'));
+    }
+
+    public static function register_rest_routes() {
+        register_rest_route('rui/v1', '/projects', array(
+            'methods' => 'POST',
+            'callback' => array('Rapid_URL_Indexer', 'handle_project_submission'),
+            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
+        ));
+
+        register_rest_route('rui/v1', '/projects/(?P<id>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array('Rapid_URL_Indexer', 'get_project_status'),
+            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
+        ));
+
+        register_rest_route('rui/v1', '/projects/(?P<id>\d+)/report', array(
+            'methods' => 'GET',
+            'callback' => array('Rapid_URL_Indexer', 'download_project_report'),
+            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
+        ));
+
+        register_rest_route('rui/v1', '/credits/balance', array(
+            'methods' => 'GET',
+            'callback' => array('Rapid_URL_Indexer', 'get_credits_balance'),
+            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
+        ));
+    }
+
+    public static function authenticate_api_request($request) {
+        $api_key = $request->get_header('X-API-Key');
+        if (!$api_key) {
+            return new WP_Error('rest_forbidden', 'API key is missing', array('status' => 403));
+        }
+
+        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
+        if (empty($user)) {
+            return new WP_Error('rest_forbidden', 'Invalid API key', array('status' => 403));
+        }
+
+        return true;
+    }
+
+    public static function handle_project_submission($request) {
+        $params = $request->get_params();
+        $project_name = sanitize_text_field($params['project_name']);
+        $urls = $params['urls'];
+        $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
+
+        // Validate and process the project submission
+        // ...
+
+        return new WP_REST_Response(array('message' => 'Project created', 'project_id' => $project_id), 200);
+    }
+
+    public static function get_project_status($request) {
+        $project_id = $request['id'];
+
+        // Fetch project status from the database
+        // ...
+
+        return new WP_REST_Response(array(
+            'project_id' => $project_id,
+            'status' => $project_status,
+            'submitted_links' => $submitted_links,
+            'indexed_links' => $indexed_links
+        ), 200);
+    }
+
+    public static function download_project_report($request) {
+        $project_id = $request['id'];
+
+        // Generate and return the project report CSV
+        // ...
+
+        return new WP_REST_Response($report_csv, 200, array('Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="project-report.csv"'));
+    }
+
+    public static function get_credits_balance($request) {
+        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
+        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
+
+        return new WP_REST_Response(array('credits' => $credits), 200);
     }
 
     public static function process_cron_jobs() {
