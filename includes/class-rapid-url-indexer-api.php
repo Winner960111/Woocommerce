@@ -59,13 +59,13 @@ class Rapid_URL_Indexer_API {
     private static function make_api_request($method, $endpoint, $api_key, $body = array()) {
         $retries = 0;
         
-        while ($retries < self::$api_max_retries) {
+        while ($retries < self::API_MAX_RETRIES) {
             // Implement rate limiting
             static $last_request_time = 0;
             $current_time = microtime(true);
             $elapsed_time = $current_time - $last_request_time;
             
-            if ($elapsed_time < 1 / self::$api_rate_limit) {
+            if ($elapsed_time < 1 / self::API_RATE_LIMIT) {
                 usleep((1 / self::API_RATE_LIMIT - $elapsed_time) * 1000000);
             }
             

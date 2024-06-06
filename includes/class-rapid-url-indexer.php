@@ -22,7 +22,7 @@ class Rapid_URL_Indexer {
 
                 if ($response && isset($response['result']['indexed_count'])) {
                     $indexed_count = $response['result']['indexed_count'];
-                    $total_urls = count(json_decode($project->urls));
+                    $total_urls = count(json_decode($project->urls, true));
                     $unindexed_count = $total_urls - $indexed_count;
                     $refund_credits = ceil($unindexed_count * 0.8);
 
@@ -42,14 +42,6 @@ class Rapid_URL_Indexer {
                     ));
                 }
             }
-        }
-
-        // Schedule the next auto refund for projects submitted exactly 14 days ago
-        $fourteen_days_ago = date('Y-m-d H:i:s', strtotime('-14 days'));
-        $next_refund_projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE status = 'submitted' AND created_at = %s", $fourteen_days_ago));
-
-        if (!empty($next_refund_projects)) {
-            wp_schedule_single_event(time() + HOUR_IN_SECONDS, 'rui_auto_refund');
         }
     }
 
@@ -154,6 +146,8 @@ class Rapid_URL_Indexer {
     }
 
     public static function process_api_request($project_id, $urls, $notify) {
+        global $wpdb;
+
         // Get API key
         $api_key = get_option('speedyindex_api_key');
     
@@ -179,14 +173,6 @@ class Rapid_URL_Indexer {
             // Notify user if required
             if ($notify) {
                 $user_info = get_userdata($user_id);
-                wp_mail(
-                    $user_info->user_email,
-                    __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
-                    __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
-                );
-            }
-            if ($notify) {
-                $user_info = get_userdata(get_current_user_id());
                 wp_mail(
                     $user_info->user_email,
                     __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
