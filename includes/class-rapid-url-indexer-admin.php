@@ -51,6 +51,13 @@ class Rapid_URL_Indexer_Admin {
             $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $credits));
         }
     }
+
+    public static function get_user_credits($user_id) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
+        $credits = $wpdb->get_var($wpdb->prepare("SELECT credits FROM $table_name WHERE user_id = %d", $user_id));
+        return $credits ? $credits : 0;
+    }
     
 }
 ?>

@@ -26,5 +26,10 @@ require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer.php';
 register_activation_hook(__FILE__, array('Rapid_URL_Indexer_Activator', 'activate'));
 register_deactivation_hook(__FILE__, array('Rapid_URL_Indexer_Deactivator', 'deactivate'));
 
-// Initialize the plugin
 add_action('plugins_loaded', array('Rapid_URL_Indexer', 'init'));
+
+// Schedule auto refund cron job
+if (!wp_next_scheduled('rui_auto_refund')) {
+    wp_schedule_event(time(), 'daily', 'rui_auto_refund');
+}
+add_action('rui_auto_refund', array('Rapid_URL_Indexer', 'auto_refund'));

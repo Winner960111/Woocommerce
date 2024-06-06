@@ -21,7 +21,8 @@ class Rapid_URL_Indexer_API {
             'body' => json_encode(array('urls' => $urls))
         ));
 
-        return wp_remote_retrieve_body($response);
+        $body = wp_remote_retrieve_body($response);
+        return json_decode($body, true);
     }
 
     public static function get_task_status($api_key, $task_id) {

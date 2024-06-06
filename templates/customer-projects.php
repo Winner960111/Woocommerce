@@ -14,6 +14,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 
 <div class="rui-projects">
     <h2>My Projects</h2>
+    <?php echo do_shortcode('[rui_credits_display]'); ?>
     <?php echo do_shortcode('[rui_project_submission]'); ?>
     <h3>Project List</h3>
     <table>
