@@ -21,6 +21,7 @@ class Rapid_URL_Indexer_Activator {
             user_id mediumint(9) NOT NULL,
             project_name varchar(255) NOT NULL,
             urls longtext NOT NULL,
+            task_id varchar(255) DEFAULT NULL,
             status varchar(50) DEFAULT 'pending',
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             auto_refund_processed tinyint(1) DEFAULT 0,

@@ -166,6 +166,12 @@ class Rapid_URL_Indexer {
     
         // Handle response and update project status
         if ($response && isset($response['task_id'])) {
+            $task_id = $response['task_id'];
+
+            // Update project with task ID
+            $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+            $wpdb->update($table_name, array('task_id' => $task_id), array('id' => $project_id));
+
             // Deduct credits and update project status
             Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
             

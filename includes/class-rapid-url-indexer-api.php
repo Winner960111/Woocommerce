@@ -137,7 +137,17 @@ class Rapid_URL_Indexer_API {
         $response = self::make_api_request('POST', '/v2/task/google/indexer/report', $api_key, array('task_id' => $task_id));
         
         if (self::is_api_response_success($response)) {
-            return wp_remote_retrieve_body($response);
+            $report_data = json_decode(wp_remote_retrieve_body($response), true);
+            
+            $csv_data = "URL,Status\n";
+            foreach ($report_data['result']['indexed_links'] as $url) {
+                $csv_data .= "$url,Indexed\n";
+            }
+            foreach ($report_data['result']['unindexed_links'] as $url) {
+                $csv_data .= "$url,Not Indexed\n";
+            }
+
+            return $csv_data;
         } else {
             self::log_api_error($response);
             return false;
