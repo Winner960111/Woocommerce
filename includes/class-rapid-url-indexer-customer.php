@@ -36,10 +36,11 @@ class Rapid_URL_Indexer_Customer {
         $order = wc_get_order($order_id);
         foreach ($order->get_items() as $item) {
             $product_id = $item->get_product_id();
-            if (get_post_meta($product_id, '_is_credits_product', true) === 'yes') {
+            $credits = get_post_meta($product_id, '_credits_amount', true);
+            if ($credits) {
                 $user_id = $order->get_user_id();
                 $quantity = $item->get_quantity();
-                self::update_user_credits($user_id, $quantity);
+                self::update_user_credits($user_id, $credits * $quantity);
             }
         }
     }

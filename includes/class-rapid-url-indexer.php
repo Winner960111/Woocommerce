@@ -19,8 +19,7 @@ class Rapid_URL_Indexer {
                 if ($response && isset($response['result']['indexed_count'])) {
                     $indexed_count = $response['result']['indexed_count'];
                     $total_urls = count(json_decode($project->urls, true));
-                    $unindexed_count = $total_urls - $indexed_count;
-                    $refund_credits = ceil($unindexed_count * 0.8);
+                    $refund_credits = $total_urls - $indexed_count;
 
                     // Refund credits
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refund_credits);
