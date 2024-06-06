@@ -108,7 +108,7 @@ class Rapid_URL_Indexer_Customer {
         self::schedule_api_request($project_id, $urls, $notify);
     }
 
-    private static function update_user_credits($user_id, $amount) {
+    public static function update_user_credits($user_id, $amount) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = self::get_user_credits($user_id);
@@ -125,7 +125,7 @@ class Rapid_URL_Indexer_Customer {
         wp_schedule_single_event(time() + 60, 'rui_process_api_request', array($project_id, $urls, $notify));
     }
 
-    private static function get_user_credits($user_id) {
+    public static function get_user_credits($user_id) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = $wpdb->get_var($wpdb->prepare("SELECT credits FROM $table_name WHERE user_id = %d", $user_id));
