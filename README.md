@@ -9,13 +9,13 @@
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Ensure WooCommerce is installed and activated.
 
-**Setting Up Credits Product:**
+**Setting Up Credits Products:**
 1. Go to WooCommerce > Products > Add New.
-2. Create a new product named "Indexing Credits" or similar.
+2. Create a new product for each credit bundle you want to offer (e.g., "100 Indexing Credits", "500 Indexing Credits", etc.).
 3. Set the product type to "Simple Product".
-4. Set the price per credit. For example, if you want to sell 1 credit for $1, set the regular price to $1.
-5. In the "Product Data" section, go to the "Advanced" tab and add a custom field with the name `_is_credits_product` and value `yes`.
-6. Publish the product.
+4. Set the price for the credit bundle.
+5. In the "Product Data" section, go to the "Advanced" tab and add a custom field with the name `_credits_amount` and the value equal to the number of credits in the bundle.
+6. Publish the products.
 
 **Configuring the Plugin:**
 1. Go to the Rapid URL Indexer settings page in the WordPress admin area.
