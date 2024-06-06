@@ -85,19 +85,6 @@ class Rapid_URL_Indexer_Customer {
 
     public static function project_submission() {
         ob_start();
-        if (isset($_POST['project_name']) && isset($_POST['urls'])) {
-            $project_name = sanitize_text_field($_POST['project_name']);
-            $urls = explode("\n", sanitize_textarea_field($_POST['urls']));
-            $urls = array_map('trim', $urls);
-            $urls = array_filter($urls, function($url) {
-                return filter_var($url, FILTER_VALIDATE_URL);
-            });
-            $notify = isset($_POST['notify']) ? 1 : 0;
-
-            if (count($urls) > 0 && count($urls) <= 9999) {
-                self::submit_project($project_name, $urls, $notify);
-            }
-        }
         ?>
         <form id="rui-project-submission-form" method="post" action="">
             <label for="project_name">Project Name:</label>
