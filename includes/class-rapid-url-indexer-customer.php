@@ -17,7 +17,10 @@ class Rapid_URL_Indexer_Customer {
                 $user_id = $order->get_user_id();
                 $quantity = $item->get_quantity();
                 self::update_user_credits($user_id, $quantity);
+            }
         }
+    }
+    
     }
     
     public static function handle_ajax_project_submission() {
@@ -40,6 +43,9 @@ class Rapid_URL_Indexer_Customer {
 
         // Log the credit change
         self::log_credit_change($user_id, $amount);
+    }
+
+        wp_send_json_error(__('Invalid URL list. Please check and try again.', 'rapid-url-indexer'));
     }
 
     private static function log_credit_change($user_id, $amount) {
