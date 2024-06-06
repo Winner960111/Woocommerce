@@ -5,7 +5,27 @@ class Rapid_URL_Indexer_Customer {
         add_shortcode('rui_credits_display', array(__CLASS__, 'credits_display'));
         add_shortcode('rui_project_submission', array(__CLASS__, 'project_submission'));
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
+        add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
     }
+    
+    public static function handle_ajax_project_submission() {
+        check_ajax_referer('rui_project_submission', 'security');
+    
+        $project_name = sanitize_text_field($_POST['project_name']);
+        $urls = explode("\n", sanitize_textarea_field($_POST['urls']));
+        $urls = array_map('trim', $urls);
+        $urls = array_filter($urls, function($url) {
+            return filter_var($url, FILTER_VALIDATE_URL);
+        });
+        $notify = isset($_POST['notify']) ? 1 : 0;
+    
+        if (count($urls) > 0 && count($urls) <= 9999) {
+            self::submit_project($project_name, $urls, $notify);
+            wp_send_json_success(__('Project submitted successfully.', 'rapid-url-indexer'));
+        } else {
+            wp_send_json_error(__('Invalid URL list. Please check and try again.', 'rapid-url-indexer'));
+        }
+    }    
 
     public static function customer_menu() {
         add_rewrite_rule('^my-account/projects/?', 'index.php?is_projects_page=1', 'top');
@@ -53,14 +73,16 @@ class Rapid_URL_Indexer_Customer {
         }
         ?>
         <form id="rui-project-submission-form" method="post" action="">
-            <label for="project_name">Project Name:</label>
-            <input type="text" name="project_name" id="project_name" required>
-            <label for="urls">URLs (one per line, max 9999):</label>
-            <textarea name="urls" id="urls" rows="10" required></textarea>
+         <label for="project_name">Project Name:</label>
+         <input type="text" name="project_name" id="project_name" required>
+         <label for="urls">URLs (one per line, max 9999):</label>
+         <textarea name="urls" id="urls" rows="10" required></textarea>
             <label for="notify">Email Notifications:</label>
-            <input type="checkbox" name="notify" id="notify">
-            <input type="submit" value="Submit Project">
+         <input type="checkbox" name="notify" id="notify">
+         <input type="hidden" name="security" value="<?php echo wp_create_nonce('rui_project_submission'); ?>">
+         <input type="submit" value="Submit Project">
         </form>
+        <div id="rui-submission-response"></div>
         <?php
         return ob_get_clean();
     }

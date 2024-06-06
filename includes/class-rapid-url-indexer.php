@@ -23,10 +23,10 @@ class Rapid_URL_Indexer {
     public static function process_api_request($project_id, $urls, $notify) {
         // Get API key
         $api_key = get_option('speedyindex_api_key');
-
+    
         // Call API to create task
         $response = Rapid_URL_Indexer_API::create_task($api_key, $urls);
-
+    
         // Handle response and update project status
         if ($response) {
             // Update project status to 'submitted'
@@ -43,12 +43,18 @@ class Rapid_URL_Indexer {
                 'details' => json_encode($response),
                 'created_at' => current_time('mysql')
             ));
-
+    
             // Notify user if required
             if ($notify) {
-                // Send notification email
+                $user_info = get_userdata(get_current_user_id());
+                wp_mail(
+                    $user_info->user_email,
+                    __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
+                    __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
+                );
             }
         }
     }
+    
 }
 ?>
