@@ -14,8 +14,12 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 
 <div class="rui-projects">
     <h2>My Projects</h2>
-    <?php echo do_shortcode('[rui_credits_display]'); ?>
-    <?php echo do_shortcode('[rui_project_submission]'); ?>
+    <div class="rui-credits-display">
+        <?php echo do_shortcode('[rui_credits_display]'); ?>
+    </div>
+    <div class="rui-project-submission">
+        <?php echo do_shortcode('[rui_project_submission]'); ?>
+    </div>
     <h3>Project List</h3>
     <table>
         <thead>
@@ -33,7 +37,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                     <td><?php echo esc_html($project->status); ?></td>
                     <td><?php echo esc_html($project->created_at); ?></td>
                     <td>
-                        <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>">Download Report</a>
+                        <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button">Download Report</a>
                     </td>
                 </tr>
             <?php endforeach; ?>
