@@ -181,6 +181,7 @@ class Rapid_URL_Indexer_Customer {
         wp_enqueue_style('rui-customer-css', RUI_PLUGIN_URL . 'assets/css/customer.css');
         wp_enqueue_script('rui-customer-js', RUI_PLUGIN_URL . 'assets/js/customer.js', array('jquery'), null, true);
     }
+}
 
 Rapid_URL_Indexer_Customer::init();
 ?>
