@@ -2,6 +2,9 @@
 class Rapid_URL_Indexer_API {
     const API_BASE_URL = 'https://api.speedyindex.com';
     const API_RATE_LIMIT = 5; // Maximum number of API requests per second
+    const API_RETRY_DELAY = 15; // Delay in seconds before retrying a failed API request 
+    const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
+    const API_RATE_LIMIT = 5; // Maximum number of API requests per second
     const API_RETRY_DELAY = 15; // Delay in seconds before retrying a failed API request
     const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
     const LOW_BALANCE_THRESHOLD = 100000; // Threshold for low balance notification
@@ -48,10 +51,19 @@ class Rapid_URL_Indexer_API {
     }
 
     private static function handle_api_response($response) {
-        if (self::is_api_response_success($response)) {
-            return json_decode(wp_remote_retrieve_body($response), true);
+        if (is_wp_error($response)) {
+            self::log_api_error($response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = json_decode(wp_remote_retrieve_body($response), true);
+
+        if ($response_code >= 200 && $response_code < 300) {
+            return $response_body;
         } else {
-            self::log_api_error($response);
+            $error_message = isset($response_body['message']) ? $response_body['message'] : 'Unknown error';
+            self::log_api_error($error_message);
             return false;
         }
     }
@@ -82,27 +94,41 @@ class Rapid_URL_Indexer_API {
 
             switch ($method) {
                 case 'GET':
-                    $response = wp_remote_get(self::$api_base_url . $endpoint, $args);
+                    $response = wp_remote_get(self::API_BASE_URL . $endpoint, $args);
                     break;
                 case 'POST':
-                    $response = wp_remote_post(self::$api_base_url . $endpoint, $args);
+                    $response = wp_remote_post(self::API_BASE_URL . $endpoint, $args);
                     break;
                 default:
                     return false;
             }
 
-            if ($response['response']['code'] === 200) {
-                return $response;
-            } else {
+            if (is_wp_error($response)) {
                 $retries++;
                 if ($retries < self::API_MAX_RETRIES) {
-                    // Delay before retrying 
                     sleep(self::API_RETRY_DELAY);
+                } else {
+                    return false;
+                }
+            } else {
+                $response_code = wp_remote_retrieve_response_code($response);
+                
+                if ($response_code === 429) {
+                    // Rate limit exceeded
+                    $retry_after = wp_remote_retrieve_header($response, 'retry-after');
+                    if ($retry_after) {
+                        sleep($retry_after);
+                    } else {
+                        sleep(1);
+                    }
+                    $retries++;
+                } else {
+                    return $response;
                 }
             }
         }
 
-        return $response;
+        return false;
     }
 
 

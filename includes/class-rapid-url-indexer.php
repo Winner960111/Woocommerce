@@ -150,6 +150,16 @@ class Rapid_URL_Indexer {
 
         // Get API key
         $api_key = get_option('speedyindex_api_key');
+
+        // Check if user has enough credits
+        $user_id = get_current_user_id();
+        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
+        if ($credits < count($urls)) {
+            return array(
+                'success' => false,
+                'error' => __('Insufficient credits to submit project.', 'rapid-url-indexer')
+            );
+        }
     
         // Call API to create task
         $response = Rapid_URL_Indexer_API::create_task($api_key, $urls);
@@ -157,7 +167,6 @@ class Rapid_URL_Indexer {
         // Handle response and update project status
         if ($response && isset($response['task_id'])) {
             // Deduct credits and update project status
-            $user_id = get_current_user_id();
             Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
             
             // Log the action
@@ -179,6 +188,11 @@ class Rapid_URL_Indexer {
                     __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
                 );
             }
+
+            return array(
+                'success' => true,
+                'error' => null
+            );
         } else {
             // Log the error
             $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
@@ -189,6 +203,11 @@ class Rapid_URL_Indexer {
                 'details' => json_encode($response),
                 'created_at' => current_time('mysql')
             ));
+
+            return array(
+                'success' => false,
+                'error' => __('An error occurred while submitting the project.', 'rapid-url-indexer')
+            );
         }
     }
 }
