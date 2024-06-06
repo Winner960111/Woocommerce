@@ -73,14 +73,14 @@ class Rapid_URL_Indexer_Customer {
         }
         ?>
         <form id="rui-project-submission-form" method="post" action="">
-         <label for="project_name">Project Name:</label>
-         <input type="text" name="project_name" id="project_name" required>
-         <label for="urls">URLs (one per line, max 9999):</label>
-         <textarea name="urls" id="urls" rows="10" required></textarea>
+            <label for="project_name">Project Name:</label>
+            <input type="text" name="project_name" id="project_name" required>
+            <label for="urls">URLs (one per line, max 9999):</label>
+            <textarea name="urls" id="urls" rows="10" required></textarea>
             <label for="notify">Email Notifications:</label>
-         <input type="checkbox" name="notify" id="notify">
-         <input type="hidden" name="security" value="<?php echo wp_create_nonce('rui_project_submission'); ?>">
-         <input type="submit" value="Submit Project">
+            <input type="checkbox" name="notify" id="notify">
+            <input type="hidden" name="security" value="<?php echo wp_create_nonce('rui_project_submission'); ?>">
+            <input type="submit" value="Submit Project">
         </form>
         <div id="rui-submission-response"></div>
         <?php
