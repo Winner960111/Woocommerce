@@ -117,14 +117,14 @@ class Rapid_URL_Indexer_API {
     }
 
     public static function download_task_report($api_key, $task_id) {
-        $response = wp_remote_post(self::$api_base_url . '/v2/task/google/indexer/report', array(
-            'headers' => array(
-                'Authorization' => $api_key,
-                'Content-Type' => 'application/json'
-            ),
-            'body' => json_encode(array('task_id' => $task_id))
-        ));
-
-        return wp_remote_retrieve_body($response);
+        $response = self::make_api_request('POST', '/v2/task/google/indexer/report', $api_key, array('task_id' => $task_id));
+        
+        if ($response['response']['code'] === 200) {
+            return wp_remote_retrieve_body($response);
+        } else {
+            // Log the error
+            error_log('SpeedyIndex API Error: ' . $response['response']['message']);
+            return false;
+        }
     }
 }
