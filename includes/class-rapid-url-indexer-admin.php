@@ -17,6 +17,15 @@ class Rapid_URL_Indexer_Admin {
 
         add_submenu_page(
             'rapid-url-indexer',
+            'Settings',
+            'Settings',
+            'manage_options',
+            'rapid-url-indexer-settings',
+            array(__CLASS__, 'settings_page')
+        );
+
+        add_submenu_page(
+            'rapid-url-indexer',
             'Manage Credits',
             'Manage Credits',
             'manage_options',
@@ -76,3 +85,12 @@ class Rapid_URL_Indexer_Admin {
     
 }
 ?>
+    public static function settings_page() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            update_option('speedyindex_api_key', sanitize_text_field($_POST['speedyindex_api_key']));
+            echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
+        }
+
+        $api_key = get_option('speedyindex_api_key');
+        include RUI_PLUGIN_DIR . 'templates/admin-settings.php';
+    }
