@@ -140,8 +140,6 @@ class Rapid_URL_Indexer_API {
         ));
     }
 
-        $body = wp_remote_retrieve_body($response);
-        return json_decode($body, true);
     }
 
     public static function get_task_status($api_key, $task_id) {
