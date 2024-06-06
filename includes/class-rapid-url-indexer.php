@@ -12,38 +12,45 @@ class Rapid_URL_Indexer {
         $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND refunded = 0");
 
         foreach ($projects as $project) {
-            $api_key = get_option('speedyindex_api_key');
-            $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->id);
+            // Check if auto refund has already been processed for this project
+            $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
+            $refund_processed = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $log_table WHERE project_id = %d AND action = 'Auto Refund'", $project->id));
 
-            if ($response && isset($response['result']['indexed_count'])) {
-                $indexed_count = $response['result']['indexed_count'];
-                $total_urls = count(json_decode($project->urls));
-                $unindexed_count = $total_urls - $indexed_count;
-                $refund_credits = ceil($unindexed_count * 0.8);
+            if (!$refund_processed) {
+                $api_key = get_option('speedyindex_api_key');
+                $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->id);
 
-                // Refund credits
-                Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refund_credits);
+                if ($response && isset($response['result']['indexed_count'])) {
+                    $indexed_count = $response['result']['indexed_count'];
+                    $total_urls = count(json_decode($project->urls));
+                    $unindexed_count = $total_urls - $indexed_count;
+                    $refund_credits = ceil($unindexed_count * 0.8);
 
-                // Update project status
-                $wpdb->update($table_name, array('status' => 'refunded'), array('id' => $project->id));
+                    // Refund credits
+                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refund_credits);
 
-                // Mark project as refunded
-                $wpdb->update($table_name, array('refunded' => 1), array('id' => $project->id));
+                    // Update project status
+                    $wpdb->update($table_name, array('status' => 'refunded'), array('id' => $project->id));
 
-                // Log the action
-                $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
-                $wpdb->insert($log_table, array(
-                    'user_id' => $project->user_id,
-                    'project_id' => $project->id,
-                    'action' => 'Auto Refund',
-                    'details' => json_encode($response),
-                    'created_at' => current_time('mysql')
-                ));
+                    // Log the action
+                    $wpdb->insert($log_table, array(
+                        'user_id' => $project->user_id,
+                        'project_id' => $project->id,
+                        'action' => 'Auto Refund',
+                        'details' => json_encode($response),
+                        'created_at' => current_time('mysql')
+                    ));
+                }
             }
         }
 
-        // Schedule the next auto refund
-        wp_schedule_single_event(time() + DAY_IN_SECONDS, 'rui_auto_refund');
+        // Schedule the next auto refund for projects submitted exactly 14 days ago
+        $fourteen_days_ago = date('Y-m-d H:i:s', strtotime('-14 days'));
+        $next_refund_projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE status = 'submitted' AND created_at = %s", $fourteen_days_ago));
+
+        if (!empty($next_refund_projects)) {
+            wp_schedule_single_event(time() + HOUR_IN_SECONDS, 'rui_auto_refund');
+        }
     }
 
 

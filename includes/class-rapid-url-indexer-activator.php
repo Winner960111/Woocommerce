@@ -23,6 +23,7 @@ class Rapid_URL_Indexer_Activator {
             urls longtext NOT NULL,
             status varchar(50) DEFAULT 'pending',
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            refunded tinyint(1) DEFAULT 0,
             PRIMARY KEY  (id)
         ) $charset_collate;";
 
