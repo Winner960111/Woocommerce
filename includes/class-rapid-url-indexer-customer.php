@@ -20,10 +20,6 @@ class Rapid_URL_Indexer_Customer {
         }
     }
     
-            }
-        }
-    }
-    
     public static function handle_ajax_project_submission() {
         check_ajax_referer('rui_project_submission', 'security');
     
@@ -46,9 +42,6 @@ class Rapid_URL_Indexer_Customer {
         self::log_credit_change($user_id, $amount);
     }
 
-        wp_send_json_error(__('Invalid URL list. Please check and try again.', 'rapid-url-indexer'));
-    }
-
     private static function log_credit_change($user_id, $amount) {
         global $wpdb;
         $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
@@ -68,17 +61,6 @@ class Rapid_URL_Indexer_Customer {
         add_action('template_redirect', array(__CLASS__, 'template_redirect'));
     }
 
-    private static function log_credit_change($user_id, $amount) {
-        global $wpdb;
-        $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
-        $wpdb->insert($log_table, array(
-            'user_id' => $user_id,
-            'project_id' => 0,
-            'action' => 'Credit Change',
-            'details' => json_encode(array('amount' => $amount)),
-            'created_at' => current_time('mysql')
-        ));
-    }
 
     public static function query_vars($vars) {
         $vars[] = 'is_projects_page';
@@ -92,16 +74,6 @@ class Rapid_URL_Indexer_Customer {
         }
     }
 
-    public static function credits_display() {
-        if (!is_user_logged_in()) {
-            return;
-        }
-
-        $user_id = get_current_user_id();
-        $credits = self::get_user_credits($user_id);
-
-        return '<div class="rui-credits-display">Remaining Credits: ' . esc_html($credits) . '</div><a href="' . esc_url(wc_get_page_permalink('shop')) . '" class="button">Buy Credits</a>';
-    }
 
     public static function credits_display() {
         if (!is_user_logged_in()) {
@@ -187,23 +159,6 @@ class Rapid_URL_Indexer_Customer {
         } else {
             $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
         }
-    }
-
-    private static function schedule_api_request($project_id, $urls, $notify) {
-        wp_schedule_single_event(time() + 60, 'rui_process_api_request', array($project_id, $urls, $notify));
-    }
-
-    public static function get_user_credits($user_id) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
-        $credits = $wpdb->get_var($wpdb->prepare("SELECT credits FROM $table_name WHERE user_id = %d", $user_id));
-        return $credits ? $credits : 0;
-    }
-
-    public static function enqueue_scripts() {
-        wp_enqueue_style('rui-customer-css', RUI_PLUGIN_URL . 'assets/css/customer.css');
-        wp_enqueue_script('rui-customer-js', RUI_PLUGIN_URL . 'assets/js/customer.js', array('jquery'), null, true);
-    }
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = self::get_user_credits($user_id);
