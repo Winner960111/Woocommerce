@@ -13,8 +13,19 @@
 1. Go to WooCommerce > Products > Add New.
 2. Create a new product named "Indexing Credits" or similar.
 3. Set the product type to "Simple Product".
-4. Set the price per credit.
-5. Publish the product.
+4. Set the price per credit. For example, if you want to sell 1 credit for $1, set the regular price to $1.
+5. In the "Product Data" section, go to the "Advanced" tab and add a custom field with the name `_is_credits_product` and value `yes`.
+6. Publish the product.
+
+**Configuring the Plugin to Recognize the Credits Product:**
+1. After creating the credits product, go to WooCommerce > Settings > Products > Inventory.
+2. Add the product ID of the "Indexing Credits" product to the "Credits Product ID" field.
+3. Save changes.
+
+**How Credits are Added When the Product is Purchased:**
+1. When a customer purchases the "Indexing Credits" product, the plugin will automatically detect the product using the custom field `_is_credits_product`.
+2. The number of credits purchased will be added to the customer's account based on the quantity purchased.
+3. The credits will be displayed in the customer's account under the "My Projects" section.
 
 **Dependencies:**
 - WooCommerce: For managing products and purchases.

@@ -130,38 +130,6 @@ class Rapid_URL_Indexer {
                     __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
                 );
             }
-            if ($notify) {
-                $user_info = get_userdata(get_current_user_id());
-                wp_mail(
-                    $user_info->user_email,
-                    __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
-                    __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
-                );
-            }
-        } else {
-            // Handle API error
-            // Log the error
-            $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
-            $wpdb->insert($table_name, array(
-                'user_id' => get_current_user_id(),
-                'project_id' => $project_id,
-                'action' => 'API Request Failed',
-                'details' => json_encode($response),
-                'created_at' => current_time('mysql')
-            ));
-        }
-        } else {
-            // Handle API error
-            // Log the error
-            $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
-            $wpdb->insert($table_name, array(
-                'user_id' => get_current_user_id(),
-                'project_id' => $project_id,
-                'action' => 'API Request Failed',
-                'details' => json_encode($response),
-                'created_at' => current_time('mysql')
-            ));
-        }
     }
 }
 ?>
