@@ -113,15 +113,20 @@ class Rapid_URL_Indexer {
     public static function get_project_status($request) {
         $project_id = $request['id'];
 
-        // Fetch project status from the database
-        // ...
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
 
-        return new WP_REST_Response(array(
-            'project_id' => $project_id,
-            'status' => $project_status,
-            'submitted_links' => $submitted_links,
-            'indexed_links' => $indexed_links
-        ), 200);
+        if ($project) {
+            return new WP_REST_Response(array(
+                'project_id' => $project_id,
+                'status' => $project->status,
+                'submitted_links' => count(json_decode($project->urls)),
+                'indexed_links' => $project->indexed_links
+            ), 200);
+        } else {
+            return new WP_Error('no_project', 'Project not found', array('status' => 404));
+        }
     }
 
     public static function download_project_report($request) {
@@ -157,7 +162,6 @@ class Rapid_URL_Indexer {
         $api_key = get_option('speedyindex_api_key');
 
         // Check if user has enough credits
-        $user_id = get_current_user_id();
         $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
         if ($credits < count($urls)) {
             return array(

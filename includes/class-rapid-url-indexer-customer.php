@@ -56,8 +56,11 @@ class Rapid_URL_Indexer_Customer {
         $notify = isset($_POST['notify']) ? 1 : 0;
     
         if (count($urls) > 0 && count($urls) <= 9999) {
-            self::submit_project($project_name, $urls, $notify);
-            wp_send_json_success(__('Project submitted successfully.', 'rapid-url-indexer'));
+            $project_id = self::submit_project($project_name, $urls, $notify);
+            wp_send_json_success(array(
+                'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
+                'project_id' => $project_id
+            ));
         } else {
             wp_send_json_error(__('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer'));
         }
