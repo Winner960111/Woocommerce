@@ -15,7 +15,7 @@ class Rapid_URL_Indexer_Customer {
         $urls = explode("\n", sanitize_textarea_field($_POST['urls']));
         $urls = array_map('trim', $urls);
         $urls = array_filter($urls, function($url) {
-            return filter_var($url, FILTER_VALIDATE_URL);
+            return preg_match('/^https?:\/\//', $url) && filter_var($url, FILTER_VALIDATE_URL);
         });
         $notify = isset($_POST['notify']) ? 1 : 0;
     
@@ -53,7 +53,7 @@ class Rapid_URL_Indexer_Customer {
         $user_id = get_current_user_id();
         $credits = self::get_user_credits($user_id);
 
-        return '<div class="rui-credits-display">Remaining Credits: ' . esc_html($credits) . '</div>';
+        return '<div class="rui-credits-display">Remaining Credits: ' . esc_html($credits) . '</div><a href="' . esc_url(wc_get_page_permalink('shop')) . '" class="button">Buy Credits</a>';
     }
 
     public static function project_submission() {
