@@ -1,30 +1,42 @@
 <?php
 class Rapid_URL_Indexer_API {
-    private static $api_base_url = 'https://api.speedyindex.com';
-
-    private static $api_rate_limit = 5; // Maximum number of API requests per second
-    private static $api_retry_delay = 15; // Delay in seconds before retrying a failed API request
-    private static $api_max_retries = 3; // Maximum number of retries for a failed API request
+    const API_BASE_URL = 'https://api.speedyindex.com';
+    const API_RATE_LIMIT = 5; // Maximum number of API requests per second
+    const API_RETRY_DELAY = 15; // Delay in seconds before retrying a failed API request
+    const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
+    const LOW_BALANCE_THRESHOLD = 100000; // Threshold for low balance notification
 
     public static function get_account_balance($api_key) {
         $response = self::make_api_request('GET', '/v2/account', $api_key);
-        $data = json_decode(wp_remote_retrieve_body($response), true);
-
-        if ($response['response']['code'] === 200) {
-            if (isset($data['balance']['indexer']) && $data['balance']['indexer'] < 100000) {
-                // Notify admin
-                wp_mail(
-                    get_option('admin_email'),
-                    __('Low API Balance', 'rapid-url-indexer'),
-                    __('The API balance for URL indexing is below 100000.', 'rapid-url-indexer')
-                );
-            }
+        
+        if (self::is_api_response_success($response)) {
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+            self::check_low_balance($data['balance']['indexer']);
             return $data;
         } else {
-            // Log the error
-            error_log('SpeedyIndex API Error: ' . $response['response']['message']);
+            self::log_api_error($response);
             return false;
         }
+    }
+
+    private static function check_low_balance($balance) {
+        if ($balance < self::LOW_BALANCE_THRESHOLD) {
+            self::notify_admin(__('Low API Balance', 'rapid-url-indexer'), 
+                               __('The API balance for URL indexing is below ' . self::LOW_BALANCE_THRESHOLD . '.', 'rapid-url-indexer'));
+        }
+    }
+
+    private static function notify_admin($subject, $message) {
+        wp_mail(get_option('admin_email'), $subject, $message);
+    }
+
+    private static function is_api_response_success($response) {
+        return $response['response']['code'] === 200;
+    }
+
+    private static function log_api_error($response) {
+        error_log('SpeedyIndex API Error: ' . $response['response']['message']);
+    }
         $body = wp_remote_retrieve_body($response);
         return json_decode($body, true);
         return json_decode(wp_remote_retrieve_body($response), true);
