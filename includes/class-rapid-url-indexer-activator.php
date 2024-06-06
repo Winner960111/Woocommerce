@@ -44,6 +44,7 @@ class Rapid_URL_Indexer_Activator {
         // Schedule cron jobs
         if (!wp_next_scheduled('rui_cron_job')) {
             wp_schedule_event(time(), 'hourly', 'rui_cron_job');
+        }
     }
 }
-?>
+}
