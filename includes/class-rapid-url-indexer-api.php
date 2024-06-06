@@ -25,8 +25,6 @@ class Rapid_URL_Indexer_API {
         $body = wp_remote_retrieve_body($response);
         return json_decode($body, true);
         return json_decode(wp_remote_retrieve_body($response), true);
-        $body = wp_remote_retrieve_body($response);
-        return json_decode($body, true);
     }
     public static function create_task($api_key, $urls) {
         $response = self::make_api_request('POST', '/v2/task/google/indexer/create', $api_key, array('urls' => $urls));
