@@ -75,10 +75,11 @@ class Rapid_URL_Indexer_API {
             $elapsed_time = $current_time - $last_request_time;
             
             if ($elapsed_time < 1 / self::API_RATE_LIMIT) {
-                usleep((1 / self::API_RATE_LIMIT - $elapsed_time) * 1000000);
+                $sleep_time = (1 / self::API_RATE_LIMIT - $elapsed_time) * 1000000;
+                usleep($sleep_time);
             }
             
-            $last_request_time = microtime(true);
+            $last_request_time = $current_time;
 
             // Make the API request
             $args = array(

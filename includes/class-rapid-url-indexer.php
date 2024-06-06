@@ -158,6 +158,14 @@ class Rapid_URL_Indexer {
         // Get project details
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
         $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
+        
+        if (!$project) {
+            return array(
+                'success' => false,
+                'error' => __('Invalid project ID.', 'rapid-url-indexer')
+            );
+        }
+        
         $user_id = $project->user_id;
 
         // Get API key
