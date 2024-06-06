@@ -1,3 +1,30 @@
+### Installation and Usage
+
+**Prerequisites:**
+- WooCommerce plugin installed and activated.
+- A valid SpeedyIndex API key.
+
+**Installation:**
+1. Upload the `rapid-url-indexer` folder to the `/wp-content/plugins/` directory.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. Ensure WooCommerce is installed and activated.
+
+**Setting Up Credits Product:**
+1. Go to WooCommerce > Products > Add New.
+2. Create a new product named "Indexing Credits" or similar.
+3. Set the product type to "Simple Product".
+4. Set the price per credit.
+5. Publish the product.
+
+**Dependencies:**
+- WooCommerce: For managing products and purchases.
+- SpeedyIndex API: For URL indexing services.
+
+**Using the Plugin:**
+1. Purchase credits through the WooCommerce store.
+2. Navigate to the "My Projects" section in the customer area to submit URLs for indexing.
+3. Manage and view the status of your projects from the same section.
+
 ### Detailed Description for WooCommerce Extension: URL Indexing Credit System
 
 **Plugin Overview:** The WooCommerce extension/plugin will enable customers to purchase credits for submitting URLs for indexing. Each credit represents one URL submission. The plugin will integrate with WooCommerce, allowing customers to manage their credits and projects within the customer area.
