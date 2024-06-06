@@ -99,6 +99,35 @@ class Rapid_URL_Indexer_API {
         return $response;
     }
 
+    private static function make_api_request($method, $endpoint, $api_key, $body = null) {
+        $args = array(
+            'headers' => array(
+                'Authorization' => $api_key,
+                'Content-Type' => 'application/json'
+            ),
+            'method' => $method,
+        );
+
+        if ($body) {
+            $args['body'] = json_encode($body);
+        }
+
+        $response = wp_remote_request(self::$api_base_url . $endpoint, $args);
+
+        if (is_wp_error($response)) {
+            self::log_api_error($endpoint, $response->get_error_message());
+            return null;
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+        if ($status_code >= 400) {
+            self::log_api_error($endpoint, wp_remote_retrieve_body($response));
+            return null;
+        }
+
+        return $response;
+    }
+
     private static function log_api_error($endpoint, $error_message) {
         global $wpdb;
         $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
