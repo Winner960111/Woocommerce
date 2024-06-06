@@ -151,8 +151,6 @@ class Rapid_URL_Indexer_API {
             'body' => json_encode(array('task_id' => $task_id))
         ));
 
-        $body = wp_remote_retrieve_body($response);
-        return json_decode($body, true);
     }
 
     public static function download_task_report($api_key, $task_id) {
