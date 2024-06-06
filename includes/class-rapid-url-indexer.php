@@ -3,8 +3,6 @@ class Rapid_URL_Indexer {
     public static function init() {
         self::load_dependencies();
         self::define_hooks();
-            }
-        }
     }
 
 
@@ -62,6 +60,7 @@ class Rapid_URL_Indexer {
 
     public static function process_cron_jobs() {
         // Code to process scheduled tasks like checking API status and auto refunds
+        self::auto_refund();
     }
 
     public static function process_api_request($project_id, $urls, $notify) {
@@ -105,5 +104,16 @@ class Rapid_URL_Indexer {
                     __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
                 );
             }
+        } else {
+            // Log the error
+            $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
+            $wpdb->insert($log_table, array(
+                'user_id' => get_current_user_id(),
+                'project_id' => $project_id,
+                'action' => 'API Error',
+                'details' => json_encode($response),
+                'created_at' => current_time('mysql')
+            ));
+        }
     }
 }
