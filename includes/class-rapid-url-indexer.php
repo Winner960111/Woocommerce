@@ -175,7 +175,7 @@ class Rapid_URL_Indexer {
         if ($credits < count($urls)) {
             return array(
                 'success' => false,
-                'error' => sprintf(__('Insufficient credits to submit project. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_page_permalink('shop')))
+                'error' => sprintf(__('Insufficient credits to submit project. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))
             );
         }
     
