@@ -6,7 +6,7 @@ $products = wc_get_products(array(
 ));
 ?>
 
-<h2>Buy Indexing Credits</h2>
+<h1>Buy Indexing Credits</h1>
 
 <?php if (!empty($products)): ?>
     <ul class="rui-credits-products">

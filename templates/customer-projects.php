@@ -13,7 +13,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 ?>
 
 <div class="rui-projects">
-    <h2>My Projects</h2>
+    <h1>My Projects</h1>
     <div class="rui-api-key-display">
         <?php echo do_shortcode('[rui_api_key_display]'); ?>
     </div>

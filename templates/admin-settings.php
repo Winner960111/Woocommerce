@@ -1,5 +1,5 @@
 <div class="wrap">
-    <h1>Rapid URL Indexer Settings</h1>
+    <h1>Rapid URL Indexer Settings</h1>  
     <form method="post">
         <table class="form-table">
             <tr>
