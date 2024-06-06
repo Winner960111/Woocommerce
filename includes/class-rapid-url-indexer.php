@@ -3,6 +3,7 @@ class Rapid_URL_Indexer {
     public static function init() {
         self::load_dependencies();
         self::define_hooks();
+        }
     }
 
     private static function log_action($user_id, $project_id, $action, $details) {
