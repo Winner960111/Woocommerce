@@ -21,8 +21,8 @@ class Rapid_URL_Indexer_API {
 
     private static function check_low_balance($balance) {
         if ($balance < self::LOW_BALANCE_THRESHOLD) {
-            self::notify_admin(__('Low API Balance', 'rapid-url-indexer'), 
-                               __('The API balance for URL indexing is below ' . self::LOW_BALANCE_THRESHOLD . '.', 'rapid-url-indexer'));
+            self::notify_admin(__('Low URL Indexing Balance', 'rapid-url-indexer'), 
+                               __('The balance for URL indexing is below the threshold.', 'rapid-url-indexer'));
         }
     }
 

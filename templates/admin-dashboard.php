@@ -7,7 +7,7 @@
         <li>Projects Processing: <?php echo esc_html($processing_projects); ?></li>
         <li>Projects Completed: <?php echo esc_html($completed_projects); ?></li>
         <li>Total Credits Available: <?php echo esc_html($total_credits); ?></li>
-        <li>SpeedyIndex API Credits: <?php echo esc_html($api_credits); ?></li>
+        <li>URL Indexing Service Credits: <?php echo esc_html($api_credits); ?></li>
     </ul>
     <h2>Logs</h2>
     <a href="<?php echo admin_url('admin.php?page=rapid-url-indexer-logs'); ?>" class="button">View Logs</a>
