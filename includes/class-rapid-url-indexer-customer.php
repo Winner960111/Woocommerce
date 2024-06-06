@@ -164,16 +164,8 @@ class Rapid_URL_Indexer_Customer {
         } else {
             $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
         }
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
-        $credits = self::get_user_credits($user_id);
-        $new_credits = max(0, $credits + $amount);
-
-        if ($credits > 0) {
-            $wpdb->update($table_name, array('credits' => $new_credits), array('user_id' => $user_id));
-        } else {
-            $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
-        }
+        
+        self::log_credit_change($user_id, $amount);
     }
 
     private static function schedule_api_request($project_id, $urls, $notify) {

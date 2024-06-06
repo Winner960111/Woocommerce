@@ -148,6 +148,11 @@ class Rapid_URL_Indexer {
     public static function process_api_request($project_id, $urls, $notify) {
         global $wpdb;
 
+        // Get project details
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
+        $user_id = $project->user_id;
+
         // Get API key
         $api_key = get_option('speedyindex_api_key');
 
