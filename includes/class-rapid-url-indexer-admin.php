@@ -32,6 +32,15 @@ class Rapid_URL_Indexer_Admin {
             'manage-credits',
             array(__CLASS__, 'manage_credits_page')
         );
+
+        add_submenu_page(
+            'rapid-url-indexer',
+            'Logs',
+            'Logs',
+            'manage_options',
+            'rapid-url-indexer-logs',
+            array(__CLASS__, 'logs_page')
+        );
     }
 
     public static function admin_page() {
@@ -93,4 +102,11 @@ class Rapid_URL_Indexer_Admin {
 
         $api_key = get_option('speedyindex_api_key');
         include RUI_PLUGIN_DIR . 'templates/admin-settings.php';
+    }
+
+    public static function logs_page() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
+        $logs = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created_at DESC");
+        include RUI_PLUGIN_DIR . 'templates/admin-logs.php';
     }

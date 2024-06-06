@@ -9,4 +9,6 @@
         <li>Total Credits Available: <?php echo esc_html($total_credits); ?></li>
         <li>SpeedyIndex API Credits: <?php echo esc_html($api_credits); ?></li>
     </ul>
+    <h2>Logs</h2>
+    <a href="<?php echo admin_url('admin.php?page=rapid-url-indexer-logs'); ?>" class="button">View Logs</a>
 </div>
