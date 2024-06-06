@@ -30,3 +30,5 @@ add_action('plugins_loaded', array('Rapid_URL_Indexer', 'init'));
 
 add_action('init', array('Rapid_URL_Indexer_Customer', 'add_my_account_endpoints'));
 add_action('woocommerce_account_rui-buy-credits_endpoint', array('Rapid_URL_Indexer_Customer', 'add_my_account_endpoint_content'));
+add_action('init', array('Rapid_URL_Indexer_Customer', 'add_my_account_endpoints'));
+add_action('woocommerce_account_rui-buy-credits_endpoint', array('Rapid_URL_Indexer_Customer', 'add_my_account_endpoint_content'));
