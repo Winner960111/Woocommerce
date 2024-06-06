@@ -10,7 +10,18 @@ class Rapid_URL_Indexer_API {
         ));
 
         $body = wp_remote_retrieve_body($response);
-        return json_decode($body, true);
+        $data = json_decode($body, true);
+
+        if (isset($data['balance']['indexer']) && $data['balance']['indexer'] < 100000) {
+            // Notify admin
+            wp_mail(
+                get_option('admin_email'),
+                __('Low API Balance', 'rapid-url-indexer'),
+                __('The API balance for URL indexing is below 100000.', 'rapid-url-indexer')
+            );
+        }
+
+        return $data;
     }
 
     public static function create_task($api_key, $urls) {
