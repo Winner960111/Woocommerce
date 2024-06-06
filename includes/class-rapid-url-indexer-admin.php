@@ -32,7 +32,7 @@ class Rapid_URL_Indexer_Admin {
         
         $total_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
         $processing_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE status = 'submitted'");
-        $completed_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE status IN ('completed', 'refunded')");
+        $completed_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE status = 'completed'");
         
         $credits_table = $wpdb->prefix . 'rapid_url_indexer_credits';
         $total_credits = $wpdb->get_var("SELECT SUM(credits) FROM $credits_table");
