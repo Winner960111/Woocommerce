@@ -124,4 +124,3 @@ class Rapid_URL_Indexer {
             }
     }
 }
-?>
