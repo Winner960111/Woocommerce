@@ -9,7 +9,7 @@ class Rapid_URL_Indexer {
     public static function auto_refund() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND refunded = 0");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
 
         foreach ($projects as $project) {
             // Check if auto refund has already been processed for this project
@@ -29,8 +29,8 @@ class Rapid_URL_Indexer {
                     // Refund credits
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refund_credits);
 
-                    // Update project status
-                    $wpdb->update($table_name, array('status' => 'refunded'), array('id' => $project->id));
+                    // Mark auto refund as processed
+                    $wpdb->update($table_name, array('auto_refund_processed' => 1), array('id' => $project->id));
 
                     // Log the action
                     $wpdb->insert($log_table, array(
