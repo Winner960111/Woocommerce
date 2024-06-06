@@ -19,6 +19,7 @@ class Rapid_URL_Indexer_Customer {
                 self::update_user_credits($user_id, $quantity);
             }
         }
+    }
     
     public static function handle_ajax_project_submission() {
         check_ajax_referer('rui_project_submission', 'security');
