@@ -100,7 +100,7 @@ class Rapid_URL_Indexer {
     public static function handle_project_submission($request) {
         $params = $request->get_params();
         $project_name = sanitize_text_field($params['project_name']);
-        $urls = $params['urls'];
+        $urls = array_map('esc_url_raw', $params['urls']);
         $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
 
         // Validate and process the project submission
