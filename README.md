@@ -17,9 +17,9 @@
 5. In the "Product Data" section, go to the "Advanced" tab and add a custom field with the name `_is_credits_product` and value `yes`.
 6. Publish the product.
 
-**Configuring the Plugin to Recognize the Credits Product:**
-1. After creating the credits product, go to WooCommerce > Settings > Products > Inventory.
-2. Add the product ID of the "Indexing Credits" product to the "Credits Product ID" field.
+**Configuring the Plugin:**
+1. Go to the Rapid URL Indexer settings page in the WordPress admin area.
+2. Enter your SpeedyIndex API key.
 3. Save changes.
 
 **How Credits are Added When the Product is Purchased:**
@@ -35,6 +35,57 @@
 1. Purchase credits through the WooCommerce store.
 2. Navigate to the "My Projects" section in the customer area to submit URLs for indexing.
 3. Manage and view the status of your projects from the same section.
+
+## API Documentation
+
+The Rapid URL Indexer plugin provides a RESTful API for customers to interact with their projects and credits programmatically. The following endpoints are available:
+
+### Authentication
+
+All API endpoints require authentication using an API key. Customers can find their API key in the "My Projects" section of their account. The API key should be included in the `X-API-Key` header of each request.
+
+### Endpoints
+
+#### Submit URLs
+
+- **Endpoint:** `POST /api/v1/projects`
+- **Description:** Submit a new project for indexing.
+- **Parameters:**
+  - `project_name` (string, required): The name of the project.
+  - `urls` (array, required): An array of URLs to be indexed.
+  - `notify_on_status_change` (boolean, optional): Whether to receive email notifications when the project status changes. Defaults to `false`.
+- **Response:** Confirmation of project creation and the unique project ID.
+
+#### Get Project Status
+
+- **Endpoint:** `GET /api/v1/projects/{project_id}`
+- **Description:** Get the status of a specific project.
+- **Parameters:**
+  - `project_id` (integer, required): The ID of the project.
+- **Response:** Project status, number of submitted and indexed links.
+
+#### Download Project Report
+
+- **Endpoint:** `GET /api/v1/projects/{project_id}/report`
+- **Description:** Download the report for a specific project.
+- **Parameters:**
+  - `project_id` (integer, required): The ID of the project.
+- **Response:** CSV file download containing the URLs and their indexing statuses.
+
+#### Get Credits Balance
+
+- **Endpoint:** `GET /api/v1/credits/balance`
+- **Description:** Get the current credit balance for the authenticated user.
+- **Response:** The current credit balance.
+
+### Error Responses
+
+If an error occurs, the API will return an appropriate HTTP status code along with an error message in the response body. Possible error codes include:
+
+- **400 Bad Request** - The request was malformed or missing required parameters.
+- **401 Unauthorized** - The API key is missing or invalid.
+- **404 Not Found** - The requested resource (e.g., project) does not exist.
+- **500 Internal Server Error** - An unexpected error occurred on the server.
 
 ### Detailed Description for WooCommerce Extension: URL Indexing Credit System
 
