@@ -49,10 +49,6 @@ class Rapid_URL_Indexer_Customer {
     
         $project_name = sanitize_text_field($_POST['project_name']);
         $urls = explode("\n", sanitize_textarea_field($_POST['urls']));
-        $urls = array_map('trim', $urls);
-        $urls = array_filter($urls, function($url) {
-            return preg_match('/^https?:\/\//', $url) && filter_var($url, FILTER_VALIDATE_URL);
-        });
         $notify = isset($_POST['notify']) ? 1 : 0;
     
         if (count($urls) > 0 && count($urls) <= 9999) {

@@ -88,6 +88,9 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         <h4>Authentication</h4>
         <p>All API endpoints require authentication using an API key. The API key should be included in the <code>X-API-Key</code> header of each request.</p>
 
+        <h4>Project Names and URLs</h4>
+        <p>Project names will be sanitized to remove any special characters or HTML tags. URLs will be validated and must start with either "http://" or "https://". Invalid URLs will be discarded.</p>
+
         <h4>Error Responses</h4>
         <p>If an error occurs, the API will return an appropriate HTTP status code along with an error message in the response body. Possible error codes include:</p>
         <ul>
