@@ -194,14 +194,20 @@ class Rapid_URL_Indexer {
                 'created_at' => current_time('mysql')
             ));
     
-            // Notify user if required
+            // Notify user if required and not rate limited
             if ($notify) {
-                $user_info = get_userdata($user_id);
-                wp_mail(
-                    $user_info->user_email,
-                    __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
-                    __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
-                );
+                $last_notification_time = get_post_meta($project_id, '_rui_last_notification_time', true);
+                $current_time = time();
+
+                if (!$last_notification_time || ($current_time - $last_notification_time) >= 86400) {
+                    $user_info = get_userdata($user_id);
+                    wp_mail(
+                        $user_info->user_email,
+                        __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
+                        __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
+                    );
+                    update_post_meta($project_id, '_rui_last_notification_time', $current_time);
+                }
             }
 
             return array(
