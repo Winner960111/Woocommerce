@@ -26,6 +26,34 @@ class Rapid_URL_Indexer_API {
         return json_decode($body, true);
         return json_decode(wp_remote_retrieve_body($response), true);
     }
+    public static function create_task($api_key, $urls) {
+        $response = self::make_api_request('POST', '/v2/task/google/indexer/create', $api_key, array('urls' => $urls));
+        return json_decode(wp_remote_retrieve_body($response), true);
+    }
+
+    public static function get_task_status($api_key, $task_id) {
+        $response = wp_remote_post(self::$api_base_url . '/v2/task/google/indexer/status', array(
+            'headers' => array(
+                'Authorization' => $api_key,
+                'Content-Type' => 'application/json'
+            ),
+            'body' => json_encode(array('task_id' => $task_id))
+        ));
+
+        return json_decode(wp_remote_retrieve_body($response), true);
+    }
+
+    public static function download_task_report($api_key, $task_id) {
+        $response = wp_remote_post(self::$api_base_url . '/v2/task/google/indexer/report', array(
+            'headers' => array(
+                'Authorization' => $api_key,
+                'Content-Type' => 'application/json'
+            ),
+            'body' => json_encode(array('task_id' => $task_id))
+        ));
+
+        return wp_remote_retrieve_body($response);
+    }
 }
 
     public static function create_task($api_key, $urls) {
@@ -57,4 +85,3 @@ class Rapid_URL_Indexer_API {
         return wp_remote_retrieve_body($response);
     }
 }
-?>
