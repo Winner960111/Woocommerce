@@ -7,6 +7,7 @@ class Rapid_URL_Indexer_Customer {
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
         add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
         add_action('woocommerce_order_status_completed', array(__CLASS__, 'handle_order_completed'));
+    }
 
     public static function handle_order_completed($order_id) {
         $order = wc_get_order($order_id);
@@ -35,11 +36,8 @@ class Rapid_URL_Indexer_Customer {
             self::submit_project($project_name, $urls, $notify);
             wp_send_json_success(__('Project submitted successfully.', 'rapid-url-indexer'));
         } else {
-            $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
+            wp_send_json_error(__('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer'));
         }
-
-        // Log the credit change
-        self::log_credit_change($user_id, $amount);
     }
 
     private static function log_credit_change($user_id, $amount) {
@@ -113,8 +111,6 @@ class Rapid_URL_Indexer_Customer {
         </form>
         <div id="rui-submission-response"></div>
         <?php
-        return ob_get_clean();
-    }
 
         return ob_get_clean();
     }
