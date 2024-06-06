@@ -50,6 +50,7 @@ class Rapid_URL_Indexer {
                     'details' => json_encode($response),
                     'created_at' => current_time('mysql')
                 ));
+            }
         }
     }
 

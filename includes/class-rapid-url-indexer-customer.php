@@ -17,7 +17,6 @@ class Rapid_URL_Indexer_Customer {
                 $user_id = $order->get_user_id();
                 $quantity = $item->get_quantity();
                 self::update_user_credits($user_id, $quantity);
-            }
         }
     }
     
