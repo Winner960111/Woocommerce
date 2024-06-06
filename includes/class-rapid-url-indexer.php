@@ -12,11 +12,7 @@ class Rapid_URL_Indexer {
         $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
 
         foreach ($projects as $project) {
-            // Check if auto refund has already been processed for this project
-            $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
-            $refund_processed = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $log_table WHERE project_id = %d AND action = 'Auto Refund'", $project->id));
-
-            if (!$refund_processed) {
+            if (!$project->auto_refund_processed) {
                 $api_key = get_option('speedyindex_api_key');
                 $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->id);
 
@@ -32,8 +28,7 @@ class Rapid_URL_Indexer {
                     // Mark auto refund as processed and store refunded credits
                     $wpdb->update($table_name, array(
                         'auto_refund_processed' => 1, 
-                        'refunded_credits' => $refund_credits,
-                        'status' => 'refunded'
+                        'refunded_credits' => $refund_credits
                     ), array('id' => $project->id));
 
                     // Log the action
