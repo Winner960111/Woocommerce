@@ -6,7 +6,19 @@ class Rapid_URL_Indexer_Customer {
         add_shortcode('rui_project_submission', array(__CLASS__, 'project_submission'));
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
         add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
+        add_action('woocommerce_order_status_completed', array(__CLASS__, 'handle_order_completed'));
     }
+
+    public static function handle_order_completed($order_id) {
+        $order = wc_get_order($order_id);
+        foreach ($order->get_items() as $item) {
+            $product_id = $item->get_product_id();
+            if (get_post_meta($product_id, '_is_credits_product', true) === 'yes') {
+                $user_id = $order->get_user_id();
+                $quantity = $item->get_quantity();
+                self::update_user_credits($user_id, $quantity);
+            }
+        }
     
     public static function handle_ajax_project_submission() {
         check_ajax_referer('rui_project_submission', 'security');
