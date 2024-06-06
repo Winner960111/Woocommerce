@@ -36,6 +36,23 @@ class Rapid_URL_Indexer_Customer {
             self::submit_project($project_name, $urls, $notify);
             wp_send_json_success(__('Project submitted successfully.', 'rapid-url-indexer'));
         } else {
+            $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
+        }
+
+        // Log the credit change
+        self::log_credit_change($user_id, $amount);
+    }
+
+    private static function log_credit_change($user_id, $amount) {
+        global $wpdb;
+        $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
+        $wpdb->insert($log_table, array(
+            'user_id' => $user_id,
+            'project_id' => 0,
+            'action' => 'Credit Change',
+            'details' => json_encode(array('amount' => $amount)),
+            'created_at' => current_time('mysql')
+        ));
             wp_send_json_error(__('Invalid URL list. Please check and try again.', 'rapid-url-indexer'));
         }
     }    
