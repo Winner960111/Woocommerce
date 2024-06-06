@@ -1,0 +1,120 @@
+<?php
+class Rapid_URL_Indexer_Customer {
+    public static function init() {
+        add_action('init', array(__CLASS__, 'customer_menu'));
+        add_shortcode('rui_credits_display', array(__CLASS__, 'credits_display'));
+        add_shortcode('rui_project_submission', array(__CLASS__, 'project_submission'));
+        add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
+    }
+
+    public static function customer_menu() {
+        add_rewrite_rule('^my-account/projects/?', 'index.php?is_projects_page=1', 'top');
+        add_filter('query_vars', array(__CLASS__, 'query_vars'));
+        add_action('template_redirect', array(__CLASS__, 'template_redirect'));
+    }
+
+    public static function query_vars($vars) {
+        $vars[] = 'is_projects_page';
+        return $vars;
+    }
+
+    public static function template_redirect() {
+        if (get_query_var('is_projects_page')) {
+            include plugin_dir_path(__FILE__) . '../templates/customer-projects.php';
+            exit;
+        }
+    }
+
+    public static function credits_display() {
+        if (!is_user_logged_in()) {
+            return;
+        }
+
+        $user_id = get_current_user_id();
+        $credits = self::get_user_credits($user_id);
+
+        return '<div class="rui-credits-display">Remaining Credits: ' . esc_html($credits) . '</div>';
+    }
+
+    public static function project_submission() {
+        ob_start();
+        if (isset($_POST['project_name']) && isset($_POST['urls'])) {
+            $project_name = sanitize_text_field($_POST['project_name']);
+            $urls = explode("\n", sanitize_textarea_field($_POST['urls']));
+            $urls = array_map('trim', $urls);
+            $urls = array_filter($urls, function($url) {
+                return filter_var($url, FILTER_VALIDATE_URL);
+            });
+            $notify = isset($_POST['notify']) ? 1 : 0;
+
+            if (count($urls) > 0 && count($urls) <= 9999) {
+                self::submit_project($project_name, $urls, $notify);
+            }
+        }
+        ?>
+        <form id="rui-project-submission-form" method="post" action="">
+            <label for="project_name">Project Name:</label>
+            <input type="text" name="project_name" id="project_name" required>
+            <label for="urls">URLs (one per line, max 9999):</label>
+            <textarea name="urls" id="urls" rows="10" required></textarea>
+            <label for="notify">Email Notifications:</label>
+            <input type="checkbox" name="notify" id="notify">
+            <input type="submit" value="Submit Project">
+        </form>
+        <?php
+        return ob_get_clean();
+    }
+
+    private static function submit_project($project_name, $urls, $notify) {
+        global $wpdb;
+        $user_id = get_current_user_id();
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $wpdb->insert($table_name, array(
+            'user_id' => $user_id,
+            'project_name' => $project_name,
+            'urls' => json_encode($urls),
+            'status' => 'pending',
+            'created_at' => current_time('mysql')
+        ));
+
+        $project_id = $wpdb->insert_id;
+
+        // Subtract credits
+        self::update_user_credits($user_id, -count($urls));
+
+        // Schedule API request
+        self::schedule_api_request($project_id, $urls, $notify);
+    }
+
+    private static function update_user_credits($user_id, $amount) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
+        $credits = self::get_user_credits($user_id);
+        $new_credits = max(0, $credits + $amount);
+
+        if ($credits > 0) {
+            $wpdb->update($table_name, array('credits' => $new_credits), array('user_id' => $user_id));
+        } else {
+            $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
+        }
+    }
+
+    private static function schedule_api_request($project_id, $urls, $notify) {
+        wp_schedule_single_event(time() + 60, 'rui_process_api_request', array($project_id, $urls, $notify));
+    }
+
+    private static function get_user_credits($user_id) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
+        $credits = $wpdb->get_var($wpdb->prepare("SELECT credits FROM $table_name WHERE user_id = %d", $user_id));
+        return $credits ? $credits : 0;
+    }
+
+    public static function enqueue_scripts() {
+        wp_enqueue_style('rui-customer-css', RUI_PLUGIN_URL . 'assets/css/customer.css');
+        wp_enqueue_script('rui-customer-js', RUI_PLUGIN_URL . 'assets/js/customer.js', array('jquery'), null, true);
+    }
+}
+
+Rapid_URL_Indexer_Customer::init();
+?>
