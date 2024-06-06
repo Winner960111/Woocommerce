@@ -17,8 +17,8 @@ class Rapid_URL_Indexer {
             $api_key = get_option('speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->id);
 
-            if ($response && isset($response['indexed_count'])) {
-                $indexed_count = $response['indexed_count'];
+            if ($response && isset($response['result']['indexed_count'])) {
+                $indexed_count = $response['result']['indexed_count'];
                 $total_urls = count(json_decode($project->urls));
                 $unindexed_count = $total_urls - $indexed_count;
                 $refund_credits = ceil($unindexed_count * 0.8);
@@ -41,7 +41,11 @@ class Rapid_URL_Indexer {
                     'details' => json_encode($response),
                     'created_at' => current_time('mysql')
                 ));
+            }
         }
+
+        // Schedule the next auto refund
+        wp_schedule_single_event(time() + DAY_IN_SECONDS, 'rui_auto_refund');
     }
 
 
