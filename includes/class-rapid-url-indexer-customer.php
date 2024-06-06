@@ -107,7 +107,7 @@ class Rapid_URL_Indexer_Customer {
         $user_id = get_current_user_id();
         $credits = self::get_user_credits($user_id);
 
-        return '<div class="rui-credits-display">Remaining Credits: ' . esc_html($credits) . '</div><a href="' . esc_url(wc_get_page_permalink('shop')) . '" class="button">Buy Credits</a>';
+        return '<div class="rui-credits-display">Remaining Credits: ' . esc_html($credits) . '</div><a href="' . esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))) . '" class="button">Buy Credits</a>';
     }
 
     public static function project_submission() {
@@ -191,3 +191,10 @@ class Rapid_URL_Indexer_Customer {
 
 Rapid_URL_Indexer_Customer::init();
 ?>
+    public static function add_my_account_endpoints() {
+        add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
+    }
+
+    public static function add_my_account_endpoint_content() {
+        include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
+    }
