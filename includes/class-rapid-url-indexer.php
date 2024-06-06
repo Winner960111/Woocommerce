@@ -29,8 +29,12 @@ class Rapid_URL_Indexer {
                     // Refund credits
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refund_credits);
 
-                    // Mark auto refund as processed
-                    $wpdb->update($table_name, array('auto_refund_processed' => 1), array('id' => $project->id));
+                    // Mark auto refund as processed and store refunded credits
+                    $wpdb->update($table_name, array(
+                        'auto_refund_processed' => 1, 
+                        'refunded_credits' => $refund_credits,
+                        'status' => 'refunded'
+                    ), array('id' => $project->id));
 
                     // Log the action
                     $wpdb->insert($log_table, array(

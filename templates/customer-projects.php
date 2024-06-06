@@ -37,7 +37,12 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             <?php foreach ($projects as $project): ?>
                 <tr>
                     <td><?php echo esc_html($project->project_name); ?></td>
-                    <td><?php echo esc_html($project->status); ?></td>
+                    <td>
+                        <?php echo esc_html($project->status); ?>
+                        <?php if ($project->status == 'refunded'): ?>
+                            (<?php echo esc_html($project->refunded_credits); ?> credits refunded)
+                        <?php endif; ?>
+                    </td>
                     <td><?php echo esc_html($project->created_at); ?></td>
                     <td>
                         <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button">Download Report</a>
