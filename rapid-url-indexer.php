@@ -28,8 +28,3 @@ register_deactivation_hook(__FILE__, array('Rapid_URL_Indexer_Deactivator', 'dea
 
 add_action('plugins_loaded', array('Rapid_URL_Indexer', 'init'));
 
-// Schedule auto refund cron job
-if (!wp_next_scheduled('rui_auto_refund')) {
-    wp_schedule_event(time(), 'daily', 'rui_auto_refund');
-}
-add_action('rui_auto_refund', array('Rapid_URL_Indexer', 'auto_refund'));

@@ -79,15 +79,14 @@ class Rapid_URL_Indexer {
     
         // Handle response and update project status
         if ($response && isset($response['task_id'])) {
-            // Update project status to 'submitted'
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-            $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
+            // Deduct credits and update project status
+            $user_id = get_current_user_id();
+            Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
             
             // Log the action
             $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
             $wpdb->insert($table_name, array(
-                'user_id' => get_current_user_id(),
+                'user_id' => $user_id,
                 'project_id' => $project_id,
                 'action' => 'API Request',
                 'details' => json_encode($response),
@@ -96,7 +95,7 @@ class Rapid_URL_Indexer {
     
             // Notify user if required
             if ($notify) {
-                $user_info = get_userdata(get_current_user_id());
+                $user_info = get_userdata($user_id);
                 wp_mail(
                     $user_info->user_email,
                     __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),

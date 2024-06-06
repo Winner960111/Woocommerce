@@ -52,8 +52,7 @@ class Rapid_URL_Indexer_Customer {
             'details' => json_encode(array('amount' => $amount)),
             'created_at' => current_time('mysql')
         ));
-            wp_send_json_error(__('Invalid URL list. Please check and try again.', 'rapid-url-indexer'));
-        }
+    }
 
     public static function customer_menu() {
         add_rewrite_rule('^my-account/projects/?', 'index.php?is_projects_page=1', 'top');
