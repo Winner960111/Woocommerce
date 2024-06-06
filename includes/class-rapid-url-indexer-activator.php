@@ -47,4 +47,3 @@ class Rapid_URL_Indexer_Activator {
         }
     }
 }
-}
