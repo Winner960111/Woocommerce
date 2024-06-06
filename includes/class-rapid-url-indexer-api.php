@@ -4,9 +4,6 @@ class Rapid_URL_Indexer_API {
     const API_RATE_LIMIT = 5; // Maximum number of API requests per second
     const API_RETRY_DELAY = 15; // Delay in seconds before retrying a failed API request 
     const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
-    const API_RATE_LIMIT = 5; // Maximum number of API requests per second
-    const API_RETRY_DELAY = 15; // Delay in seconds before retrying a failed API request
-    const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
     const LOW_BALANCE_THRESHOLD = 100000; // Threshold for low balance notification
 
     public static function get_account_balance($api_key) {
