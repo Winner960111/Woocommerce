@@ -162,11 +162,18 @@ class Rapid_URL_Indexer_Customer {
 
         $project_id = $wpdb->insert_id;
 
+        // Schedule API request
+        self::schedule_api_request($project_id, $urls, $notify);
+    }
+
+    public static function handle_api_success($project_id, $user_id, $urls) {
         // Subtract credits
         self::update_user_credits($user_id, -count($urls));
 
-        // Schedule API request
-        self::schedule_api_request($project_id, $urls, $notify);
+        // Update project status
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
     }
 
     public static function update_user_credits($user_id, $amount) {
