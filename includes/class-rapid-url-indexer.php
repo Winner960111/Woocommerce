@@ -3,6 +3,7 @@ class Rapid_URL_Indexer {
     public static function init() {
         self::load_dependencies();
         self::define_hooks();
+            }
         }
     }
 
@@ -40,7 +41,6 @@ class Rapid_URL_Indexer {
                     'details' => json_encode($response),
                     'created_at' => current_time('mysql')
                 ));
-            }
         }
     }
 
