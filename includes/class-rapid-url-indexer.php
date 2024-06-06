@@ -6,17 +6,6 @@ class Rapid_URL_Indexer {
         }
     }
 
-    private static function log_action($user_id, $project_id, $action, $details) {
-        global $wpdb;
-        $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
-        $wpdb->insert($log_table, array(
-            'user_id' => $user_id,
-            'project_id' => $project_id,
-            'action' => $action,
-            'details' => $details,
-            'created_at' => current_time('mysql')
-        ));
-    }
 
     public static function auto_refund() {
         global $wpdb;
