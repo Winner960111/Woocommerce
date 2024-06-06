@@ -37,7 +37,6 @@ class Rapid_URL_Indexer_API {
     private static function log_api_error($response) {
         error_log('SpeedyIndex API Error: ' . $response['response']['message']);
     }
-    }
     public static function create_task($api_key, $urls) {
         $response = self::make_api_request('POST', '/v2/task/google/indexer/create', $api_key, array('urls' => $urls));
         return self::handle_api_response($response);
@@ -67,7 +66,7 @@ class Rapid_URL_Indexer_API {
             $elapsed_time = $current_time - $last_request_time;
             
             if ($elapsed_time < 1 / self::$api_rate_limit) {
-                usleep((1 / self::$api_rate_limit - $elapsed_time) * 1000000);
+                usleep((1 / self::API_RATE_LIMIT - $elapsed_time) * 1000000);
             }
             
             $last_request_time = microtime(true);
@@ -96,9 +95,9 @@ class Rapid_URL_Indexer_API {
                 return $response;
             } else {
                 $retries++;
-                if ($retries < self::$api_max_retries) {
-                    // Delay before retrying
-                    sleep(self::$api_retry_delay);
+                if ($retries < self::API_MAX_RETRIES) {
+                    // Delay before retrying 
+                    sleep(self::API_RETRY_DELAY);
                 }
             }
         }
