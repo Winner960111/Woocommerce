@@ -46,4 +46,50 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             <?php endforeach; ?>
         </tbody>
     </table>
+    <details>
+        <summary>API Documentation</summary>
+        <table>
+            <thead>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>/api/v1/projects</td>
+                    <td>POST</td>
+                    <td>Submit a new project for indexing. Requires authentication.</td>
+                </tr>
+                <tr>
+                    <td>/api/v1/projects/{project_id}</td>
+                    <td>GET</td>
+                    <td>Get the status of a specific project. Requires authentication.</td>
+                </tr>
+                <tr>
+                    <td>/api/v1/projects/{project_id}/report</td>
+                    <td>GET</td>
+                    <td>Download the report for a specific project. Requires authentication.</td>
+                </tr>
+                <tr>
+                    <td>/api/v1/credits/balance</td>
+                    <td>GET</td>
+                    <td>Get the current credit balance for the authenticated user.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h4>Authentication</h4>
+        <p>All API endpoints require authentication using an API key. The API key should be included in the <code>X-API-Key</code> header of each request.</p>
+
+        <h4>Error Responses</h4>
+        <p>If an error occurs, the API will return an appropriate HTTP status code along with an error message in the response body. Possible error codes include:</p>
+        <ul>
+            <li><strong>400 Bad Request</strong> - The request was malformed or missing required parameters.</li>
+            <li><strong>401 Unauthorized</strong> - The API key is missing or invalid.</li>
+            <li><strong>404 Not Found</strong> - The requested resource (e.g., project) does not exist.</li>
+            <li><strong>500 Internal Server Error</strong> - An unexpected error occurred on the server.</li>
+        </ul>
+    </details>
 </div>
