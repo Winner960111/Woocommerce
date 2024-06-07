@@ -30,3 +30,5 @@
     </form>
     <div id="rui-bulk-submit-response"></div>
 </div>
+        <h2>Credits Balance</h2>
+        <p>Remaining Credits: <?php echo $this->get_credits_balance(); ?></p>

@@ -21,6 +21,20 @@ class Rapid_URL_Indexer_WordPress {
         add_action('save_post', array($this, 'save_post'), 10, 2);
         add_action('admin_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('wp_ajax_rui_bulk_submit', array($this, 'handle_bulk_submit'));
+        
+        // Add actions for post status transitions
+        add_action('transition_post_status', array($this, 'on_post_status_change'), 10, 3);
+    }
+    
+    public function on_post_status_change($new_status, $old_status, $post) {
+        if ($new_status === 'publish') {
+            $submit_on_publish = get_post_meta($post->ID, '_rui_submit_on_publish', true);
+            $submit_on_update = get_post_meta($post->ID, '_rui_submit_on_update', true);
+
+            if (($old_status !== 'publish' && $submit_on_publish) || ($old_status === 'publish' && $submit_on_update)) {
+                $this->submit_url($post->guid, $post->post_name);
+            }
+        }
     }
 
     public function add_plugin_page() {
