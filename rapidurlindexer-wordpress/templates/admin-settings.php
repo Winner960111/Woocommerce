@@ -30,8 +30,10 @@
     </form>
     <div id="rui-bulk-submit-response"></div>
 </div>
-        <h2>Credits Balance</h2>
-        <p>Remaining Credits: <?php echo $this->get_credits_balance(); ?></p>
+        <tr>
+            <th scope="row"><?php _e('Remaining Credits', 'rapid-url-indexer'); ?></th>
+            <td><?php echo esc_html($this->get_credits_balance()); ?></td>
+        </tr>
 
 <h2>Automatic Submission Settings</h2>
 <table class="form-table">
