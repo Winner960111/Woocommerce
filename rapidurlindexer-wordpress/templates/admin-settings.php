@@ -1,5 +1,5 @@
 <div class="wrap">
-    <h1>Rapid URL Indexer Settings</h1>
+    <h1><?php _e('Rapid URL Indexer Settings', 'rapid-url-indexer'); ?></h1>
     <form method="post" action="options.php">
         <?php
         settings_fields('rui_options');
@@ -7,26 +7,26 @@
         ?>
         <table class="form-table">
             <tr>
-                <th scope="row">Remaining Credits</th>
-                <td><?php echo $this->get_credits_balance(); ?></td>
+                <th scope="row"><?php _e('Remaining Credits', 'rapid-url-indexer'); ?></th>
+                <td><?php echo esc_html($this->get_credits_balance()); ?></td>
             </tr>
         </table>
         <?php submit_button(); ?>
     </form>
     <hr>
-    <h2>Bulk Submit URLs</h2>
+    <h2><?php _e('Bulk Submit URLs', 'rapid-url-indexer'); ?></h2>
     <form id="rui-bulk-submit-form">
         <table class="form-table">
             <tr>
-                <th scope="row"><label for="rui-project-name">Project Name</label></th>
-                <td><input type="text" id="rui-project-name" name="project_name" class="regular-text"></td>
+                <th scope="row"><label for="rui-project-name"><?php _e('Project Name', 'rapid-url-indexer'); ?></label></th>
+                <td><input type="text" id="rui-project-name" name="project_name" class="regular-text" required></td>
             </tr>
             <tr>
-                <th scope="row"><label for="rui-urls">URLs (one per line)</label></th>
-                <td><textarea id="rui-urls" name="urls" rows="10" cols="50"></textarea></td>
+                <th scope="row"><label for="rui-urls"><?php _e('URLs (one per line)', 'rapid-url-indexer'); ?></label></th>
+                <td><textarea id="rui-urls" name="urls" rows="10" cols="50" required></textarea></td>
             </tr>
         </table>
-        <?php submit_button('Submit URLs', 'primary', 'submit', false); ?>
+        <?php submit_button(__('Submit URLs', 'rapid-url-indexer'), 'primary', 'submit', false); ?>
     </form>
     <div id="rui-bulk-submit-response"></div>
 </div>

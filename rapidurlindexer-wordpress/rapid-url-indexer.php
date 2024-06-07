@@ -136,24 +136,24 @@ class Rapid_URL_Indexer_WordPress {
         check_ajax_referer('rui_bulk_submit', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error('Insufficient permissions');
+            wp_send_json_error(__('Insufficient permissions', 'rapid-url-indexer'));
         }
 
         $urls = isset($_POST['urls']) ? explode("\n", sanitize_textarea_field($_POST['urls'])) : array();
-        $urls = array_filter(array_map('trim', $urls));
+        $urls = array_filter(array_map('esc_url_raw', $urls));
 
         if (empty($urls)) {
-            wp_send_json_error('No URLs provided');
+            wp_send_json_error(__('No valid URLs provided', 'rapid-url-indexer'));
         }
 
-        $project_name = isset($_POST['project_name']) ? sanitize_text_field($_POST['project_name']) : 'Bulk Submit';
+        $project_name = isset($_POST['project_name']) ? sanitize_text_field($_POST['project_name']) : __('Bulk Submit', 'rapid-url-indexer');
 
         $response = $this->submit_urls($urls, $project_name);
 
         if ($response['code'] === 0) {
-            wp_send_json_success('URLs submitted successfully');
+            wp_send_json_success(__('URLs submitted successfully', 'rapid-url-indexer'));
         } else {
-            wp_send_json_error('Error submitting URLs: ' . $response['message']);
+            wp_send_json_error(sprintf(__('Error submitting URLs: %s', 'rapid-url-indexer'), $response['message']));
         }
     }
 
@@ -162,7 +162,7 @@ class Rapid_URL_Indexer_WordPress {
         $api_key = isset($settings['api_key']) ? $settings['api_key'] : '';
 
         if (empty($api_key)) {
-            return array('code' => 1, 'message' => 'API key not set');
+            return array('code' => 1, 'message' => __('API key not set', 'rapid-url-indexer'));
         }
 
         $response = wp_remote_post($this->api_base_url . '/v2/task/google/indexer/create', array(
@@ -174,15 +174,25 @@ class Rapid_URL_Indexer_WordPress {
                 'title' => $project_name,
                 'urls' => array($url),
             )),
+            'timeout' => 30,
         ));
 
         if (is_wp_error($response)) {
-            return array('code' => 1, 'message' => $response->get_error_message());
+            $error_message = $response->get_error_message();
+            error_log("SpeedyIndex API Error: $error_message");
+            return array('code' => 1, 'message' => __('Error communicating with API', 'rapid-url-indexer'));
         }
 
+        $response_code = wp_remote_retrieve_response_code($response);
         $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
-        return $response_body;
+        if ($response_code === 200) {
+            return $response_body;
+        } else {
+            $error_message = isset($response_body['message']) ? $response_body['message'] : __('Unknown API error', 'rapid-url-indexer');
+            error_log("SpeedyIndex API Error: $error_message");
+            return array('code' => $response_code, 'message' => $error_message);
+        }
     }
 
     private function submit_urls($urls, $project_name) {
