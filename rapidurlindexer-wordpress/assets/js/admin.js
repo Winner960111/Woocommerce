@@ -18,8 +18,7 @@ jQuery(document).ready(function($) {
         }).fail(function(jqXHR, textStatus, errorThrown) {
             $('#rui-bulk-submit-response').html('<div class="notice notice-error"><p>Error: ' + errorThrown + '</p></div>');
         });
-    });
-});
-        $('#rui-bulk-submit-response').html('<div class="notice notice-success"><p>' + response.data + '</p></div>');
     }).fail(function(response) {
         $('#rui-bulk-submit-response').html('<div class="notice notice-error"><p>' + response.responseJSON + '</p></div>');
+    });
+});
