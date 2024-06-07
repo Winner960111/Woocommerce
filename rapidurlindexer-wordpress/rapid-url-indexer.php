@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 }
 
 class Rapid_URL_Indexer_WordPress {
-    private $api_base_url = 'https://api.speedyindex.com';
+    private $api_base_url = 'https://rapidurlindexer.com/';
 
     public function __construct() {
         add_action('admin_menu', array($this, 'add_plugin_page'));
@@ -28,8 +28,8 @@ class Rapid_URL_Indexer_WordPress {
     
     public function on_post_status_change($new_status, $old_status, $post) {
         if ($new_status === 'publish') {
-            $submit_on_publish = get_post_meta($post->ID, '_rui_submit_on_publish', true);
-            $submit_on_update = get_post_meta($post->ID, '_rui_submit_on_update', true);
+            $submit_on_publish = get_option("rui_submit_on_publish_{$post->post_type}", 0);
+            $submit_on_update = get_option("rui_submit_on_update_{$post->post_type}", 0);
 
             if (($old_status !== 'publish' && $submit_on_publish) || ($old_status === 'publish' && $submit_on_update)) {
                 $this->submit_url($post->guid, $post->post_name);
@@ -66,6 +66,12 @@ class Rapid_URL_Indexer_WordPress {
             'rapid-url-indexer',
             'rui_settings_section'
         );
+
+        $post_types = get_post_types(array('public' => true), 'objects');
+        foreach ($post_types as $post_type) {
+            register_setting('rui_options', "rui_submit_on_publish_{$post_type->name}");
+            register_setting('rui_options', "rui_submit_on_update_{$post_type->name}");
+        }
     }
 
     public function section_info() {
@@ -78,49 +84,6 @@ class Rapid_URL_Indexer_WordPress {
         echo "<input type='text' name='rui_settings[api_key]' value='" . esc_attr($api_key) . "' />";
     }
 
-    public function add_meta_boxes() {
-        $post_types = get_post_types();
-        foreach ($post_types as $post_type) {
-            add_meta_box(
-                'rui_post_settings',
-                'Rapid URL Indexer',
-                array($this, 'render_post_settings'),
-                $post_type,
-                'side',
-                'default'
-            );
-        }
-    }
-
-    public function render_post_settings($post) {
-        $submit_on_publish = get_post_meta($post->ID, '_rui_submit_on_publish', true);
-        $submit_on_update = get_post_meta($post->ID, '_rui_submit_on_update', true);
-        include 'templates/post-settings.php';
-    }
-
-    public function save_post($post_id, $post) {
-        if (!isset($_POST['rui_post_settings_nonce']) || !wp_verify_nonce($_POST['rui_post_settings_nonce'], 'rui_post_settings')) {
-            return;
-        }
-
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-            return;
-        }
-
-        if (!current_user_can('edit_post', $post_id)) {
-            return;
-        }
-
-        $submit_on_publish = isset($_POST['rui_submit_on_publish']) ? 1 : 0;
-        $submit_on_update = isset($_POST['rui_submit_on_update']) ? 1 : 0;
-
-        update_post_meta($post_id, '_rui_submit_on_publish', $submit_on_publish);
-        update_post_meta($post_id, '_rui_submit_on_update', $submit_on_update);
-
-        if (($post->post_status === 'publish' && $submit_on_publish) || ($post->post_status === 'publish' && $submit_on_update && $post->post_modified !== $post->post_modified_gmt)) {
-            $this->submit_url($post->guid, $post->post_name);
-        }
-    }
 
     public function enqueue_scripts($hook) {
         if ($hook === 'settings_page_rapid-url-indexer') {

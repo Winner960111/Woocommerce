@@ -32,3 +32,48 @@
 </div>
         <h2>Credits Balance</h2>
         <p>Remaining Credits: <?php echo $this->get_credits_balance(); ?></p>
+
+<h2>Automatic Submission Settings</h2>
+<table class="form-table">
+    <tr>
+        <th scope="row">Submit on Publish</th>
+        <td>
+            <fieldset>
+                <legend class="screen-reader-text"><span>Submit on Publish</span></legend>
+                <?php 
+                $post_types = get_post_types(array('public' => true), 'objects');
+                foreach ($post_types as $post_type) {
+                    $submit_on_publish = get_option("rui_submit_on_publish_{$post_type->name}", 0);
+                    ?>
+                    <label>
+                        <input type="checkbox" name="rui_submit_on_publish_<?php echo esc_attr($post_type->name); ?>" value="1" <?php checked($submit_on_publish, 1); ?>>
+                        <?php echo esc_html($post_type->labels->singular_name); ?>
+                    </label>
+                    <br>
+                    <?php
+                }
+                ?>
+            </fieldset>
+        </td>
+    </tr>
+    <tr>
+        <th scope="row">Submit on Update</th>
+        <td>
+            <fieldset>
+                <legend class="screen-reader-text"><span>Submit on Update</span></legend>
+                <?php 
+                foreach ($post_types as $post_type) {
+                    $submit_on_update = get_option("rui_submit_on_update_{$post_type->name}", 0);
+                    ?>
+                    <label>
+                        <input type="checkbox" name="rui_submit_on_update_<?php echo esc_attr($post_type->name); ?>" value="1" <?php checked($submit_on_update, 1); ?>>
+                        <?php echo esc_html($post_type->labels->singular_name); ?>
+                    </label>
+                    <br>
+                    <?php
+                }
+                ?>
+            </fieldset>
+        </td>
+    </tr>
+</table>
