@@ -55,7 +55,7 @@ class Rapid_URL_Indexer_Admin {
         $credits_table = $wpdb->prefix . 'rapid_url_indexer_credits';
         $total_credits = $wpdb->get_var("SELECT SUM(credits) FROM $credits_table");
         
-        $api_key = get_option('speedyindex_api_key');
+        $api_key = $this->get_api_key();
         $api_credits = Rapid_URL_Indexer_API::get_account_balance($api_key);
         $api_credits = $api_credits ? $api_credits['balance']['indexer'] : 'N/A';
         
