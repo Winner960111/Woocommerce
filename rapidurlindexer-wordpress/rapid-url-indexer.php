@@ -124,7 +124,7 @@ class Rapid_URL_Indexer_WordPress {
 
     public function enqueue_scripts($hook) {
         if ($hook === 'settings_page_rapid-url-indexer') {
-            wp_enqueue_script('rui-admin-js', plugin_dir_url(__FILE__) . 'assets/js/admin.js', array('jquery'), '1.0.0', true);
+            wp_enqueue_script('rui-admin-js', plugin_dir_url(__FILE__) . 'assets/js/admin.js', array(), '1.0.0', true);
             wp_localize_script('rui-admin-js', 'rui_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('rui_bulk_submit'),

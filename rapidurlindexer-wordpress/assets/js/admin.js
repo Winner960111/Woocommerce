@@ -1,24 +1,27 @@
-jQuery(document).ready(function($) {
-    $('#rui-bulk-submit-form').on('submit', function(e) {
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('rui-bulk-submit-form').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        var formData = {
-            action: 'rui_bulk_submit',
-            nonce: rui_ajax.nonce,
-            project_name: $('#rui-project-name').val(),
-            urls: $('#rui-urls').val(),
-        };
+        var formData = new FormData();
+        formData.append('action', 'rui_bulk_submit');
+        formData.append('nonce', rui_ajax.nonce);
+        formData.append('project_name', document.getElementById('rui-project-name').value);
+        formData.append('urls', document.getElementById('rui-urls').value);
 
-        $.post(rui_ajax.ajax_url, formData, function(response) {
-            if (response.success) {
-                $('#rui-bulk-submit-response').html('<div class="notice notice-success"><p>' + response.data + '</p></div>');
+        fetch(rui_ajax.ajax_url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('rui-bulk-submit-response').innerHTML = '<div class="notice notice-success"><p>' + data.data + '</p></div>';
             } else {
-                $('#rui-bulk-submit-response').html('<div class="notice notice-error"><p>' + response.data + '</p></div>');
+                document.getElementById('rui-bulk-submit-response').innerHTML = '<div class="notice notice-error"><p>' + data.data + '</p></div>';
             }
-        }).fail(function(jqXHR, textStatus, errorThrown) {
-            $('#rui-bulk-submit-response').html('<div class="notice notice-error"><p>Error: ' + errorThrown + '</p></div>');
+        })
+        .catch(error => {
+            document.getElementById('rui-bulk-submit-response').innerHTML = '<div class="notice notice-error"><p>Error: ' + error + '</p></div>';
         });
-    }).fail(function(response) {
-        $('#rui-bulk-submit-response').html('<div class="notice notice-error"><p>' + response.responseJSON + '</p></div>');
     });
 });
