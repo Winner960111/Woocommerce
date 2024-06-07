@@ -18,3 +18,6 @@ jQuery(document).ready(function($) {
         });
     });
 });
+        $('#rui-bulk-submit-response').html('<div class="notice notice-success"><p>' + response.data + '</p></div>');
+    }).fail(function(response) {
+        $('#rui-bulk-submit-response').html('<div class="notice notice-error"><p>' + response.responseJSON + '</p></div>');
