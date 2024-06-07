@@ -121,20 +121,13 @@ class Rapid_URL_Indexer_WordPress {
     }
 
     private function submit_url($url, $project_name) {
-        $settings = get_option('rui_settings');
-        $api_key = isset($settings['api_key']) ? $settings['api_key'] : '';
-
-        if (empty($api_key)) {
-            return array('code' => 1, 'message' => __('API key not set', 'rapid-url-indexer'));
-        }
-
-        $response = wp_remote_post($this->api_base_url . '/v2/task/google/indexer/create', array(
+        $response = wp_remote_post(rest_url('rui/v1/projects'), array(
             'headers' => array(
-                'Authorization' => $api_key,
+                'X-API-Key' => $this->get_api_key(),
                 'Content-Type' => 'application/json',
             ),
             'body' => json_encode(array(
-                'title' => $project_name,
+                'project_name' => $project_name,
                 'urls' => array($url),
             )),
             'timeout' => 30,
@@ -142,7 +135,7 @@ class Rapid_URL_Indexer_WordPress {
 
         if (is_wp_error($response)) {
             $error_message = $response->get_error_message();
-            error_log("SpeedyIndex API Error: $error_message");
+            error_log("API Error: $error_message");
             return array('code' => 1, 'message' => __('Error communicating with API', 'rapid-url-indexer'));
         }
 
@@ -153,26 +146,19 @@ class Rapid_URL_Indexer_WordPress {
             return $response_body;
         } else {
             $error_message = isset($response_body['message']) ? $response_body['message'] : __('Unknown API error', 'rapid-url-indexer');
-            error_log("SpeedyIndex API Error: $error_message");
+            error_log("API Error: $error_message");
             return array('code' => $response_code, 'message' => $error_message);
         }
     }
 
     private function submit_urls($urls, $project_name) {
-        $settings = get_option('rui_settings');
-        $api_key = isset($settings['api_key']) ? $settings['api_key'] : '';
-
-        if (empty($api_key)) {
-            return array('code' => 1, 'message' => 'API key not set');
-        }
-
-        $response = wp_remote_post($this->api_base_url . '/v2/task/google/indexer/create', array(
+        $response = wp_remote_post(rest_url('rui/v1/projects'), array(
             'headers' => array(
-                'Authorization' => $api_key,
+                'X-API-Key' => $this->get_api_key(),
                 'Content-Type' => 'application/json',
             ),
             'body' => json_encode(array(
-                'title' => $project_name,
+                'project_name' => $project_name,
                 'urls' => $urls,
             )),
         ));
@@ -186,17 +172,15 @@ class Rapid_URL_Indexer_WordPress {
         return $response_body;
     }
 
+    private function get_api_key() {
+        $user_id = get_current_user_id();
+        return get_user_meta($user_id, 'rui_api_key', true);
+    }
+
     public function get_credits_balance() {
-        $settings = get_option('rui_settings');
-        $api_key = isset($settings['api_key']) ? $settings['api_key'] : '';
-
-        if (empty($api_key)) {
-            return 'N/A';
-        }
-
-        $response = wp_remote_get($this->api_base_url . '/v2/account', array(
+        $response = wp_remote_get(rest_url('rui/v1/credits/balance'), array(
             'headers' => array(
-                'Authorization' => $api_key,
+                'X-API-Key' => $this->get_api_key(),
             ),
         ));
 
@@ -206,8 +190,8 @@ class Rapid_URL_Indexer_WordPress {
 
         $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
-        if ($response_body['code'] === 0) {
-            return $response_body['balance']['indexer'];
+        if (isset($response_body['credits'])) {
+            return $response_body['credits'];
         }
 
         return 'N/A';
