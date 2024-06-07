@@ -11,6 +11,14 @@ class Rapid_URL_Indexer_Customer {
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
     }
 
+    public static function add_my_account_endpoints() {
+        add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
+    }
+
+    public static function add_my_account_endpoint_content() {
+        include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
+    }
+
     public static function generate_api_key($user_id) {
         $api_key = wp_generate_password(32, false);
         update_user_meta($user_id, 'rui_api_key', $api_key);
@@ -145,6 +153,7 @@ class Rapid_URL_Indexer_Customer {
 
         // Schedule API request
         self::schedule_api_request($project_id, $urls, $notify);
+        return $project_id;
     }
 
     public static function handle_api_success($project_id, $user_id, $urls) {
