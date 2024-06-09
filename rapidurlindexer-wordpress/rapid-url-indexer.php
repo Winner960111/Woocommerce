@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name: Rapid URL Indexer for WordPress
- * Description: Submit URLs to the Rapid URL Indexer API for indexing.
- * Version: 1.0.0
- * Author: Your Name
- * Text Domain: rapid-url-indexer
+ * Description: Submit URLs to Rapid URL Indexer for fast and reliable Google indexing.
+ * Version: 1.0
+ * Author: RapidURLIndexer.com
+ * Text Domain: rapidurlindexer-wordpress
  */
 
 if (!defined('ABSPATH')) {

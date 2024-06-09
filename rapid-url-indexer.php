@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Rapid URL Indexer
- * Description: WooCommerce extension for purchasing and managing URL indexing credits.
- * Version: 1.0.0
- * Author: Your Name
+ * Description: WooCommerce extension for selling and managing URL indexing credits.
+ * Version: 1.0
+ * Author: RapidURLIndexer.com
  * Text Domain: rapid-url-indexer
  */
 
