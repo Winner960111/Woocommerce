@@ -24,6 +24,35 @@ class Rapid_URL_Indexer_WordPress {
         
         // Add actions for post status transitions
         add_action('transition_post_status', array($this, 'on_post_status_change'), 10, 3);
+
+        // Add credits amount field to simple products
+        add_action('woocommerce_product_options_general_product_data', array($this, 'add_credits_amount_field'));
+        add_action('woocommerce_process_product_meta', array($this, 'save_credits_amount_field'));
+    }
+
+    public function add_credits_amount_field() {
+        global $post;
+        $product = wc_get_product($post->ID);
+
+        if ($product->is_type('simple')) {
+            woocommerce_wp_text_input(array(
+                'id' => '_credits_amount',
+                'label' => __('Credits Amount', 'rapid-url-indexer'),
+                'placeholder' => '',
+                'desc_tip' => 'true',
+                'description' => __('Enter the number of credits this product represents.', 'rapid-url-indexer'),
+                'type' => 'number',
+                'custom_attributes' => array(
+                    'step' => '1',
+                    'min' => '0'
+                )
+            ));
+        }
+    }
+
+    public function save_credits_amount_field($post_id) {
+        $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : '';
+        update_post_meta($post_id, '_credits_amount', $credits_amount);
     }
     
     public function on_post_status_change($new_status, $old_status, $post) {
