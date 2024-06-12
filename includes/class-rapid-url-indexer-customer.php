@@ -158,7 +158,7 @@ class Rapid_URL_Indexer_Customer {
 
     public static function handle_api_success($project_id, $user_id, $urls) {
         // Subtract credits
-        self::update_user_credits($user_id, -count($urls));
+        Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
 
         // Update project status
         global $wpdb;
