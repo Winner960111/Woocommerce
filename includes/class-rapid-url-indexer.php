@@ -5,6 +5,28 @@ class Rapid_URL_Indexer {
         self::define_hooks();
     }
 
+    public static function update_project_status() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted'");
+
+        foreach ($projects as $project) {
+            $api_key = get_option('speedyindex_api_key');
+            $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
+
+            if ($response && isset($response['result']['status'])) {
+                $status = $response['result']['status'];
+                $indexed_links = isset($response['result']['indexed_count']) ? $response['result']['indexed_count'] : 0;
+
+                if ($status === 'completed') {
+                    $wpdb->update($table_name, array('status' => 'completed', 'indexed_links' => $indexed_links), array('id' => $project->id));
+                } elseif ($status === 'failed') {
+                    $wpdb->update($table_name, array('status' => 'failed'), array('id' => $project->id));
+                }
+            }
+        }
+    }
+
 
     public static function auto_refund() {
         global $wpdb;
