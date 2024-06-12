@@ -198,5 +198,3 @@ class Rapid_URL_Indexer_Customer {
     }
 }
 
-Rapid_URL_Indexer_Customer::init();
-?>
