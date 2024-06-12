@@ -200,24 +200,3 @@ class Rapid_URL_Indexer_Customer {
 
 Rapid_URL_Indexer_Customer::init();
 ?>
-    public static function add_my_account_endpoints() {
-        add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
-    }
-
-    public static function add_my_account_endpoint_content() {
-        include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
-    }
-    public static function add_my_account_endpoints() {
-        add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
-    }
-
-    public static function add_my_account_endpoint_content() {
-        include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
-    }
-    public static function add_my_account_endpoints() {
-        add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
-    }
-
-    public static function add_my_account_endpoint_content() {
-        include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
-    }
