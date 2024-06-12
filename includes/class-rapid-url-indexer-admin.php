@@ -3,6 +3,7 @@ class Rapid_URL_Indexer_Admin {
     public static function init() {
         add_action('admin_menu', array(__CLASS__, 'admin_menu'));
         add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
+        add_action('rui_log_entry_created', array(__CLASS__, 'limit_log_entries'));
     }
 
     public static function delete_data_on_uninstall_callback() {
@@ -98,6 +99,12 @@ class Rapid_URL_Indexer_Admin {
             echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
         }
 
+        $log_entry_limit = get_option('rui_log_entry_limit', 1000);
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            update_option('rui_log_entry_limit', intval($_POST['rui_log_entry_limit']));
+        }
+
         include RUI_PLUGIN_DIR . 'templates/admin-settings.php';
     }
 
@@ -145,3 +152,16 @@ class Rapid_URL_Indexer_Admin {
         wp_send_json_success($output);
     }
 }
+
+    public static function limit_log_entries() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
+        $log_entry_limit = get_option('rui_log_entry_limit', 1000);
+        
+        $log_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+        
+        if ($log_count > $log_entry_limit) {
+            $logs_to_delete = $log_count - $log_entry_limit;
+            $wpdb->query("DELETE FROM $table_name ORDER BY created_at ASC LIMIT $logs_to_delete");
+        }
+    }
