@@ -151,6 +151,19 @@ class Rapid_URL_Indexer_Admin {
 
         wp_send_json_success($output);
     }
+
+    public static function limit_log_entries() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
+        $log_entry_limit = get_option('rui_log_entry_limit', 1000);
+        
+        $log_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+        
+        if ($log_count > $log_entry_limit) {
+            $logs_to_delete = $log_count - $log_entry_limit;
+            $wpdb->query("DELETE FROM $table_name ORDER BY created_at ASC LIMIT $logs_to_delete");
+        }
+    }
 }
 
     public static function limit_log_entries() {
