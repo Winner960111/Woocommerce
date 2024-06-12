@@ -102,7 +102,6 @@ class Rapid_URL_Indexer_Admin {
     }
     
 }
-?>
     public static function settings_page() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             update_option('speedyindex_api_key', sanitize_text_field($_POST['speedyindex_api_key']));
@@ -119,3 +118,4 @@ class Rapid_URL_Indexer_Admin {
         $logs = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created_at DESC");
         include RUI_PLUGIN_DIR . 'templates/admin-logs.php';
     }
+}
