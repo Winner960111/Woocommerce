@@ -94,10 +94,10 @@ class Rapid_URL_Indexer_Admin {
     public static function settings_page() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             update_option('speedyindex_api_key', sanitize_text_field($_POST['speedyindex_api_key']));
+            update_option('rui_delete_data_on_uninstall', isset($_POST['rui_delete_data_on_uninstall']) ? 1 : 0);
             echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
         }
 
-        $api_key = get_option('speedyindex_api_key');
         include RUI_PLUGIN_DIR . 'templates/admin-settings.php';
     }
 
