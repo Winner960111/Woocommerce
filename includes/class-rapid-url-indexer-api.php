@@ -7,7 +7,7 @@ class Rapid_URL_Indexer_API {
     const LOW_BALANCE_THRESHOLD = 100000; // Threshold for low balance notification
 
     public static function get_account_balance($api_key) {
-        $response = self::make_api_request('GET', '/v2/account', $api_key);
+        $response = self::make_api_request('GET', '/v2/account', $api_key, array());
         
         if (self::is_api_response_success($response)) {
             $data = json_decode(wp_remote_retrieve_body($response), true);
