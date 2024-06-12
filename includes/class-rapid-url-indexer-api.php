@@ -34,8 +34,8 @@ class Rapid_URL_Indexer_API {
         return wp_remote_retrieve_response_code($response) === 200;
     }
 
-    private static function log_api_error($response) {
-        error_log('SpeedyIndex API Error: ' . $response['response']['message']);
+    private static function log_api_error($message) {
+        error_log('SpeedyIndex API Error: ' . $message);
     }
     public static function create_task($api_key, $urls) {
         $response = self::make_api_request('POST', '/v2/task/google/indexer/create', $api_key, array('urls' => $urls));

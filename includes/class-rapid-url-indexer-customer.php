@@ -166,7 +166,7 @@ class Rapid_URL_Indexer_Customer {
         $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
     }
 
-    public static function update_user_credits($user_id, $amount) {
+    public static function update_user_credits($user_id, $credits) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = self::get_user_credits($user_id);

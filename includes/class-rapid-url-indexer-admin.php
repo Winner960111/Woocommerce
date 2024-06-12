@@ -3,7 +3,7 @@ class Rapid_URL_Indexer_Admin {
     public static function init() {
         add_action('admin_menu', array(__CLASS__, 'admin_menu'));
         add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
-        add_action('rui_log_entry_created', array('Rapid_URL_Indexer_Admin', 'limit_log_entries'));
+        add_action('rui_log_entry_created', array(__CLASS__, 'limit_log_entries'));
     }
 
     public static function delete_data_on_uninstall_callback() {
