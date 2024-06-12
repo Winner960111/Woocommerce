@@ -31,7 +31,7 @@ class Rapid_URL_Indexer_API {
     }
 
     private static function is_api_response_success($response) {
-        return $response['response']['code'] === 200;
+        return wp_remote_retrieve_response_code($response) === 200;
     }
 
     private static function log_api_error($response) {

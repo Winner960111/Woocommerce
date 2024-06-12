@@ -26,7 +26,7 @@ class Rapid_URL_Indexer_WordPress {
         add_action('transition_post_status', array($this, 'on_post_status_change'), 10, 3);
 
         // Add credits amount field to simple products
-        add_action('woocommerce_product_options_general_product_data', array($this, 'add_credits_amount_field'));
+        add_action('woocommerce_product_options_general_product_data', array($this, 'add_credits_amount_field'), 10);
         add_action('woocommerce_process_product_meta', array($this, 'save_credits_amount_field'));
     }
 

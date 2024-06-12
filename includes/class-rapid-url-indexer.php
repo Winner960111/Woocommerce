@@ -53,7 +53,7 @@ class Rapid_URL_Indexer {
                     ), array('id' => $project->id));
 
                     // Log the action
-                    $wpdb->insert($log_table, array(
+                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
                         'project_id' => $project->id,
                         'action' => 'Auto Refund',
