@@ -5,6 +5,11 @@ class Rapid_URL_Indexer_Admin {
         add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
     }
 
+    public static function delete_data_on_uninstall_callback() {
+        $delete_data_on_uninstall = get_option('rui_delete_data_on_uninstall', 0);
+        echo '<input type="checkbox" name="rui_delete_data_on_uninstall" value="1" ' . checked(1, $delete_data_on_uninstall, false) . ' />';
+    }
+
     private static function get_api_key() {
         return get_option('speedyindex_api_key');
     }
