@@ -225,6 +225,8 @@ class Rapid_URL_Indexer {
                 'details' => json_encode($response),
                 'created_at' => current_time('mysql')
             ));
+
+            do_action('rui_log_entry_created');
     
             // Notify user if required and not rate limited
             if ($notify) {
