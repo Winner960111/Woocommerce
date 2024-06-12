@@ -217,8 +217,7 @@ class Rapid_URL_Indexer {
             Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
             
             // Log the action
-            $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
-            $wpdb->insert($table_name, array(
+            $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                 'user_id' => $user_id,
                 'project_id' => $project_id,
                 'action' => 'API Request',

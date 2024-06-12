@@ -164,4 +164,4 @@ class Rapid_URL_Indexer_Admin {
             $wpdb->query("DELETE FROM $table_name ORDER BY created_at ASC LIMIT $logs_to_delete");
         }
     }
-    }
+}

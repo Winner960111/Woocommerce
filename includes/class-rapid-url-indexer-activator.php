@@ -40,7 +40,7 @@ class Rapid_URL_Indexer_Activator {
             PRIMARY KEY  (id)
         ) $charset_collate;";
 
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
 
         // Schedule hourly cron job to update project status
