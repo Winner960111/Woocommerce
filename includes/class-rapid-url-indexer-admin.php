@@ -83,16 +83,6 @@ class Rapid_URL_Indexer_Admin {
         wp_enqueue_script('rui-admin-js', RUI_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), null, true);
     }
 
-    public static function update_user_credits($user_id, $credits) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
-        $current_credits = $wpdb->get_var($wpdb->prepare("SELECT credits FROM $table_name WHERE user_id = %d", $user_id));
-        if ($current_credits !== null) {
-            $wpdb->update($table_name, array('credits' => $credits), array('user_id' => $user_id));
-        } else {
-            $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $credits));
-        }
-    }
 
     public static function get_user_credits($user_id) {
         global $wpdb;

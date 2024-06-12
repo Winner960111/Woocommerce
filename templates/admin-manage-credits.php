@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user_id && $credits) {
         $current_credits = Rapid_URL_Indexer_Admin::get_user_credits($user_id);
         $new_credits = $current_credits + $credits;
-        Rapid_URL_Indexer_Admin::update_user_credits($user_id, $new_credits);
+        Rapid_URL_Indexer_Customer::update_user_credits($user_id, $new_credits);
         echo '<p>Credits updated successfully.</p>';
     } else {
         echo '<p>Invalid user ID or credits amount.</p>';
