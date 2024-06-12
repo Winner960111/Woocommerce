@@ -24,7 +24,7 @@
 
     <?php
     if (isset($_POST['update_credits'])) {
-        $user_id = intval($_POST['user_id']);
+        $user_id = absint($_POST['user_id']);
         $credits = intval($_POST['credits']);
 
         if ($user_id && $credits) {

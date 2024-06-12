@@ -59,6 +59,7 @@ class Rapid_URL_Indexer_Customer {
         $project_name = sanitize_text_field($_POST['project_name']);
         $urls = array_map('esc_url_raw', array_filter(array_map('trim', explode("\n", sanitize_textarea_field($_POST['urls'])))));
         $notify = isset($_POST['notify']) ? 1 : 0;
+        $notify = isset($_POST['notify']) ? 1 : 0;
     
         if (count($urls) > 0 && count($urls) <= 9999) {
             $project_id = self::submit_project($project_name, $urls, $notify);
