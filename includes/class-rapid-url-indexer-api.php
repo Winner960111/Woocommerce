@@ -34,8 +34,14 @@ class Rapid_URL_Indexer_API {
         return wp_remote_retrieve_response_code($response) === 200;
     }
 
-    private static function log_api_error($message) {
-        error_log('SpeedyIndex API Error: ' . $message);
+    private static function log_api_error($response) {
+        if (is_wp_error($response)) {
+            error_log('SpeedyIndex API Error: ' . $response->get_error_message());
+        } else {
+            $response_body = json_decode(wp_remote_retrieve_body($response), true);
+            $error_message = isset($response_body['message']) ? $response_body['message'] : 'Unknown error';
+            error_log('SpeedyIndex API Error: ' . $error_message);
+        }
     }
     public static function create_task($api_key, $urls) {
         $response = self::make_api_request('POST', '/v2/task/google/indexer/create', $api_key, array('urls' => $urls));
