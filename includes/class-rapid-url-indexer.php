@@ -76,6 +76,7 @@ class Rapid_URL_Indexer {
         add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs')); // Hourly cron job to update project status
         add_action('rui_process_api_request', array('Rapid_URL_Indexer', 'process_api_request'), 10, 3);
         add_action('rest_api_init', array('Rapid_URL_Indexer', 'register_rest_routes'));
+        add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
     }
 
     public static function register_rest_routes() {

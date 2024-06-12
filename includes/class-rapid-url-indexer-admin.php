@@ -104,7 +104,44 @@ class Rapid_URL_Indexer_Admin {
     public static function logs_page() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
-        $logs = $wpdb->get_results("SELECT * FROM $table_name ORDER BY created_at DESC");
+
+        $logs_per_page = 50;
+        $paged = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+        $offset = ($paged - 1) * $logs_per_page;
+
+        $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+        $where = $search ? $wpdb->prepare(" WHERE action LIKE %s OR details LIKE %s", '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%') : '';
+
+        $total_logs = $wpdb->get_var("SELECT COUNT(*) FROM $table_name $where");
+        $logs = $wpdb->get_results("SELECT * FROM $table_name $where ORDER BY created_at DESC LIMIT $offset, $logs_per_page");
+
         include RUI_PLUGIN_DIR . 'templates/admin-logs.php';
+    }
+
+    public static function ajax_search_logs() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
+
+        $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+        $where = $search ? $wpdb->prepare(" WHERE action LIKE %s OR details LIKE %s", '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%') : '';
+
+        $logs = $wpdb->get_results("SELECT * FROM $table_name $where ORDER BY created_at DESC");
+
+        ob_start();
+        foreach ($logs as $log) {
+            ?>
+            <tr>
+                <td><?php echo esc_html($log->id); ?></td>
+                <td><?php echo esc_html($log->user_id); ?></td>
+                <td><?php echo esc_html($log->project_id); ?></td>
+                <td><?php echo esc_html($log->action); ?></td>
+                <td><?php echo esc_html($log->details); ?></td>
+                <td><?php echo esc_html($log->created_at); ?></td>
+            </tr>
+            <?php
+        }
+        $output = ob_get_clean();
+
+        wp_send_json_success($output);
     }
 }

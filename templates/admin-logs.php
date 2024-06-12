@@ -1,6 +1,28 @@
 <div class="wrap">
     <h1>Rapid URL Indexer Logs</h1>
-    <table class="wp-list-table widefat fixed striped">
+    
+    <div class="tablenav top">
+        <div class="alignleft actions">
+            <label for="rui-log-search">Search:</label>
+            <input type="search" id="rui-log-search" name="s" value="">
+            <input type="button" id="rui-log-search-submit" class="button" value="Search">
+        </div>
+        <div class="tablenav-pages">
+            <span class="displaying-num"><?php echo $total_logs; ?> items</span>
+            <span class="pagination-links">
+                <?php echo paginate_links(array(
+                    'base' => add_query_arg('paged', '%#%'),
+                    'format' => '',
+                    'prev_text' => __('&laquo;'),
+                    'next_text' => __('&raquo;'),
+                    'total' => ceil($total_logs / $logs_per_page),
+                    'current' => $paged
+                )); ?>
+            </span>
+        </div>
+    </div>
+
+    <table class="wp-list-table widefat fixed striped" id="rui-logs-table">
         <thead>
             <tr>
                 <th>ID</th>
