@@ -101,6 +101,24 @@ class Rapid_URL_Indexer_WordPress {
             register_setting('rui_options', "rui_submit_on_publish_{$post_type->name}");
             register_setting('rui_options', "rui_submit_on_update_{$post_type->name}");
         }
+
+        add_filter('allowed_options', array($this, 'allowed_options'));
+    }
+
+    public function allowed_options($allowed_options) {
+        $allowed_options['rui_options'] = array(
+            'rui_settings',
+            'rui_delete_data_on_uninstall',
+            'rui_log_entry_limit',
+        );
+
+        $post_types = get_post_types(array('public' => true), 'objects');
+        foreach ($post_types as $post_type) {
+            $allowed_options['rui_options'][] = "rui_submit_on_publish_{$post_type->name}";
+            $allowed_options['rui_options'][] = "rui_submit_on_update_{$post_type->name}";
+        }
+
+        return $allowed_options;
     }
 
     public function section_info() {
