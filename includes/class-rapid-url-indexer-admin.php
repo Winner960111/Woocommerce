@@ -163,3 +163,4 @@ class Rapid_URL_Indexer_Admin {
             $logs_to_delete = $log_count - $log_entry_limit;
             $wpdb->query("DELETE FROM $table_name ORDER BY created_at ASC LIMIT $logs_to_delete");
         }
+    }
