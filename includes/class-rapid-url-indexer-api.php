@@ -47,9 +47,6 @@ class Rapid_URL_Indexer_API {
         return self::handle_api_response($response);
     }
 
-    private static function log_api_error($error_message) {
-        error_log('SpeedyIndex API Error: ' . $error_message);
-    }
 
     private static function handle_api_response($response) {
         if (is_wp_error($response)) {
