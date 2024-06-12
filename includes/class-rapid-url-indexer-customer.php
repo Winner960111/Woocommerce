@@ -57,7 +57,7 @@ class Rapid_URL_Indexer_Customer {
         check_ajax_referer('rui_project_submission', 'security');
     
         $project_name = sanitize_text_field($_POST['project_name']);
-        $urls = array_filter(array_map('trim', explode("\n", sanitize_textarea_field($_POST['urls']))));
+        $urls = array_map('esc_url_raw', array_filter(array_map('trim', explode("\n", sanitize_textarea_field($_POST['urls'])))));
         $notify = isset($_POST['notify']) ? 1 : 0;
     
         if (count($urls) > 0 && count($urls) <= 9999) {
