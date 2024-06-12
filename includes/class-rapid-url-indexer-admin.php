@@ -99,9 +99,6 @@ class Rapid_URL_Indexer_Admin {
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = $wpdb->get_var($wpdb->prepare("SELECT credits FROM $table_name WHERE user_id = %d", $user_id));
         return $credits ? $credits : 0;
-    }
-    
-}
     public static function settings_page() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             update_option('speedyindex_api_key', sanitize_text_field($_POST['speedyindex_api_key']));
