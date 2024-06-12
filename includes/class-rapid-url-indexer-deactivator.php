@@ -1,5 +1,9 @@
 <?php
 class Rapid_URL_Indexer_Deactivator {
+    public static function init() {
+        self::deactivate();
+    }
+    
     public static function deactivate() {
         // Clear scheduled cron jobs
         $timestamp = wp_next_scheduled('rui_cron_job');
