@@ -6,4 +6,3 @@ class Rapid_URL_Indexer_Deactivator {
         wp_unschedule_event($timestamp, 'rui_cron_job');
     }
 }
-?>
