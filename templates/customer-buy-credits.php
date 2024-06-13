@@ -5,7 +5,9 @@ $products = wc_get_products(array(
     'meta_compare' => '!=',
 ));
 ?>
-<div class="rui-credits-display"><strong>Remaining Credits:</strong> ' . esc_html($credits) . '</div>
+<div class="rui-credits-display">
+    <?php echo do_shortcode('[rui_credits_display]'); ?>
+</div>
 <?php if (!empty($products)): ?>
     <h2>Available Packages:</h2>
     <ul class="rui-credits-products">
