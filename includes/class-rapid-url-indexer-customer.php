@@ -169,7 +169,7 @@ class Rapid_URL_Indexer_Customer {
                 <label for="notify">Email Notifications</label>
             </div>
             <input type="hidden" name="security" value="<?php echo wp_create_nonce('rui_project_submission'); ?>">
-            <button type="submit" class="button wp-element-button">Submit Project</button>
+            <button type="submit" class="button wp-element-button">Submit New Project ›</button>
         </form>
         <div id="rui-submission-response"></div>
         <?php
