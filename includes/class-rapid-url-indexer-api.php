@@ -7,7 +7,7 @@ class Rapid_URL_Indexer_API {
     const LOW_BALANCE_THRESHOLD = 100000; // Threshold for low balance notification
 
     public static function get_account_balance($api_key) {
-        $response = self::make_api_request('GET', '/v2/account', $api_key, array());
+        $response = self::make_api_request('GET', '/v2/account', $api_key);
         
         if (self::is_api_response_success($response)) {
             $data = json_decode(wp_remote_retrieve_body($response), true);
@@ -72,7 +72,7 @@ class Rapid_URL_Indexer_API {
         }
     }
 
-    private static function make_api_request($method, $endpoint, $api_key, $body = array()) {
+    private static function make_api_request($method, $endpoint, $api_key, $body = null) {
         $retries = 0;
         
         while ($retries < self::API_MAX_RETRIES) {
@@ -91,11 +91,14 @@ class Rapid_URL_Indexer_API {
             // Make the API request
             $args = array(
                 'headers' => array(
-                    'Authorization' => $api_key,
-                    'Content-Type' => 'application/json'
-                ),
-                'body' => json_encode($body)
+                    'Authorization' => $api_key
+                )
             );
+
+            if ($body !== null) {
+                $args['body'] = json_encode($body);
+                $args['headers']['Content-Type'] = 'application/json';
+            }
 
             switch ($method) {
                 case 'GET':
