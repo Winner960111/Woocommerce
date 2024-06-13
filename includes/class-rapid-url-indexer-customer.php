@@ -62,7 +62,7 @@ class Rapid_URL_Indexer_Customer {
             update_user_meta($user_id, 'rui_api_key', $api_key);
         }
 
-        return '<div class="rui-api-key-display">Your API Key: <code>' . esc_html($api_key) . '</code></div>';
+        return '<div class="rui-api-key-display"><strong>Your API Key:</strong> <code>' . esc_html($api_key) . '</code></div>';
     }
 
     public static function handle_order_completed($order_id) {
@@ -140,7 +140,7 @@ class Rapid_URL_Indexer_Customer {
         $user_id = get_current_user_id();
         $credits = self::get_user_credits($user_id);
 
-        return '<div class="rui-credits-display">Remaining Credits: ' . esc_html($credits) . '</div><a href="' . esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))) . '" class="button">Buy Credits</a>';
+        return '<div class="rui-credits-display"><strong>Remaining Credits:</strong> ' . esc_html($credits) . ' <a href="' . esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))) . '" class="button">Buy Credits</a></div>';
     }
 
     public static function project_submission() {

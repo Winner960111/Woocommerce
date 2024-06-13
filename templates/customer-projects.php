@@ -20,11 +20,11 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <div class="rui-project-submission">
         <?php echo do_shortcode('[rui_project_submission]'); ?>
     </div>
-    <h2>Projects List</h2>
+    <h2>Project List</h2>
     <table>
         <thead>
             <tr>
-                <th>Project Name</th>
+                <th>Project</th>
                 <th>Status</th>
                 <th>Created at</th>
                 <th>Actions</th>
@@ -51,6 +51,8 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <div class="rui-api-key-display">
         <?php echo do_shortcode('[rui_api_key_display]'); ?>
     </div>
+    <br>
+    <br>
     <details>
         <summary>API Documentation</summary>
         <table>
