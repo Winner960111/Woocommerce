@@ -108,7 +108,7 @@ class Rapid_URL_Indexer_Customer {
                         wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
                     }
                 } else {
-                    wp_send_json_error(array('message' => __('Failed to create SpeedyIndex task. Please try again.', 'rapid-url-indexer')));
+                    wp_send_json_error(array('message' => __('Failed to create indexing task. Please try again.', 'rapid-url-indexer')));
                 }
             } else {
                 wp_send_json_error(array('message' => __('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer')));
