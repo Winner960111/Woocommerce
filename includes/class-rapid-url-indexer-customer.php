@@ -14,7 +14,7 @@ class Rapid_URL_Indexer_Customer {
         add_action('init', array(__CLASS__, 'add_my_account_endpoints'));
         add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'));
         add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'));
-        add_action('woocommerce_account_rui-buy-credits_endpoint', array(__CLASS__, 'add_my_account_endpoint_content'));
+        add_action('woocommerce_account_rui-buy-credits_endpoint', array(__CLASS__, 'buy_credits_endpoint_content'));
     }
 
     public static function add_my_account_endpoints() {
@@ -22,7 +22,7 @@ class Rapid_URL_Indexer_Customer {
         add_rewrite_endpoint('rui-projects', EP_PAGES);
     }
 
-    public static function add_my_account_endpoint_content() {
+    public static function buy_credits_endpoint_content() {
         include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
     }
 
@@ -205,8 +205,11 @@ class Rapid_URL_Indexer_Customer {
     }
 
     public static function add_my_account_menu_items($items) {
+        $logout = $items['customer-logout'];
+        unset($items['customer-logout']);
         $items['rui-projects'] = __('My Indexing Projects', 'rapid-url-indexer');
         $items['rui-buy-credits'] = __('Buy Indexing Credits', 'rapid-url-indexer');
+        $items['customer-logout'] = $logout;
         return $items;
     }
 
