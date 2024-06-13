@@ -28,19 +28,6 @@
     border-radius: 4px;
 }
 
-.rui-project-submission input[type="submit"] {
-    width: auto;
-    padding: 10px 20px;
-    background-color: #0073aa;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.rui-project-submission input[type="submit"]:hover {
-    background-color: #005177;
-}
 
 .rui-projects table {
     width: 100%;
