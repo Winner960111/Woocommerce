@@ -25,9 +25,9 @@ class Rapid_URL_Indexer_Customer {
         if (is_account_page()) {
             global $wp;
             if (isset($wp->query_vars['rui-projects'])) {
-                return __('My Indexing Projects', 'rapid-url-indexer');
+                return __('My Projects', 'rapid-url-indexer');
             } elseif (isset($wp->query_vars['rui-buy-credits'])) {
-                return __('Buy Indexing Credits', 'rapid-url-indexer');
+                return __('Buy Credits', 'rapid-url-indexer');
             }
         }
         return $title;
@@ -224,8 +224,8 @@ class Rapid_URL_Indexer_Customer {
 
     public static function add_my_account_menu_items($items) {
         $new_items = array();
-        $new_items['rui-projects'] = __('My Indexing Projects', 'rapid-url-indexer');
-        $new_items['rui-buy-credits'] = __('Buy Indexing Credits', 'rapid-url-indexer');
+        $new_items['rui-projects'] = __('My Projects', 'rapid-url-indexer');
+        $new_items['rui-buy-credits'] = __('Buy Credits', 'rapid-url-indexer');
         foreach ($items as $key => $value) {
             $new_items[$key] = $value;
         }
