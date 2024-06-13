@@ -1,0 +1,111 @@
+.rui-projects {
+    margin: 20px 0;
+}
+
+.rui-credits-display {
+    margin-bottom: 20px;
+}
+
+.rui-project-submission {
+    margin-bottom: 40px;
+}
+
+.rui-project-submission form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rui-project-submission label {
+    font-weight: bold;
+}
+
+.rui-project-submission input[type="text"],
+.rui-project-submission textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.rui-project-submission input[type="submit"] {
+    width: auto;
+    padding: 10px 20px;
+    background-color: #0073aa;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.rui-project-submission input[type="submit"]:hover {
+    background-color: #005177;
+}
+
+.rui-projects table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.rui-projects table th,
+.rui-projects table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+.rui-projects table th {
+    background-color: #f9f9f9;
+    font-weight: bold;
+}
+
+.rui-projects table td a.button {
+    padding: 5px 10px;
+    background-color: #0073aa;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.rui-projects table td a.button:hover {
+    background-color: #005177;
+}
+
+.rui-api-key-display {
+    margin-top: 20px;
+}
+
+details {
+    margin-top: 20px;
+}
+
+details summary {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+details table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+details table th,
+details table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+details table th {
+    background-color: #f9f9f9;
+    font-weight: bold;
+}
+
+details ul {
+    margin-top: 10px;
+    padding-left: 20px;
+}
