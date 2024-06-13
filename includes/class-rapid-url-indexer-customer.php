@@ -132,7 +132,7 @@ class Rapid_URL_Indexer_Customer {
     }
 
 
-    public static function credits_display() {
+    public static function credits_display($show_button = true) {
         if (!is_user_logged_in()) {
             return;
         }
@@ -140,7 +140,11 @@ class Rapid_URL_Indexer_Customer {
         $user_id = get_current_user_id();
         $credits = self::get_user_credits($user_id);
 
-        return '<div class="rui-credits-display"><strong>Remaining Credits:</strong> ' . esc_html($credits) . ' <a href="' . esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))) . '" class="button wp-element-button">Buy Credits</a></div>';
+        $output = '<div class="rui-credits-display"><strong>Remaining Credits:</strong> ' . esc_html($credits) . '</div>';
+        if ($show_button) {
+            $output .= ' <a href="' . esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))) . '" class="button wp-element-button">Buy Credits</a>';
+        }
+        return $output;
     }
 
     public static function project_submission() {

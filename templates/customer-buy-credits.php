@@ -6,7 +6,7 @@ $products = wc_get_products(array(
 ));
 ?>
 <div class="rui-credits-display">
-    <?php echo do_shortcode('[rui_credits_display]'); ?>
+    <?php echo Rapid_URL_Indexer_Customer::credits_display(false); ?>
 </div>
 <?php if (!empty($products)): ?>
     <h2>Available Packages:</h2>
