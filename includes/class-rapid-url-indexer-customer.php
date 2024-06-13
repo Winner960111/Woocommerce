@@ -140,7 +140,7 @@ class Rapid_URL_Indexer_Customer {
         $user_id = get_current_user_id();
         $credits = self::get_user_credits($user_id);
 
-        return '<div class="rui-credits-display"><strong>Remaining Credits:</strong> ' . esc_html($credits) . ' <a href="' . esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))) . '" class="button">Buy Credits</a></div>';
+        return '<div class="rui-credits-display"><strong>Remaining Credits:</strong> ' . esc_html($credits) . ' <a href="' . esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))) . '" class="button wp-element-button">Buy Credits</a></div>';
     }
 
     public static function project_submission() {
@@ -156,7 +156,7 @@ class Rapid_URL_Indexer_Customer {
                 <label for="notify">Email Notifications</label>
             </div>
             <input type="hidden" name="security" value="<?php echo wp_create_nonce('rui_project_submission'); ?>">
-            <button type="submit" class="button">Submit Project</button>
+            <button type="submit" class="button wp-element-button">Submit Project</button>
         </form>
         <div id="rui-submission-response"></div>
         <?php
