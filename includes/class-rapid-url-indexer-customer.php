@@ -89,9 +89,9 @@ class Rapid_URL_Indexer_Customer {
         $notify = isset($_POST['notify']) ? 1 : 0;
 
         if ($credits <= 0) {
-            wp_send_json_error(sprintf(__('You have no credits. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount')))));
+            wp_send_json_error(array('message' => sprintf(__('You have no credits. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
         } elseif ($credits < count($urls)) {
-            wp_send_json_error(sprintf(__('You do not have enough credits to submit %d URLs. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), count($urls), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount')))));
+            wp_send_json_error(array('message' => sprintf(__('You do not have enough credits to submit %d URLs. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), count($urls), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
         } else {
             if (count($urls) > 0 && count($urls) <= 9999) {
                 $project_id = self::submit_project($project_name, $urls, $notify);
@@ -101,10 +101,10 @@ class Rapid_URL_Indexer_Customer {
                         'project_id' => $project_id
                     ));
                 } else {
-                    wp_send_json_error(__('Failed to submit project. Please try again.', 'rapid-url-indexer'));
+                    wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
                 }
             } else {
-                wp_send_json_error(__('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer'));
+                wp_send_json_error(array('message' => __('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer')));
             }
         }
     }
