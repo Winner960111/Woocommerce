@@ -151,10 +151,12 @@ class Rapid_URL_Indexer_Customer {
             <input type="text" name="project_name" id="project_name" required>
             <label for="urls">URLs (one per line, max 9999):</label>
             <textarea name="urls" id="urls" rows="10" required></textarea>
-            <label for="notify">Email Notifications:</label>
-            <input type="checkbox" name="notify" id="notify">
+            <div class="rui-checkbox-wrapper">
+                <input type="checkbox" name="notify" id="notify">
+                <label for="notify">Email Notifications</label>
+            </div>
             <input type="hidden" name="security" value="<?php echo wp_create_nonce('rui_project_submission'); ?>">
-            <input type="submit" value="Submit Project">
+            <button type="submit" class="button">Submit Project</button>
         </form>
         <div id="rui-submission-response"></div>
         <?php
