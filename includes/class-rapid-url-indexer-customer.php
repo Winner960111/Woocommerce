@@ -1,6 +1,7 @@
 <?php
 class Rapid_URL_Indexer_Customer {
     public static function init() {
+        add_action('init', array(__CLASS__, 'add_my_account_endpoints'), 10);
         add_action('init', array(__CLASS__, 'customer_menu'), 10);
         add_shortcode('rui_credits_display', array(__CLASS__, 'credits_display'));
         add_shortcode('rui_project_submission', array(__CLASS__, 'project_submission'));
@@ -11,9 +12,9 @@ class Rapid_URL_Indexer_Customer {
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
 
         // Add custom endpoints
-        add_action('init', array(__CLASS__, 'add_my_account_endpoints'));
         add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'));
         add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'));
+        add_action('woocommerce_account_rui-buy-credits_endpoint', array(__CLASS__, 'buy_credits_endpoint_content'));
     }
 
     public static function add_my_account_endpoints() {
