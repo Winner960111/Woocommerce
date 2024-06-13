@@ -20,6 +20,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <div class="rui-project-submission">
         <?php echo do_shortcode('[rui_project_submission]'); ?>
     </div>
+    <br>
     <h2>Project List</h2>
     <table>
         <thead>
