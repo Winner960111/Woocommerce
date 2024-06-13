@@ -78,6 +78,34 @@ class Rapid_URL_Indexer {
         add_action('rest_api_init', array('Rapid_URL_Indexer', 'register_rest_routes'));
         add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
         add_action('wp_ajax_nopriv_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
+        
+        // Add credits amount field to simple product
+        add_action('woocommerce_product_options_general_product_data', array('Rapid_URL_Indexer', 'add_credits_field'));
+        add_action('woocommerce_process_product_meta', array('Rapid_URL_Indexer', 'save_credits_field'));
+    }
+    
+    public static function add_credits_field() {
+        global $post;
+        
+        echo '<div class="options_group">';
+        woocommerce_wp_text_input(array(
+            'id' => '_credits_amount',
+            'label' => __('Credits Amount', 'rapid-url-indexer'),
+            'placeholder' => '',
+            'desc_tip' => 'true',
+            'description' => __('Enter the number of credits this product will add to the customer\'s account upon purchase.', 'rapid-url-indexer'),
+            'type' => 'number',
+            'custom_attributes' => array(
+                'step' => '1',
+                'min' => '0'
+            )
+        ));
+        echo '</div>';
+    }
+    
+    public static function save_credits_field($post_id) {
+        $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : 0;
+        update_post_meta($post_id, '_credits_amount', $credits_amount);
     }
 
     public static function register_rest_routes() {
