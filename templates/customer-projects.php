@@ -3,15 +3,12 @@ if (!is_user_logged_in()) {
     wp_redirect(wp_login_url());
     exit;
 }
-
 // Fetch user projects
 global $wpdb;
 $user_id = get_current_user_id();
 $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id));
-
 ?>
-
 <div class="rui-projects">
     <div class="rui-credits-display">
         <?php echo do_shortcode('[rui_credits_display]'); ?>
