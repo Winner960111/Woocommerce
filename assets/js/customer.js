@@ -11,7 +11,7 @@ jQuery(document).ready(function($) {
         };
 
         $.post(ajax_object.ajaxurl, data, function(response) {
-            $('#rui-submission-response').html(response.data);
+            $('#rui-submission-response').html('<br>' + response.data);
         });
     });
 });
