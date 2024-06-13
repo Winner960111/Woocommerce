@@ -205,12 +205,15 @@ class Rapid_URL_Indexer_Customer {
     }
 
     public static function add_my_account_menu_items($items) {
-        $logout = $items['customer-logout'];
-        unset($items['customer-logout']);
-        $items['rui-projects'] = __('My Indexing Projects', 'rapid-url-indexer');
-        $items['rui-buy-credits'] = __('Buy Indexing Credits', 'rapid-url-indexer');
-        $items['customer-logout'] = $logout;
-        return $items;
+        $new_items = array();
+        foreach ($items as $key => $value) {
+            if ($key === 'orders') {
+                $new_items['rui-projects'] = __('My Indexing Projects', 'rapid-url-indexer');
+                $new_items['rui-buy-credits'] = __('Buy Indexing Credits', 'rapid-url-indexer');
+            }
+            $new_items[$key] = $value;
+        }
+        return $new_items;
     }
 
     public static function projects_endpoint_content() {
