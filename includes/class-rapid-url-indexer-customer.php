@@ -94,14 +94,21 @@ class Rapid_URL_Indexer_Customer {
             wp_send_json_error(array('message' => sprintf(__('You do not have enough credits to submit %d URLs. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), count($urls), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
         } else {
             if (count($urls) > 0 && count($urls) <= 9999) {
-                $project_id = self::submit_project($project_name, $urls, $notify);
-                if ($project_id) {
-                    wp_send_json_success(array(
-                        'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
-                        'project_id' => $project_id
-                    ));
+                $api_key = get_option('speedyindex_api_key');
+                $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name);
+
+                if ($response && isset($response['task_id'])) {
+                    $project_id = self::submit_project($project_name, $urls, $notify);
+                    if ($project_id) {
+                        wp_send_json_success(array(
+                            'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
+                            'project_id' => $project_id
+                        ));
+                    } else {
+                        wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
+                    }
                 } else {
-                    wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
+                    wp_send_json_error(array('message' => __('Failed to create SpeedyIndex task. Please try again.', 'rapid-url-indexer')));
                 }
             } else {
                 wp_send_json_error(array('message' => __('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer')));
