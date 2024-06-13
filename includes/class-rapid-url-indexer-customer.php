@@ -220,10 +220,10 @@ class Rapid_URL_Indexer_Customer {
     }
 
     public static function projects_endpoint_content() {
-        include RUI_PLUGIN_DIR . 'templates/customer-projects.php';
+        wc_get_template('my-account-rui-projects.php', array(), '', RUI_PLUGIN_DIR . 'templates/');
     }
 
     public static function buy_credits_endpoint_content() {
-        include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
+        wc_get_template('my-account-rui-buy-credits.php', array(), '', RUI_PLUGIN_DIR . 'templates/');
     }
 }
