@@ -116,7 +116,7 @@ class Rapid_URL_Indexer_API {
                 'method' => $method,
                 'endpoint' => self::API_BASE_URL . $endpoint,
                 'headers' => $args['headers'],
-                'body' => $body
+                'body' => json_encode($body) // Log the JSON body being sent
             ), true));
 
             switch ($method) {
