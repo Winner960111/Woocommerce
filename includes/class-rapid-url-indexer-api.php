@@ -99,9 +99,11 @@ class Rapid_URL_Indexer_API {
 
             switch ($method) {
                 case 'GET':
+                    $args['body'] = $body;
                     $response = wp_remote_get(self::API_BASE_URL . $endpoint, $args);
                     break;
                 case 'POST':
+                    $args['body'] = $body;
                     $response = wp_remote_post(self::API_BASE_URL . $endpoint, $args);
                     break;
                 default:
