@@ -84,13 +84,15 @@ class Rapid_URL_Indexer_Customer {
         $user_id = get_current_user_id();
         $credits = self::get_user_credits($user_id);
 
+        $project_name = sanitize_text_field($_POST['project_name']);
+        $urls = array_map('esc_url_raw', array_filter(array_map('trim', explode("\n", sanitize_textarea_field($_POST['urls'])))));
+        $notify = isset($_POST['notify']) ? 1 : 0;
+
         if ($credits <= 0) {
             wp_send_json_error(sprintf(__('You have no credits. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount')))));
+        } elseif ($credits < count($urls)) {
+            wp_send_json_error(sprintf(__('You do not have enough credits to submit %d URLs. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), count($urls), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount')))));
         } else {
-            $project_name = sanitize_text_field($_POST['project_name']);
-            $urls = array_map('esc_url_raw', array_filter(array_map('trim', explode("\n", sanitize_textarea_field($_POST['urls'])))));
-            $notify = isset($_POST['notify']) ? 1 : 0;
-        
             if (count($urls) > 0 && count($urls) <= 9999) {
                 $project_id = self::submit_project($project_name, $urls, $notify);
                 if ($project_id) {
