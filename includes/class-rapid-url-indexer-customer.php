@@ -212,7 +212,7 @@ class Rapid_URL_Indexer_Customer {
         $credits = self::get_user_credits($user_id);
         $new_credits = max(0, $credits + $amount);
 
-        if ($credits !== null) {
+        if ($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE user_id = %d", $user_id)) > 0) {
             $wpdb->update($table_name, array('credits' => $new_credits), array('user_id' => $user_id));
         } else {
             $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
