@@ -7,6 +7,7 @@ class Rapid_URL_Indexer_Customer {
         add_shortcode('rui_project_submission', array(__CLASS__, 'project_submission'));
         add_shortcode('rui_api_key_display', array(__CLASS__, 'api_key_display'));
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
+        add_filter('the_title', array(__CLASS__, 'replace_my_account_title'), 10, 2);
         add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
         add_action('woocommerce_order_status_completed', array(__CLASS__, 'handle_order_completed'));
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
@@ -19,6 +20,17 @@ class Rapid_URL_Indexer_Customer {
         // Flush rewrite rules on plugin activation
         register_activation_hook(RUI_PLUGIN_DIR . 'rapid-url-indexer.php', array(__CLASS__, 'flush_rewrite_rules'));
     }
+
+    public static function replace_my_account_title($title, $id) {
+        if (is_account_page()) {
+            global $wp;
+            if (isset($wp->query_vars['rui-projects'])) {
+                return __('My Indexing Projects', 'rapid-url-indexer');
+            } elseif (isset($wp->query_vars['rui-buy-credits'])) {
+                return __('Buy Indexing Credits', 'rapid-url-indexer');
+            }
+        }
+        return $title;
 
     public static function flush_rewrite_rules() {
         self::add_my_account_endpoints();
