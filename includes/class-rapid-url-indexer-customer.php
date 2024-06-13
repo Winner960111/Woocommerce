@@ -9,10 +9,16 @@ class Rapid_URL_Indexer_Customer {
         add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
         add_action('woocommerce_order_status_completed', array(__CLASS__, 'handle_order_completed'));
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
+
+        // Add custom endpoints
+        add_action('init', array(__CLASS__, 'add_my_account_endpoints'));
+        add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'));
+        add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'));
     }
 
     public static function add_my_account_endpoints() {
         add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
+        add_rewrite_endpoint('rui-projects', EP_ROOT | EP_PAGES);
     }
 
     public static function add_my_account_endpoint_content() {
@@ -198,3 +204,12 @@ class Rapid_URL_Indexer_Customer {
     }
 }
 
+    public static function add_my_account_menu_items($items) {
+        $items['rui-buy-credits'] = 'Buy Credits';
+        $items['rui-projects'] = 'Projects'; 
+        return $items;
+    }
+
+    public static function projects_endpoint_content() {
+        include RUI_PLUGIN_DIR . 'templates/customer-projects.php';
+    }
