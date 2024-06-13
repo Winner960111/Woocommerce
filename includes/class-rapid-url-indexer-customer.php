@@ -211,12 +211,10 @@ class Rapid_URL_Indexer_Customer {
 
     public static function add_my_account_menu_items($items) {
         $new_items = array();
+        $new_items['rui-projects'] = __('My Indexing Projects', 'rapid-url-indexer');
+        $new_items['rui-buy-credits'] = __('Buy Indexing Credits', 'rapid-url-indexer');
         foreach ($items as $key => $value) {
             $new_items[$key] = $value;
-            if ($key === 'orders') {
-                $new_items['rui-projects'] = __('My Indexing Projects', 'rapid-url-indexer');
-                $new_items['rui-buy-credits'] = __('Buy Indexing Credits', 'rapid-url-indexer');
-            }
         }
         return $new_items;
     }
