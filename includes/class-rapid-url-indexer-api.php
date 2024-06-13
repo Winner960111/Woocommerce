@@ -111,6 +111,14 @@ class Rapid_URL_Indexer_API {
                 $args['headers']['Content-Type'] = 'application/json';
             }
 
+            // Log the request details
+            error_log('SpeedyIndex API Request: ' . print_r(array(
+                'method' => $method,
+                'endpoint' => self::API_BASE_URL . $endpoint,
+                'headers' => $args['headers'],
+                'body' => $body
+            ), true));
+
             switch ($method) {
                 case 'GET':
                     $args['body'] = $body;
@@ -123,6 +131,9 @@ class Rapid_URL_Indexer_API {
                 default:
                     return false;
             }
+
+            // Log the response details
+            error_log('SpeedyIndex API Response: ' . print_r($response, true));
 
             if (is_wp_error($response)) {
                 $retries++;
