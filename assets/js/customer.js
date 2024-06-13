@@ -10,7 +10,7 @@ jQuery(document).ready(function($) {
             notify: $('#notify').is(':checked') ? 1 : 0
         };
 
-        $.post(ajaxurl, data, function(response) {
+        $.post(ajax_object.ajaxurl, data, function(response) {
             $('#rui-submission-response').html(response.data);
         });
     });
