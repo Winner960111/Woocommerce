@@ -1,7 +1,7 @@
 <?php
 class Rapid_URL_Indexer_Customer {
     public static function init() {
-        add_action('init', array(__CLASS__, 'customer_menu'));
+        add_action('init', array(__CLASS__, 'customer_menu'), 10);
         add_shortcode('rui_credits_display', array(__CLASS__, 'credits_display'));
         add_shortcode('rui_project_submission', array(__CLASS__, 'project_submission'));
         add_shortcode('rui_api_key_display', array(__CLASS__, 'api_key_display'));
@@ -11,16 +11,14 @@ class Rapid_URL_Indexer_Customer {
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
 
         // Add custom endpoints
-        add_action('init', array(__CLASS__, 'add_my_account_endpoints'), 5);
-        add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'), 5, 1);
-        add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'), 10, 1);
+        add_action('init', array(__CLASS__, 'add_my_account_endpoints'));
+        add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'));
+        add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'));
     }
 
     public static function add_my_account_endpoints() {
-        add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
-        add_rewrite_endpoint('rui-projects', EP_ROOT | EP_PAGES);
-        add_action('woocommerce_account_rui-buy-credits_endpoint', array(__CLASS__, 'add_my_account_endpoint_content'));
-        add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'), 10, 1);
+        add_rewrite_endpoint('rui-buy-credits', EP_PAGES);
+        add_rewrite_endpoint('rui-projects', EP_PAGES);
     }
 
     public static function add_my_account_endpoint_content() {
@@ -206,8 +204,8 @@ class Rapid_URL_Indexer_Customer {
     }
 
     public static function add_my_account_menu_items($items) {
-        $items['rui-projects'] = 'My Indexing Projects';
-        $items['rui-buy-credits'] = 'Buy Indexing Credits';
+        $items['rui-projects'] = __('My Indexing Projects', 'rapid-url-indexer');
+        $items['rui-buy-credits'] = __('Buy Indexing Credits', 'rapid-url-indexer');
         return $items;
     }
 
