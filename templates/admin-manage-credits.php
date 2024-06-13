@@ -28,9 +28,8 @@
         $credits = intval($_POST['credits']);
 
         if ($user_id && $credits) {
-            $current_credits = Rapid_URL_Indexer_Admin::get_user_credits($user_id);
-            $new_credits = $current_credits + $credits;
             Rapid_URL_Indexer_Customer::update_user_credits($user_id, $credits);
+            $new_credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
             echo '<p>Credits updated successfully. New balance: ' . esc_html($new_credits) . ' credits</p>';
         } else {
             echo '<p>Invalid user ID or credits amount.</p>';
