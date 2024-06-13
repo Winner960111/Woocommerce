@@ -31,6 +31,7 @@ class Rapid_URL_Indexer_Customer {
             }
         }
         return $title;
+    }
 
     public static function flush_rewrite_rules() {
         self::add_my_account_endpoints();
