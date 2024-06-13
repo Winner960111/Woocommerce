@@ -4,6 +4,9 @@
 
 .rui-credits-display {
     margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .rui-project-submission {
