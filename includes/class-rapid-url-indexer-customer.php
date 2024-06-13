@@ -14,6 +14,7 @@ class Rapid_URL_Indexer_Customer {
         add_action('init', array(__CLASS__, 'add_my_account_endpoints'));
         add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'));
         add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'));
+        add_action('woocommerce_account_rui-buy-credits_endpoint', array(__CLASS__, 'add_my_account_endpoint_content'));
     }
 
     public static function add_my_account_endpoints() {
