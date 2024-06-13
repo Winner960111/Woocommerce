@@ -109,6 +109,13 @@ class Rapid_URL_Indexer_Customer {
                     }
                 } else {
                     error_log('SpeedyIndex API Response: ' . print_r($response, true));
+                    if (is_wp_error($response)) {
+                        error_log('SpeedyIndex API Error: ' . $response->get_error_message());
+                    } else {
+                        $response_body = json_decode(wp_remote_retrieve_body($response), true);
+                        $error_message = isset($response_body['message']) ? $response_body['message'] : 'Unknown error';
+                        error_log('SpeedyIndex API Error: ' . $error_message);
+                    }
                     wp_send_json_error(array('message' => __('Failed to create indexing task. Please try again.', 'rapid-url-indexer')));
                 }
             } else {
