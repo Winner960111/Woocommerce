@@ -48,11 +48,11 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             <?php endforeach; ?>
         </tbody>
     </table>
+    <br>
+    <br>
     <div class="rui-api-key-display">
         <?php echo do_shortcode('[rui_api_key_display]'); ?>
     </div>
-    <br>
-    <br>
     <details>
         <summary>API Documentation</summary>
         <table>
