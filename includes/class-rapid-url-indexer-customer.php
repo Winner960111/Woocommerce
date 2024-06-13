@@ -11,13 +11,9 @@ class Rapid_URL_Indexer_Customer {
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
 
         // Add custom endpoints
-        add_action('init', array(__CLASS__, 'add_my_account_endpoints'), 0);
-        add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'), 10, 1);
-
-        // Add custom endpoints
-        add_action('init', array(__CLASS__, 'add_my_account_endpoints'));
-        add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'));
-        add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'));
+        add_action('init', array(__CLASS__, 'add_my_account_endpoints'), 5);
+        add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'), 5, 1);
+        add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'), 10, 1);
     }
 
     public static function add_my_account_endpoints() {
