@@ -2,7 +2,7 @@
 class Rapid_URL_Indexer_Customer {
     public static function init() {
         add_action('init', array(__CLASS__, 'add_my_account_endpoints'), 10);
-        add_action('init', array(__CLASS__, 'customer_menu'), 10);
+        add_action('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'), 10);
         add_shortcode('rui_credits_display', array(__CLASS__, 'credits_display'));
         add_shortcode('rui_project_submission', array(__CLASS__, 'project_submission'));
         add_shortcode('rui_api_key_display', array(__CLASS__, 'api_key_display'));
@@ -17,7 +17,7 @@ class Rapid_URL_Indexer_Customer {
         add_action('woocommerce_account_rui-buy-credits_endpoint', array(__CLASS__, 'buy_credits_endpoint_content'));
 
         // Flush rewrite rules on plugin activation
-        register_activation_hook(__FILE__, array(__CLASS__, 'flush_rewrite_rules'));
+        register_activation_hook(RUI_PLUGIN_DIR . 'rapid-url-indexer.php', array(__CLASS__, 'flush_rewrite_rules'));
     }
 
     public static function flush_rewrite_rules() {
@@ -178,7 +178,7 @@ class Rapid_URL_Indexer_Customer {
         $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
     }
 
-    public static function update_user_credits($user_id, $credits) {
+    public static function update_user_credits($user_id, $amount) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = self::get_user_credits($user_id);
