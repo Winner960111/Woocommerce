@@ -213,3 +213,4 @@ class Rapid_URL_Indexer_Customer {
     public static function projects_endpoint_content() {
         include RUI_PLUGIN_DIR . 'templates/customer-projects.php';
     }
+}
