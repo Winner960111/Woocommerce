@@ -159,7 +159,17 @@ class Rapid_URL_Indexer_API {
         
         if (self::is_api_response_success($response)) {
             $report_data = json_decode(wp_remote_retrieve_body($response), true);
-            return $report_data['result'];
+            $csv_data = array(
+                array('URL', 'Status')
+            );
+            foreach ($report_data['result']['indexed_links'] as $url) {
+                $csv_data[] = array($url, 'Indexed');
+            }
+            foreach ($report_data['result']['unindexed_links'] as $url) {
+                $csv_data[] = array($url, 'Not Indexed');
+            }
+            
+            return self::generate_csv($csv_data);
         } else {
             self::log_api_error($response);
             return false;
@@ -167,10 +177,11 @@ class Rapid_URL_Indexer_API {
     }
 
     public static function generate_csv($data) {
-        $output = fopen('php://output', 'w');
+        $output = fopen('php://temp', 'w'); 
         foreach ($data as $row) {
             fputcsv($output, $row);
         }
-        fclose($output);
+        rewind($output);
+        return stream_get_contents($output);
     }
 }
