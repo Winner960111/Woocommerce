@@ -12,7 +12,7 @@ class Rapid_URL_Indexer_Customer {
 
         // Add custom endpoints
         add_action('init', array(__CLASS__, 'add_my_account_endpoints'));
-        add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'), 10, 1);
+        add_filter('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'));
 
         // Add custom endpoints
         add_action('init', array(__CLASS__, 'add_my_account_endpoints'));
@@ -23,8 +23,8 @@ class Rapid_URL_Indexer_Customer {
     public static function add_my_account_endpoints() {
         add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
         add_rewrite_endpoint('rui-projects', EP_ROOT | EP_PAGES);
-        add_action('woocommerce_account_rui-buy-credits_endpoint', array(__CLASS__, 'add_my_account_endpoint_content'));
-        add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'));
+        add_action('woocommerce_account_rui-buy-credits_endpoint', array(__CLASS__, 'add_my_account_endpoint_content'), 10, 1);
+        add_action('woocommerce_account_rui-projects_endpoint', array(__CLASS__, 'projects_endpoint_content'), 10, 1);
     }
 
     public static function add_my_account_endpoint_content() {
@@ -209,10 +209,10 @@ class Rapid_URL_Indexer_Customer {
         wp_enqueue_script('rui-customer-js', RUI_PLUGIN_URL . 'assets/js/customer.js', array('jquery'), null, true);
     }
 
-    public static function add_my_account_menu_items($endpoints) {
-        $endpoints['rui-projects'] = 'My Indexing Projects';
-        $endpoints['rui-buy-credits'] = 'Buy Indexing Credits';
-        return $endpoints;
+    public static function add_my_account_menu_items($items) {
+        $items['rui-projects'] = 'My Indexing Projects';
+        $items['rui-buy-credits'] = 'Buy Indexing Credits';
+        return $items;
     }
 
     public static function projects_endpoint_content() {
