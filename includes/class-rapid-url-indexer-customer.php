@@ -109,7 +109,6 @@ class Rapid_URL_Indexer_Customer {
                     }
                 } else {
                     error_log('SpeedyIndex API Response: ' . print_r($response, true));
-                    error_log('SpeedyIndex API Response: ' . print_r($response, true));
                     if (is_wp_error($response)) {
                         error_log('SpeedyIndex API Error: ' . $response->get_error_message());
                     } else {
@@ -119,7 +118,7 @@ class Rapid_URL_Indexer_Customer {
                         $error_message = isset($response_body_json['message']) ? $response_body_json['message'] : 'Unknown error';
                         error_log('SpeedyIndex API Error: ' . $error_message);
                     }
-                    wp_send_json_error(array('message' => __('Failed to create indexing task. Please try again.', 'rapid-url-indexer')));
+                    wp_send_json_error(array('message' => __('Failed to create indexing task. Please try again.', 'rapid-url-indexer'), 'response' => $response));
                 }
             } else {
                 wp_send_json_error(array('message' => __('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer')));
