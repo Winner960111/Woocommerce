@@ -108,6 +108,7 @@ class Rapid_URL_Indexer_Customer {
                         wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
                     }
                 } else {
+                    error_log('SpeedyIndex API Response: ' . print_r($response, true));
                     wp_send_json_error(array('message' => __('Failed to create indexing task. Please try again.', 'rapid-url-indexer')));
                 }
             } else {
