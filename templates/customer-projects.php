@@ -10,12 +10,12 @@ $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id));
 ?>
 <div class="rui-projects">
-    <div class="rui-credits-display">
-        <?php echo Rapid_URL_Indexer_Customer::credits_display(true); ?>
-    </div>
     <h2>Submit New Project</h2>
     <div class="rui-project-submission">
         <?php echo do_shortcode('[rui_project_submission]'); ?>
+    </div>
+    <div class="rui-credits-display">
+    <?php echo Rapid_URL_Indexer_Customer::credits_display(true); ?>
     </div>
     <br>
     <h2>Project List</h2>
