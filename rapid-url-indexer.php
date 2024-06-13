@@ -28,6 +28,7 @@ register_deactivation_hook(__FILE__, array('Rapid_URL_Indexer_Deactivator', 'dea
 
 add_action('plugins_loaded', array('Rapid_URL_Indexer', 'init'));
 Rapid_URL_Indexer_Admin::init();
+add_action('admin_init', array('Rapid_URL_Indexer_Admin', 'register_settings'));
 
 add_action('init', array('Rapid_URL_Indexer_Customer', 'add_my_account_endpoints'));
 add_action('woocommerce_account_rui-buy-credits_endpoint', array('Rapid_URL_Indexer_Customer', 'add_my_account_endpoint_content'));

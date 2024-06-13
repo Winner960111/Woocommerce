@@ -2,13 +2,13 @@
     <h1>Rapid URL Indexer Settings</h1>  
     <form method="post" action="options.php">
         <?php
-        settings_fields('rui_options');
-        do_settings_sections('rapid-url-indexer');
+        settings_fields('rui_settings');
+        do_settings_sections('rui_settings');
         ?>
         <table class="form-table">
             <tr>
                 <th scope="row"><?php _e('SpeedyIndex API Key', 'rapid-url-indexer'); ?></th>
-                <td><input type="text" name="speedyindex_api_key" value="<?php echo esc_attr(get_option('speedyindex_api_key')); ?>" /></td>
+                <td><input type="text" name="rui_speedyindex_api_key" value="<?php echo esc_attr(get_option('rui_speedyindex_api_key')); ?>" /></td>
             </tr>
             <tr>
                 <th scope="row"><?php _e('Delete Data on Uninstall', 'rapid-url-indexer'); ?></th>

@@ -94,18 +94,24 @@ class Rapid_URL_Indexer_Admin {
 
     public static function settings_page() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            update_option('speedyindex_api_key', sanitize_text_field($_POST['speedyindex_api_key']));
+            check_admin_referer('rui_settings');
+            update_option('rui_speedyindex_api_key', sanitize_text_field($_POST['rui_speedyindex_api_key']));
             update_option('rui_delete_data_on_uninstall', isset($_POST['rui_delete_data_on_uninstall']) ? 1 : 0);
+            update_option('rui_log_entry_limit', intval($_POST['rui_log_entry_limit']));
             echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
         }
 
-        $log_entry_limit = get_option('rui_log_entry_limit', 1000);
-        
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            update_option('rui_log_entry_limit', intval($_POST['rui_log_entry_limit']));
-        }
-
         include RUI_PLUGIN_DIR . 'templates/admin-settings.php';
+    }
+
+    public static function register_settings() {
+        register_setting('rui_settings', 'rui_speedyindex_api_key');
+        register_setting('rui_settings', 'rui_delete_data_on_uninstall');
+        register_setting('rui_settings', 'rui_log_entry_limit', array(
+            'type' => 'integer',
+            'default' => 1000,
+            'sanitize_callback' => 'intval'
+        ));
     }
 
     public static function logs_page() {
