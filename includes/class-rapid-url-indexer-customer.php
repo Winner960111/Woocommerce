@@ -18,8 +18,8 @@ class Rapid_URL_Indexer_Customer {
     }
 
     public static function add_my_account_endpoints() {
-        add_rewrite_endpoint('rui-buy-credits', EP_PAGES);
-        add_rewrite_endpoint('rui-projects', EP_PAGES);
+        add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
+        add_rewrite_endpoint('rui-projects', EP_ROOT | EP_PAGES);
     }
 
     public static function buy_credits_endpoint_content() {
@@ -207,16 +207,20 @@ class Rapid_URL_Indexer_Customer {
     public static function add_my_account_menu_items($items) {
         $new_items = array();
         foreach ($items as $key => $value) {
+            $new_items[$key] = $value;
             if ($key === 'orders') {
                 $new_items['rui-projects'] = __('My Indexing Projects', 'rapid-url-indexer');
                 $new_items['rui-buy-credits'] = __('Buy Indexing Credits', 'rapid-url-indexer');
             }
-            $new_items[$key] = $value;
         }
         return $new_items;
     }
 
     public static function projects_endpoint_content() {
         include RUI_PLUGIN_DIR . 'templates/customer-projects.php';
+    }
+
+    public static function buy_credits_endpoint_content() {
+        include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
     }
 }
