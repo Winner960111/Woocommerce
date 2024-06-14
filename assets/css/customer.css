@@ -47,22 +47,15 @@
 }
 
 .rui-projects table th {
-    background-color: #f9f9f9;
     font-weight: bold;
 }
 
 .rui-projects table td a.button {
     padding: 5px 10px;
-    background-color: #0073aa;
-    color: #fff;
     border: none;
     border-radius: 4px;
     text-decoration: none;
     cursor: pointer;
-}
-
-.rui-projects table td a.button:hover {
-    background-color: #005177;
 }
 
 .rui-api-key-display {
@@ -92,7 +85,6 @@ details table td {
 }
 
 details table th {
-    background-color: #f9f9f9;
     font-weight: bold;
 }
 
