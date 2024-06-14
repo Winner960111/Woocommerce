@@ -31,8 +31,15 @@ class Rapid_URL_Indexer_API {
             $tasks = $data['result'];
             
             if (!empty($search)) {
+                $search = strtolower($search);
                 $tasks = array_filter($tasks, function($task) use ($search) {
-                    return stripos($task['title'], $search) !== false;
+                    return stripos($task['id'], $search) !== false
+                        || stripos($task['title'], $search) !== false
+                        || stripos($task['type'], $search) !== false
+                        || stripos($task['size'], $search) !== false
+                        || stripos($task['processed_count'], $search) !== false
+                        || stripos($task['indexed_count'], $search) !== false
+                        || stripos($task['created_at'], $search) !== false;
                 });
             }
             
