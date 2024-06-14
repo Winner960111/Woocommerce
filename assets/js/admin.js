@@ -11,7 +11,12 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     $('#rui-logs-table tbody').html(response.data);
+                } else {
+                    alert('No logs found.');
                 }
+            },
+            error: function() {
+                alert('An error occurred while searching logs.');
             }
         });
     });
