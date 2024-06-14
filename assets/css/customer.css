@@ -32,11 +32,6 @@
     border-radius: 4px;
 }
 
-.rui-project-submission input[type="text"]:focus,
-.rui-project-submission textarea:focus {
-}
-
-
 .rui-projects table {
     width: 100%;
     border-collapse: collapse;
