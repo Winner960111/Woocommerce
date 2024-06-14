@@ -119,6 +119,9 @@ class Rapid_URL_Indexer_API {
                 'body' => json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) // Log the JSON body being sent with unescaped slashes and pretty print
             ), true));
 
+            // Log the raw JSON body separately for clarity
+            error_log('SpeedyIndex API Request JSON Body: ' . json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+
             switch ($method) {
                 case 'GET':
                     $args['body'] = $body;
