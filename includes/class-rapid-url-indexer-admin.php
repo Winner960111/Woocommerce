@@ -6,25 +6,6 @@ class Rapid_URL_Indexer_Admin {
         add_action('rui_log_entry_created', array(__CLASS__, 'limit_log_entries'));
     }
 
-    public static function admin_page() {
-        global $wpdb;
-        
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        
-        $total_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
-        $processing_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE status = 'submitted'");
-        $completed_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE status = 'completed'");
-        
-        $credits_table = $wpdb->prefix . 'rapid_url_indexer_credits';
-        $total_credits = $wpdb->get_var("SELECT SUM(credits) FROM $credits_table");
-        
-        $api_key = get_option('rui_speedyindex_api_key');
-        $api_credits = Rapid_URL_Indexer_API::get_account_balance($api_key);
-        $api_credits = $api_credits ? $api_credits['balance']['indexer'] : 'N/A';
-        
-        include RUI_PLUGIN_DIR . 'templates/admin-dashboard.php';
-    }
-
     public static function view_tasks_page() {
         $api_key = get_option('rui_speedyindex_api_key');
         $tasks = Rapid_URL_Indexer_API::get_tasks($api_key);
