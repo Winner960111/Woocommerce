@@ -111,16 +111,24 @@ class Rapid_URL_Indexer_API {
                 $args['headers']['Content-Type'] = 'application/json';
             }
 
+            // Ensure the JSON body is correctly formatted
+            if ($body !== null) {
+                $args['body'] = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+                $args['headers']['Content-Type'] = 'application/json';
+            }
+
             // Log the request details
             error_log('SpeedyIndex API Request: ' . print_r(array(
                 'method' => $method,
                 'endpoint' => self::API_BASE_URL . $endpoint,
                 'headers' => $args['headers'],
-                'body' => $args['body'] // Log the JSON body being sent
+                'body' => isset($args['body']) ? $args['body'] : null // Log the JSON body being sent
             ), true));
 
             // Log the raw JSON body separately for clarity
-            error_log('SpeedyIndex API Request JSON Body: ' . $args['body']);
+            if (isset($args['body'])) {
+                error_log('SpeedyIndex API Request JSON Body: ' . $args['body']);
+            }
 
             switch ($method) {
                 case 'GET':
