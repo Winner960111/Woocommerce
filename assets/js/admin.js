@@ -27,4 +27,15 @@ jQuery(document).ready(function($) {
             $('#rui-log-search-submit').click();
         }
     });
+    $('#rui-task-search-submit').on('click', function() {
+        var searchQuery = $('#rui-task-search').val();
+        window.location.href = window.location.pathname + '?page=rapid-url-indexer-tasks&s=' + encodeURIComponent(searchQuery);
+    });
+
+    // Trigger search on Enter key press
+    $('#rui-task-search').on('keypress', function(e) {
+        if (e.which == 13) {
+            $('#rui-task-search-submit').click();
+        }
+    });
 });
