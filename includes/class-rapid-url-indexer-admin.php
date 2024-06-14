@@ -94,24 +94,18 @@ class Rapid_URL_Indexer_Admin {
     } 
 
     public static function enqueue_scripts($hook) {
-        error_log('enqueue_scripts called for ' . $hook);
         $valid_hooks = array(
             'toplevel_page_rapid-url-indexer',
             'rapid-url-indexer_page_rapid-url-indexer-settings',
-            'rapid-url-indexer_page_manage-credits',
+            'rapid-url-indexer_page_rapid-url-indexer-manage-credits',
             'rapid-url-indexer_page_rapid-url-indexer-logs',
             'rapid-url-indexer_page_rapid-url-indexer-tasks'
         );
-        error_log('Valid hooks: ' . implode(', ', $valid_hooks));
         if (!in_array($hook, $valid_hooks)) {
-            error_log('Invalid hook: ' . $hook);
             return;
         }
         wp_enqueue_style('rui-admin-css', RUI_PLUGIN_URL . 'assets/css/admin.css', array(), '1.0.0', 'all');
-        $script_url = RUI_PLUGIN_URL . 'assets/js/admin.js';
-        error_log('Enqueuing script: ' . $script_url);
-        wp_enqueue_script('rui-admin-js', $script_url, array('jquery'), '1.0.0', true);
-        error_log('admin.js enqueued for ' . $hook);
+        wp_enqueue_script('rui-admin-js', RUI_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), '1.0.0', true);
     }
 
 
