@@ -42,7 +42,8 @@ class Rapid_URL_Indexer_Customer {
 
                 if ($report_csv) {
                     header('Content-Type: text/csv');
-                    header('Content-Disposition: attachment; filename="project-report.csv"');
+                    $filename = sanitize_file_name($project->project_name) . '-report.csv';
+                    header('Content-Disposition: attachment; filename="' . $filename . '"');
                     echo $report_csv;
                     exit;
                 } else {
