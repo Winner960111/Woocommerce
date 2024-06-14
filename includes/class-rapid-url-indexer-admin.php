@@ -99,6 +99,7 @@ class Rapid_URL_Indexer_Admin {
         }
         wp_enqueue_style('rui-admin-css', RUI_PLUGIN_URL . 'assets/css/admin.css', array(), '1.0.0', 'all');
         wp_enqueue_script('rui-admin-js', RUI_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), '1.0.0', true);
+        error_log('admin.js enqueued for ' . $hook);
     }
 
 
