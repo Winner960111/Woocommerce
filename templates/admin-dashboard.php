@@ -11,7 +11,7 @@
     <h2>Potential Abusers</h2>
     <form id="check-abuse-form" method="post" action="">
         <input type="hidden" name="action" value="check_abuse">
-        <button type="button" id="check-abuse-button" class="button">Check for Potential Abusers</button>
+        <button type="button" id="check-abuse-button" class="button">Find Abusers</button>
     </form>
     <div id="abuse-results"></div>
 
