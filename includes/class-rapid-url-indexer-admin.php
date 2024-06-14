@@ -95,7 +95,13 @@ class Rapid_URL_Indexer_Admin {
 
     public static function enqueue_scripts($hook) {
         error_log('enqueue_scripts called for ' . $hook);
-        $valid_hooks = array('toplevel_page_rapid-url-indexer', 'rapid-url-indexer_page_rapid-url-indexer-settings', 'rapid-url-indexer_page_manage-credits', 'rapid-url-indexer_page_rapid-url-indexer-logs', 'rapid-url-indexer_page_rapid-url-indexer-tasks');
+        $valid_hooks = array(
+            'toplevel_page_rapid-url-indexer',
+            'rapid-url-indexer_page_rapid-url-indexer-settings',
+            'rapid-url-indexer_page_manage-credits',
+            'rapid-url-indexer_page_rapid-url-indexer-logs',
+            'rapid-url-indexer_page_rapid-url-indexer-tasks'
+        );
         error_log('Valid hooks: ' . implode(', ', $valid_hooks));
         if (!in_array($hook, $valid_hooks)) {
             error_log('Invalid hook: ' . $hook);
