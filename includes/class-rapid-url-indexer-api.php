@@ -99,91 +99,83 @@ class Rapid_URL_Indexer_API {
             
             $last_request_time = $current_time;
 
-            // Retrieve the API key from the settings
-            $api_key = get_option('speedyindex_api_key');
-            if (empty($api_key)) {
-                error_log('SpeedyIndex API Key is empty. Please check the plugin settings.');
-                return new WP_Error('api_key_missing', __('API key is missing. Please check the plugin settings.', 'rapid-url-indexer'));
-            }
-
-            // Make the API request
-            $args = array(
-                'headers' => array(
-                    'Authorization' => $api_key
-                )
-            );
-
-            if ($body !== null) {
-                $args['body'] = json_encode($body);
-                $args['headers']['Content-Type'] = 'application/json';
-            }
-
-            // Ensure the JSON body is correctly formatted
-            if ($body !== null) {
-                $args['body'] = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-                $args['headers']['Content-Type'] = 'application/json';
-            }
-
-            // Log the request details
-            error_log('SpeedyIndex API Request: ' . print_r(array(
-                'method' => $method,
-                'endpoint' => self::API_BASE_URL . $endpoint,
-                'headers' => $args['headers'],
-                'body' => isset($args['body']) ? $args['body'] : null // Log the JSON body being sent
-            ), true));
-            error_log('SpeedyIndex API Key Used: ' . $api_key);
-
-            // Log the raw JSON body separately for clarity
-            if (isset($args['body'])) {
-                error_log('SpeedyIndex API Request JSON Body: ' . $args['body']);
-            }
-
-            switch ($method) {
-                case 'GET':
-                    $args['body'] = $body;
-                    $response = wp_remote_get(self::API_BASE_URL . $endpoint, $args);
-                    break;
-                case 'POST':
-                    $args['body'] = $body;
-                    $response = wp_remote_post(self::API_BASE_URL . $endpoint, $args);
-                    break;
-                default:
-                    return false;
-            }
-
-            // Log the response details
-            error_log('SpeedyIndex API Response: ' . print_r($response, true));
-
-            // Log the raw response body separately for clarity
-            $response_body = wp_remote_retrieve_body($response);
-            error_log('SpeedyIndex API Raw Response Body: ' . $response_body);
-
-            if (is_wp_error($response)) {
-                $retries++;
-                if ($retries < self::API_MAX_RETRIES) {
-                    sleep(self::API_RETRY_DELAY);
-                } else {
-                    return false;
-                }
-            } else {
-                $response_code = wp_remote_retrieve_response_code($response);
-                
-                if ($response_code === 429) {
-                    // Rate limit exceeded
-                    $retry_after = wp_remote_retrieve_header($response, 'retry-after');
-                    if ($retry_after) {
-                        sleep($retry_after);
-                    } else {
-                        sleep(1);
-                    }
-                    $retries++;
-                } else {
-                    return $response;
-                }
-            }
+        // Retrieve the API key from the settings
+        $api_key = get_option('rui_speedyindex_api_key');
+        if (empty($api_key)) {
+            error_log('SpeedyIndex API Key is empty. Please check the plugin settings.');
+            return new WP_Error('api_key_missing', __('API key is missing. Please check the plugin settings.', 'rapid-url-indexer'));
         }
 
-        return false;
+        // Make the API request
+        $args = array(
+            'headers' => array(
+                'Authorization' => $api_key
+            )
+        );
+
+        if ($body !== null) {
+            $args['body'] = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+            $args['headers']['Content-Type'] = 'application/json';
+        }
+
+        // Log the request details
+        error_log('SpeedyIndex API Request: ' . print_r(array(
+            'method' => $method,
+            'endpoint' => self::API_BASE_URL . $endpoint,
+            'headers' => $args['headers'],
+            'body' => isset($args['body']) ? $args['body'] : null // Log the JSON body being sent
+        ), true));
+        error_log('SpeedyIndex API Key Used: ' . $api_key);
+
+        // Log the raw JSON body separately for clarity
+        if (isset($args['body'])) {
+            error_log('SpeedyIndex API Request JSON Body: ' . $args['body']);
+        }
+
+        switch ($method) {
+            case 'GET':
+                $response = wp_remote_get(self::API_BASE_URL . $endpoint, $args);
+                break;
+            case 'POST':
+                $response = wp_remote_post(self::API_BASE_URL . $endpoint, $args);
+                break;
+            default:
+                return false;
+        }
+
+        // Log the response details
+        error_log('SpeedyIndex API Response: ' . print_r($response, true));
+
+        // Log the raw response body separately for clarity
+        $response_body = wp_remote_retrieve_body($response);
+        error_log('SpeedyIndex API Raw Response Body: ' . $response_body);
+
+        if (is_wp_error($response)) {
+            $retries++;
+            if ($retries < self::API_MAX_RETRIES) {
+                sleep(self::API_RETRY_DELAY);
+            } else {
+                return false;
+            }
+        } else {
+            $response_code = wp_remote_retrieve_response_code($response);
+            
+            if ($response_code === 429) {
+                // Rate limit exceeded
+                $retry_after = wp_remote_retrieve_header($response, 'retry-after');
+                if ($retry_after) {
+                    sleep($retry_after);
+                } else {
+                    sleep(1);
+                }
+                $retries++;
+            } else {
+                return $response;
+            }
+        }
+    }
+
+    return false;
     }
 
 
