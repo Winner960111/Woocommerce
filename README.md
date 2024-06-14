@@ -1,3 +1,11 @@
+improve logging to include reasons
+
+max of completed, pending, failed, and refunded orders: delete oldest, check every 24 hours, purpose is to keep the database maintainable
+
+notifications on status change - hourly - report download link
+
+pending projects backlog for 48 hours if speedy unresponsive or 1 or 2 codes
+
 ### Installation and Usage
 
 **Prerequisites:**
