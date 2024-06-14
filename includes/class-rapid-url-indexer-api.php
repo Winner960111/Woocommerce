@@ -116,7 +116,7 @@ class Rapid_URL_Indexer_API {
                 'method' => $method,
                 'endpoint' => self::API_BASE_URL . $endpoint,
                 'headers' => $args['headers'],
-                'body' => json_encode($body, JSON_UNESCAPED_SLASHES) // Log the JSON body being sent with unescaped slashes
+                'body' => json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) // Log the JSON body being sent with unescaped slashes and pretty print
             ), true));
 
             switch ($method) {
