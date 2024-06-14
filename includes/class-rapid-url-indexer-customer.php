@@ -119,7 +119,12 @@ class Rapid_URL_Indexer_Customer {
         $credits = self::get_user_credits($user_id);
 
         $project_name = sanitize_text_field($_POST['project_name']);
-        $urls = array_map('esc_url_raw', array_filter(array_map('trim', explode("\n", sanitize_textarea_field($_POST['urls'])))));
+        $urls = array_filter(array_map(function($url) {
+            $url = trim($url);
+            return filter_var($url, FILTER_SANITIZE_URL);
+        }, explode("\n", sanitize_textarea_field($_POST['urls']))), function($url) {
+            return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
+        });
         $notify = isset($_POST['notify']) ? 1 : 0;
 
         if ($credits <= 0) {
