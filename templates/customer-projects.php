@@ -38,10 +38,19 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                             (<?php echo esc_html($project->refunded_credits); ?> credits refunded)
                         <?php endif; ?>
                     </td>
+                    <td>
+                        <?php
+                        $urls = json_decode($project->urls, true);
+                        $total_urls = count($urls);
+                        $indexed_links = $project->indexed_links;
+                        $percentage = $total_urls > 0 ? round(($indexed_links / $total_urls) * 100) : 0;
+                        echo esc_html("$indexed_links/$total_urls ($percentage%)");
+                        ?>
+                    </td>
                     <td><?php echo esc_html($project->created_at); ?></td>
                     <td>
                         <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button">Download Report</a>
-                    </td>
+                    </td
                 </tr>
             <?php endforeach; ?>
         </tbody>
