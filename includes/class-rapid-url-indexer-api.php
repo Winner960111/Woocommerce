@@ -154,6 +154,10 @@ class Rapid_URL_Indexer_API {
             // Log the response details
             error_log('SpeedyIndex API Response: ' . print_r($response, true));
 
+            // Log the raw response body separately for clarity
+            $response_body = wp_remote_retrieve_body($response);
+            error_log('SpeedyIndex API Raw Response Body: ' . $response_body);
+
             if (is_wp_error($response)) {
                 $retries++;
                 if ($retries < self::API_MAX_RETRIES) {
