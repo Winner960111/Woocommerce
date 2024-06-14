@@ -128,7 +128,7 @@ class Rapid_URL_Indexer_Customer {
         } else {
             if (count($urls) > 0 && count($urls) <= 9999) {
                 $api_key = get_option('speedyindex_api_key');
-                $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name);
+                $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (User ID: ' . $user_id . ')');
 
                 if ($response && isset($response['task_id'])) {
                     $project_id = self::submit_project($project_name, $urls, $notify);
