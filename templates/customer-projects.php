@@ -23,6 +23,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             <tr>
                 <th>Project</th>
                 <th>Status</th>
+                <th>Indexed</th>
                 <th>Created at</th>
                 <th>Actions</th>
             </tr>
