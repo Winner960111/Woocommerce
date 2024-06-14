@@ -19,6 +19,18 @@ class Rapid_URL_Indexer_API {
         }
     }
 
+    public static function get_tasks($api_key, $page = 0) {
+        $response = self::make_api_request('GET', "/v2/task/google/indexer/list/$page", $api_key);
+        
+        if (self::is_api_response_success($response)) {
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+            return $data['result'];
+        } else {
+            self::log_api_error($response);
+            return false;
+        }
+    }
+
     private static function check_low_balance($balance) {
         if ($balance < self::LOW_BALANCE_THRESHOLD) {
             self::notify_admin(__('Low URL Indexing Balance', 'rapid-url-indexer'), 

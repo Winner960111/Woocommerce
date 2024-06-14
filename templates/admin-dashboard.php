@@ -10,4 +10,6 @@
     </ul>
     <h2>Logs</h2>
     <a href="<?php echo admin_url('admin.php?page=rapid-url-indexer-logs'); ?>" class="button">View Logs</a>
+    <h2>Tasks</h2>
+    <a href="<?php echo admin_url('admin.php?page=rapid-url-indexer-tasks'); ?>" class="button">View Tasks</a>
 </div>
