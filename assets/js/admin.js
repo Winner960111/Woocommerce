@@ -1,16 +1,25 @@
 jQuery(document).ready(function($) {
     $('#rui-log-search-submit').on('click', function() {
-        var search = $('#rui-log-search').val();
+        var searchQuery = $('#rui-log-search').val();
         $.ajax({
             url: ajaxurl,
-            type: 'GET',
+            method: 'GET',
             data: {
                 action: 'rui_search_logs',
-                s: search
+                s: searchQuery
             },
             success: function(response) {
-                $('#rui-logs-table tbody').html(response.data);
+                if (response.success) {
+                    $('#rui-logs-table tbody').html(response.data);
+                }
             }
         });
+    });
+
+    // Trigger search on Enter key press
+    $('#rui-log-search').on('keypress', function(e) {
+        if (e.which == 13) {
+            $('#rui-log-search-submit').click();
+        }
     });
 });
