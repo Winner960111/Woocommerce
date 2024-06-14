@@ -70,7 +70,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                     </td>
                     <td><?php echo esc_html($project->created_at); ?></td>
                     <td>
-                        <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button">Download Report</a>
+                        <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button wp-element-button">Download Report</a>
                     </td
                 </tr>
             <?php endforeach; ?>
