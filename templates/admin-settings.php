@@ -18,7 +18,18 @@
                 <th scope="row"><?php _e('Log Entry Limit', 'rapid-url-indexer'); ?></th>
                 <td><input type="number" name="rui_log_entry_limit" value="<?php echo esc_attr(get_option('rui_log_entry_limit', 1000)); ?>" /></td>
             </tr>
-        </table>
+            </table>
+            <h2><?php _e('Abuse Detection Settings', 'rapid-url-indexer'); ?></h2>
+            <table class="form-table">
+                <tr>
+                    <th scope="row"><?php _e('Minimum Number of Projects for Abuse Detection', 'rapid-url-indexer'); ?></th>
+                    <td><input type="number" name="rui_min_projects_for_abuse" value="<?php echo esc_attr(get_option('rui_min_projects_for_abuse', 10)); ?>" /></td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Average Refund Rate for Abuse Detection', 'rapid-url-indexer'); ?></th>
+                    <td><input type="number" step="0.01" name="rui_avg_refund_rate_for_abuse" value="<?php echo esc_attr(get_option('rui_avg_refund_rate_for_abuse', 0.7)); ?>" /></td>
+                </tr>
+            </table>
         <?php submit_button(); ?>
     </form>
 </div>

@@ -14,14 +14,17 @@ class Rapid_URL_Indexer {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 
-        // Get users with more than 10 projects where 70% or more URLs were not indexed and refunded
-        $results = $wpdb->get_results("
+        $min_projects = get_option('rui_min_projects_for_abuse', 10);
+        $avg_refund_rate = get_option('rui_avg_refund_rate_for_abuse', 0.7);
+
+        // Get users with more than the minimum number of projects where the average refund rate is above the threshold
+        $results = $wpdb->get_results($wpdb->prepare("
             SELECT user_id, COUNT(*) as project_count, AVG(refunded_credits / (indexed_links + refunded_credits)) as avg_refund_rate
             FROM $table_name
             WHERE status = 'refunded'
             GROUP BY user_id
-            HAVING project_count > 10 AND avg_refund_rate >= 0.7
-        ");
+            HAVING project_count > %d AND avg_refund_rate >= %f
+        ", $min_projects, $avg_refund_rate));
 
         if ($results) {
             $admin_email = get_option('admin_email');
