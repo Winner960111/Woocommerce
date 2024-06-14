@@ -117,5 +117,47 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             <li><strong>404 Not Found</strong> - The requested resource (e.g., project) does not exist.</li>
             <li><strong>500 Internal Server Error</strong> - An unexpected error occurred on the server.</li>
         </ul>
+
+        <h4>Example Requests and Responses</h4>
+        <h5>Submit a New Project</h5>
+        <pre><code>curl -X POST https://yourdomain.com/api/v1/projects \
+-H "X-API-Key: your_api_key" \
+-H "Content-Type: application/json" \
+-d '{
+    "project_name": "My Project",
+    "urls": ["http://example.com", "http://example.org"]
+}'</code></pre>
+        <p><strong>Response:</strong></p>
+        <pre><code>{
+    "message": "Project created",
+    "project_id": 123
+}</code></pre>
+
+        <h5>Get Project Status</h5>
+        <pre><code>curl -X GET https://yourdomain.com/api/v1/projects/123 \
+-H "X-API-Key: your_api_key"</code></pre>
+        <p><strong>Response:</strong></p>
+        <pre><code>{
+    "project_id": 123,
+    "status": "submitted",
+    "submitted_links": 2,
+    "indexed_links": 0
+}</code></pre>
+
+        <h5>Download Project Report</h5>
+        <pre><code>curl -X GET https://yourdomain.com/api/v1/projects/123/report \
+-H "X-API-Key: your_api_key"</code></pre>
+        <p><strong>Response:</strong></p>
+        <pre><code>URL,Status
+http://example.com,Indexed
+http://example.org,Not Indexed</code></pre>
+
+        <h5>Get Credit Balance</h5>
+        <pre><code>curl -X GET https://yourdomain.com/api/v1/credits/balance \
+-H "X-API-Key: your_api_key"</code></pre>
+        <p><strong>Response:</strong></p>
+        <pre><code>{
+    "credits": 100
+}</code></pre>
     </details>
 </div>
