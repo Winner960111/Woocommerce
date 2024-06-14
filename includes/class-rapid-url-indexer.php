@@ -8,7 +8,7 @@ class Rapid_URL_Indexer {
     public static function update_project_status() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'processing'");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted'");
 
         foreach ($projects as $project) {
             $api_key = get_option('speedyindex_api_key');
@@ -35,7 +35,7 @@ class Rapid_URL_Indexer {
     public static function auto_refund() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'processing' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
 
         foreach ($projects as $project) {
             if (!$project->auto_refund_processed) {
