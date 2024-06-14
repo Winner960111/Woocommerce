@@ -29,6 +29,7 @@ jQuery(document).ready(function($) {
             $('#rui-log-search-submit').click();
         }
     });
+
     $('#rui-task-search-submit').on('click', function() {
         var searchQuery = $('#rui-task-search').val();
         window.location.href = window.location.pathname + '?page=rapid-url-indexer-tasks&s=' + encodeURIComponent(searchQuery);
@@ -39,6 +40,23 @@ jQuery(document).ready(function($) {
         if (e.which == 13) {
             $('#rui-task-search-submit').click();
         }
+    });
+
+    $('#check-abuse-button').on('click', function() {
+        $.ajax({
+            url: ajaxurl,
+            method: 'POST',
+            data: {
+                action: 'check_abuse'
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#abuse-results').html(response.data);
+                } else {
+                    $('#abuse-results').html('<p>' + response.data + '</p>');
+                }
+            }
+        });
     });
 });
 jQuery(document).ready(function($) {
