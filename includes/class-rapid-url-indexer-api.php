@@ -101,6 +101,10 @@ class Rapid_URL_Indexer_API {
 
             // Retrieve the API key from the settings
             $api_key = get_option('speedyindex_api_key');
+            if (empty($api_key)) {
+                error_log('SpeedyIndex API Key is empty. Please check the plugin settings.');
+                return new WP_Error('api_key_missing', __('API key is missing. Please check the plugin settings.', 'rapid-url-indexer'));
+            }
 
             // Make the API request
             $args = array(
