@@ -116,11 +116,11 @@ class Rapid_URL_Indexer_API {
                 'method' => $method,
                 'endpoint' => self::API_BASE_URL . $endpoint,
                 'headers' => $args['headers'],
-                'body' => json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) // Log the JSON body being sent with unescaped slashes and pretty print
+                'body' => $args['body'] // Log the JSON body being sent
             ), true));
 
             // Log the raw JSON body separately for clarity
-            error_log('SpeedyIndex API Request JSON Body: ' . json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+            error_log('SpeedyIndex API Request JSON Body: ' . $args['body']);
 
             switch ($method) {
                 case 'GET':
