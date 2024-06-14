@@ -7,7 +7,7 @@ if (!is_user_logged_in()) {
 global $wpdb;
 $user_id = get_current_user_id();
 $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-$projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id));
+$projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC", $user_id));
 ?>
 <div class="rui-projects">
     <div class="rui-project-submission">
