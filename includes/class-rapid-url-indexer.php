@@ -30,6 +30,18 @@ class Rapid_URL_Indexer {
 
             foreach ($results as $result) {
                 $message .= sprintf(__('User ID: %d, Project Count: %d, Average Refund Rate: %.2f%%', 'rapid-url-indexer'), $result->user_id, $result->project_count, $result->avg_refund_rate * 100) . "\n";
+
+                // Log the detected abuser
+                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                    'user_id' => $result->user_id,
+                    'project_id' => 0,
+                    'action' => 'Abuse Detected',
+                    'details' => json_encode(array(
+                        'project_count' => $result->project_count,
+                        'avg_refund_rate' => $result->avg_refund_rate * 100
+                    )),
+                    'created_at' => current_time('mysql')
+                ));
             }
 
             wp_mail($admin_email, $subject, $message);
