@@ -30,6 +30,8 @@
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    background-color: var(--wp--preset--color--inputbg);
+    color: var(--wp--preset--color--inputtext);
 }
 
 .rui-projects table {
