@@ -114,9 +114,20 @@ class Rapid_URL_Indexer_API {
         $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
         if ($response_code >= 200 && $response_code < 300) {
-            if (isset($response_body['code']) && in_array($response_body['code'], [1, 2])) {
-                self::notify_admin(__('SpeedyIndex API Issue', 'rapid-url-indexer'), __('The SpeedyIndex API responded with a code indicating an issue. Please check your balance or retry later.', 'rapid-url-indexer'));
-                self::add_admin_notice(__('The SpeedyIndex API responded with a code indicating an issue. Please check your balance or retry later.', 'rapid-url-indexer'));
+            if (isset($response_body['code'])) {
+                switch ($response_body['code']) {
+                    case 1:
+                        $message = __('The SpeedyIndex API responded with code 1: Top up balance.', 'rapid-url-indexer');
+                        break;
+                    case 2:
+                        $message = __('The SpeedyIndex API responded with code 2: The server is overloaded. Please retry later.', 'rapid-url-indexer');
+                        break;
+                    default:
+                        $message = __('The SpeedyIndex API responded with an unknown issue.', 'rapid-url-indexer');
+                        break;
+                }
+                self::notify_admin(__('SpeedyIndex API Issue', 'rapid-url-indexer'), $message);
+                self::add_admin_notice($message);
             }
             return $response_body;
         } else {
