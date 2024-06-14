@@ -13,7 +13,7 @@ $products = wc_get_products(array(
     <ul class="rui-credits-products">
         <?php foreach ($products as $product): ?>
             <li>
-                <a href="<?php echo esc_url('?add-to-cart=' . $product->get_id()); ?>"><?php echo esc_html($product->get_name()); ?></a><span class="rui-credits-amount"> <i>(get <?php echo esc_html(get_post_meta($product->get_id(), '_credits_amount', true)); ?> URLs indexed)</i></span>
+                <a href="<?php echo esc_url('?add-to-cart=' . $product->get_id()); ?>"><?php echo esc_html($product->get_name()); ?></a><span class="rui-credits-amount"> <i>(Guaranteed to get <?php echo esc_html(get_post_meta($product->get_id(), '_credits_amount', true)); ?> URLs indexed)</i></span>
             </li>
         <?php endforeach; ?>
     </ul>
