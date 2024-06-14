@@ -19,6 +19,39 @@ class Rapid_URL_Indexer_Customer {
 
         // Flush rewrite rules on plugin activation
         register_activation_hook(RUI_PLUGIN_DIR . 'rapid-url-indexer.php', array(__CLASS__, 'flush_rewrite_rules'));
+        add_action('template_redirect', array(__CLASS__, 'handle_download_report'));
+    }
+
+    public static function handle_download_report() {
+        if (isset($_GET['download_report'])) {
+            $project_id = intval($_GET['download_report']);
+            $user_id = get_current_user_id();
+
+            if (!$user_id) {
+                wp_redirect(wp_login_url());
+                exit;
+            }
+
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d AND user_id = %d", $project_id, $user_id));
+
+            if ($project) {
+                $api_key = get_option('speedyindex_api_key');
+                $report_csv = Rapid_URL_Indexer_API::download_task_report($api_key, $project->task_id);
+
+                if ($report_csv) {
+                    header('Content-Type: text/csv');
+                    header('Content-Disposition: attachment; filename="project-report.csv"');
+                    echo $report_csv;
+                    exit;
+                } else {
+                    wp_die(__('Failed to generate report. Please try again later.', 'rapid-url-indexer'));
+                }
+            } else {
+                wp_die(__('You do not have permission to download this report.', 'rapid-url-indexer'));
+            }
+        }
     }
 
     public static function replace_my_account_title($title, $id) {
