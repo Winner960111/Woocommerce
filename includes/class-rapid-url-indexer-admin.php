@@ -97,7 +97,7 @@ class Rapid_URL_Indexer_Admin {
         $valid_hooks = array(
             'toplevel_page_rapid-url-indexer',
             'rapid-url-indexer_page_rapid-url-indexer-settings',
-            'rapid-url-indexer_page_manage-credits',
+            'rapid-url-indexer_page_rapid-url-indexer-manage-credits',
             'rapid-url-indexer_page_rapid-url-indexer-logs',
             'rapid-url-indexer_page_rapid-url-indexer-tasks'
         );
