@@ -3,11 +3,18 @@ if (!is_user_logged_in()) {
     wp_redirect(wp_login_url());
     exit;
 }
-// Fetch user projects
 global $wpdb;
 $user_id = get_current_user_id();
 $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-$projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC", $user_id));
+
+// Pagination settings
+$projects_per_page = 50;
+$paged = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+$offset = ($paged - 1) * $projects_per_page;
+
+// Fetch user projects with pagination
+$total_projects = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE user_id = %d", $user_id));
+$projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC LIMIT %d OFFSET %d", $user_id, $projects_per_page, $offset));
 ?>
 <div class="rui-projects">
     <div class="rui-project-submission">
@@ -16,7 +23,20 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <div class="rui-credits-display">
     <?php echo Rapid_URL_Indexer_Customer::credits_display(false); ?>
     </div>
-    <br>
+    <div class="tablenav">
+        <div class="tablenav-pages">
+            <?php
+            echo paginate_links(array(
+                'base' => add_query_arg('paged', '%#%'),
+                'format' => '',
+                'prev_text' => __('&laquo;'),
+                'next_text' => __('&raquo;'),
+                'total' => ceil($total_projects / $projects_per_page),
+                'current' => $paged
+            ));
+            ?>
+        </div>
+    </div>
     <h2>Project List</h2>
     <table>
         <thead>
