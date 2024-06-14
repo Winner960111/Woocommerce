@@ -1,3 +1,5 @@
+console.log("admin.js loaded");
+
 jQuery(document).ready(function($) {
     $('#rui-log-search-submit').on('click', function() {
         var searchQuery = $('#rui-log-search').val();

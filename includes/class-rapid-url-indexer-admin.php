@@ -94,7 +94,7 @@ class Rapid_URL_Indexer_Admin {
     } 
 
     public static function enqueue_scripts($hook) {
-        if (!in_array($hook, array('toplevel_page_rapid-url-indexer', 'rapid-url-indexer_page_rapid-url-indexer-settings', 'rapid-url-indexer_page_manage-credits', 'rapid-url-indexer_page_rapid-url-indexer-logs'))) {
+        if (!in_array($hook, array('toplevel_page_rapid-url-indexer', 'rapid-url-indexer_page_rapid-url-indexer-settings', 'rapid-url-indexer_page_manage-credits', 'rapid-url-indexer_page_rapid-url-indexer-logs', 'rapid-url-indexer_page_rapid-url-indexer-tasks'))) {
             return;
         }
         wp_enqueue_style('rui-admin-css', RUI_PLUGIN_URL . 'assets/css/admin.css', array(), '1.0.0', 'all');
