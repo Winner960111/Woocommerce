@@ -20,12 +20,26 @@ class Rapid_URL_Indexer {
 
                 if ($status === 'completed') {
                     $wpdb->update($table_name, array('status' => 'completed', 'indexed_links' => $indexed_links), array('id' => $project->id));
-                } elseif ($status === 'failed') {
+                } elseif ($status === 'failed' && !$project->auto_refund_processed) {
                     // Refund credits
                     $total_urls = count(json_decode($project->urls, true));
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
 
-                    $wpdb->update($table_name, array('status' => 'failed'), array('id' => $project->id));
+                    // Mark auto refund as processed and store refunded credits
+                    $wpdb->update($table_name, array(
+                        'status' => 'failed',
+                        'auto_refund_processed' => 1,
+                        'refunded_credits' => $total_urls
+                    ), array('id' => $project->id));
+
+                    // Log the action
+                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                        'user_id' => $project->user_id,
+                        'project_id' => $project->id,
+                        'action' => 'Auto Refund',
+                        'details' => json_encode(array('refunded_credits' => $total_urls)),
+                        'created_at' => current_time('mysql')
+                    ));
                 }
             }
 
