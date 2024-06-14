@@ -103,13 +103,13 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             </tbody>
         </table>
 
-        <h4>Authentication</h4>
+        <h3>Authentication</h3>
         <p>All API endpoints require authentication using an API key. The API key should be included in the <code>X-API-Key</code> header of each request.</p>
 
-        <h4>Project Names and URLs</h4>
+        <h3>Project Names and URLs</h3>
         <p>Project names will be sanitized to remove any special characters or HTML tags. URLs will be validated and must start with either "http://" or "https://". Invalid URLs will be discarded.</p>
 
-        <h4>Error Responses</h4>
+        <h3>Error Responses</h3>
         <p>If an error occurs, the API will return an appropriate HTTP status code along with an error message in the response body. Possible error codes include:</p>
         <ul>
             <li><strong>400 Bad Request</strong> - The request was malformed or missing required parameters.</li>
@@ -118,8 +118,8 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             <li><strong>500 Internal Server Error</strong> - An unexpected error occurred on the server.</li>
         </ul>
 
-        <h4>Example Requests and Responses</h4>
-        <h5>Submit a New Project</h5>
+        <h3>Example Requests and Responses</h3>
+        <h4>Submit a New Project</h4>
         <pre><code>curl -X POST https://rapidurlindexer.com/api/v1/projects \
 -H "X-API-Key: your_api_key" \
 -H "Content-Type: application/json" \
@@ -133,7 +133,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     "project_id": 123
 }</code></pre>
 
-        <h5>Get Project Status</h5>
+        <h4>Get Project Status</h4>
         <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/projects/123 \
 -H "X-API-Key: your_api_key"</code></pre>
         <p><strong>Response:</strong></p>
@@ -144,7 +144,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     "indexed_links": 0
 }</code></pre>
 
-        <h5>Download Project Report</h5>
+        <h4>Download Project Report</h4>
         <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/projects/123/report \
 -H "X-API-Key: your_api_key"</code></pre>
         <p><strong>Response:</strong></p>
@@ -152,7 +152,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 http://example.com,Indexed
 http://example.org,Not Indexed</code></pre>
 
-        <h5>Get Credit Balance</h5>
+        <h4>Get Credit Balance</h4>
         <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/credits/balance \
 -H "X-API-Key: your_api_key"</code></pre>
         <p><strong>Response:</strong></p>
