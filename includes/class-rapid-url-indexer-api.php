@@ -118,19 +118,6 @@ class Rapid_URL_Indexer_API {
             $args['headers']['Content-Type'] = 'application/json';
         }
 
-        // Log the request details
-        error_log('SpeedyIndex API Request: ' . print_r(array(
-            'method' => $method,
-            'endpoint' => self::API_BASE_URL . $endpoint,
-            'headers' => $args['headers'],
-            'body' => isset($args['body']) ? $args['body'] : null // Log the JSON body being sent
-        ), true));
-        error_log('SpeedyIndex API Key Used: ' . $api_key);
-
-        // Log the raw JSON body separately for clarity
-        if (isset($args['body'])) {
-            error_log('SpeedyIndex API Request JSON Body: ' . $args['body']);
-        }
 
         switch ($method) {
             case 'GET':
@@ -143,12 +130,6 @@ class Rapid_URL_Indexer_API {
                 return false;
         }
 
-        // Log the response details
-        error_log('SpeedyIndex API Response: ' . print_r($response, true));
-
-        // Log the raw response body separately for clarity
-        $response_body = wp_remote_retrieve_body($response);
-        error_log('SpeedyIndex API Raw Response Body: ' . $response_body);
 
         if (is_wp_error($response)) {
             $retries++;
