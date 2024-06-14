@@ -48,6 +48,18 @@ class Rapid_URL_Indexer {
             }
 
             wp_mail($admin_email, $subject, $message);
+
+            // Log the email notification
+            $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                'user_id' => 0,
+                'project_id' => 0,
+                'action' => 'Admin Notification',
+                'details' => json_encode(array(
+                    'subject' => $subject,
+                    'message' => $message
+                )),
+                'created_at' => current_time('mysql')
+            ));
         }
     }
 
@@ -66,7 +78,29 @@ class Rapid_URL_Indexer {
 
                 if ($status === 'completed') {
                     $wpdb->update($table_name, array('status' => 'completed', 'indexed_links' => $indexed_links), array('id' => $project->id));
+                    // Log the project status change
+                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                        'user_id' => $project->user_id,
+                        'project_id' => $project->id,
+                        'action' => 'Project Status Change',
+                        'details' => json_encode(array(
+                            'old_status' => 'pending',
+                            'new_status' => 'completed'
+                        )),
+                        'created_at' => current_time('mysql')
+                    ));
                 } elseif ($status === 'failed' && !$project->auto_refund_processed) {
+                    // Log the project status change
+                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                        'user_id' => $project->user_id,
+                        'project_id' => $project->id,
+                        'action' => 'Project Status Change',
+                        'details' => json_encode(array(
+                            'old_status' => 'pending',
+                            'new_status' => 'failed'
+                        )),
+                        'created_at' => current_time('mysql')
+                    ));
                     // Refund credits
                     $total_urls = count(json_decode($project->urls, true));
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
@@ -342,11 +376,21 @@ class Rapid_URL_Indexer {
 
                     if (!$last_notification_time || ($current_time - $last_notification_time) >= 86400) {
                         $user_info = get_userdata($user_id);
-                        wp_mail(
-                            $user_info->user_email,
-                            __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
-                            __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
-                        );
+                        $subject = __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer');
+                        $message = __('Your project has been submitted and is being processed.', 'rapid-url-indexer');
+                        wp_mail($user_info->user_email, $subject, $message);
+
+                        // Log the email notification
+                        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                            'user_id' => $user_id,
+                            'project_id' => $project_id,
+                            'action' => 'User Notification',
+                            'details' => json_encode(array(
+                                'subject' => $subject,
+                                'message' => $message
+                            )),
+                            'created_at' => current_time('mysql')
+                        ));
                         update_post_meta($project_id, '_rui_last_notification_time', $current_time);
                     }
                 }

@@ -126,6 +126,16 @@ class Rapid_URL_Indexer_API {
                 self::notify_admin(__('SpeedyIndex API Issue', 'rapid-url-indexer'), $message);
                 self::add_admin_notice($message);
             }
+            // Log the API response
+            global $wpdb;
+            $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                'user_id' => get_current_user_id(),
+                'project_id' => 0,
+                'action' => 'API Response',
+                'details' => json_encode($response_body),
+                'created_at' => current_time('mysql')
+            ));
+
             return $response_body;
         } else {
             $error_message = isset($response_body['message']) ? $response_body['message'] : 'Unknown error';
