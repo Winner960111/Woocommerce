@@ -120,7 +120,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 
         <h4>Example Requests and Responses</h4>
         <h5>Submit a New Project</h5>
-        <pre><code>curl -X POST https://yourdomain.com/api/v1/projects \
+        <pre><code>curl -X POST https://rapidurlindexer.com/api/v1/projects \
 -H "X-API-Key: your_api_key" \
 -H "Content-Type: application/json" \
 -d '{
@@ -134,7 +134,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 }</code></pre>
 
         <h5>Get Project Status</h5>
-        <pre><code>curl -X GET https://yourdomain.com/api/v1/projects/123 \
+        <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/projects/123 \
 -H "X-API-Key: your_api_key"</code></pre>
         <p><strong>Response:</strong></p>
         <pre><code>{
@@ -145,7 +145,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 }</code></pre>
 
         <h5>Download Project Report</h5>
-        <pre><code>curl -X GET https://yourdomain.com/api/v1/projects/123/report \
+        <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/projects/123/report \
 -H "X-API-Key: your_api_key"</code></pre>
         <p><strong>Response:</strong></p>
         <pre><code>URL,Status
@@ -153,7 +153,7 @@ http://example.com,Indexed
 http://example.org,Not Indexed</code></pre>
 
         <h5>Get Credit Balance</h5>
-        <pre><code>curl -X GET https://yourdomain.com/api/v1/credits/balance \
+        <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/credits/balance \
 -H "X-API-Key: your_api_key"</code></pre>
         <p><strong>Response:</strong></p>
         <pre><code>{
