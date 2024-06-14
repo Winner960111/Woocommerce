@@ -183,7 +183,8 @@ class Rapid_URL_Indexer {
         $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
 
         // Validate and process the project submission
-        // ...
+        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
+        $project_id = Rapid_URL_Indexer_Customer::submit_project($project_name, $urls, $notify, $user_id);
 
         return new WP_REST_Response(array('message' => 'Project created', 'project_id' => $project_id), 200);
     }
@@ -211,7 +212,8 @@ class Rapid_URL_Indexer {
         $project_id = $request['id'];
 
         // Generate and return the project report CSV
-        // ...
+        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
+        $report_csv = Rapid_URL_Indexer_API::download_task_report($user_id, $project_id);
 
         return new WP_REST_Response($report_csv, 200, array('Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="project-report.csv"'));
     }
