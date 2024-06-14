@@ -4,6 +4,34 @@ class Rapid_URL_Indexer_Admin {
         add_action('admin_menu', array(__CLASS__, 'admin_menu'));
         add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
         add_action('rui_log_entry_created', array(__CLASS__, 'limit_log_entries'));
+        add_action('wp_ajax_check_abuse', array(__CLASS__, 'ajax_check_abuse'));
+    }
+
+    public static function ajax_check_abuse() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+
+        // Get users with more than 10 projects where 70% or more URLs were not indexed and refunded
+        $results = $wpdb->get_results("
+            SELECT user_id, COUNT(*) as project_count, AVG(refunded_credits / (indexed_links + refunded_credits)) as avg_refund_rate
+            FROM $table_name
+            WHERE status = 'refunded'
+            GROUP BY user_id
+            HAVING project_count > 10 AND avg_refund_rate >= 0.7
+        ");
+
+        if ($results) {
+            ob_start();
+            echo '<ul>';
+            foreach ($results as $result) {
+                echo '<li>' . sprintf(__('User ID: %d, Project Count: %d, Average Refund Rate: %.2f%%', 'rapid-url-indexer'), $result->user_id, $result->project_count, $result->avg_refund_rate * 100) . '</li>';
+            }
+            echo '</ul>';
+            $output = ob_get_clean();
+            wp_send_json_success($output);
+        } else {
+            wp_send_json_error(__('No potential abusers found.', 'rapid-url-indexer'));
+        }
     }
 
     public static function view_tasks_page() {
