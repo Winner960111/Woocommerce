@@ -3,6 +3,37 @@ class Rapid_URL_Indexer {
     public static function init() {
         self::load_dependencies();
         self::define_hooks();
+        // Schedule abuse check
+        if (!wp_next_scheduled('rui_check_abuse')) {
+            wp_schedule_event(time(), 'daily', 'rui_check_abuse');
+        }
+        add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
+    }
+
+    public static function check_abuse() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+
+        // Get users with more than 10 projects where 70% or more URLs were not indexed and refunded
+        $results = $wpdb->get_results("
+            SELECT user_id, COUNT(*) as project_count, AVG(refunded_credits / (indexed_links + refunded_credits)) as avg_refund_rate
+            FROM $table_name
+            WHERE status = 'refunded'
+            GROUP BY user_id
+            HAVING project_count > 10 AND avg_refund_rate >= 0.7
+        ");
+
+        if ($results) {
+            $admin_email = get_option('admin_email');
+            $subject = __('Potential Abuse Detected', 'rapid-url-indexer');
+            $message = __('The following users have created more than 10 projects with an average of 70% or more URLs not indexed and refunded:', 'rapid-url-indexer') . "\n\n";
+
+            foreach ($results as $result) {
+                $message .= sprintf(__('User ID: %d, Project Count: %d, Average Refund Rate: %.2f%%', 'rapid-url-indexer'), $result->user_id, $result->project_count, $result->avg_refund_rate * 100) . "\n";
+            }
+
+            wp_mail($admin_email, $subject, $message);
+        }
     }
 
     public static function update_project_status() {
