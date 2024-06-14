@@ -110,6 +110,9 @@ class Rapid_URL_Indexer {
         // Add credits amount field to simple product
         add_action('woocommerce_product_options_general_product_data', array('Rapid_URL_Indexer', 'add_credits_field'));
         add_action('woocommerce_process_product_meta', array('Rapid_URL_Indexer', 'save_credits_field'));
+
+        // Admin notice for SpeedyIndex API issues
+        add_action('admin_notices', array('Rapid_URL_Indexer_API', 'display_admin_notices'));
     }
     
     public static function add_credits_field() {

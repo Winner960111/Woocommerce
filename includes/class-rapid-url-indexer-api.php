@@ -114,12 +114,22 @@ class Rapid_URL_Indexer_API {
         $response_body = json_decode(wp_remote_retrieve_body($response), true);
 
         if ($response_code >= 200 && $response_code < 300) {
+            if (isset($response_body['code']) && in_array($response_body['code'], [1, 2])) {
+                self::notify_admin(__('SpeedyIndex API Issue', 'rapid-url-indexer'), __('The SpeedyIndex API responded with a code indicating an issue. Please check your balance or retry later.', 'rapid-url-indexer'));
+                self::add_admin_notice(__('The SpeedyIndex API responded with a code indicating an issue. Please check your balance or retry later.', 'rapid-url-indexer'));
+            }
             return $response_body;
         } else {
             $error_message = isset($response_body['message']) ? $response_body['message'] : 'Unknown error';
             self::log_api_error($error_message);
             return false;
         }
+    }
+
+    private static function add_admin_notice($message) {
+        add_action('admin_notices', function() use ($message) {
+            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($message) . '</p></div>';
+        });
     }
 
     private static function make_api_request($method, $endpoint, $api_key, $body = null) {
