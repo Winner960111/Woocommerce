@@ -96,8 +96,8 @@ class Rapid_URL_Indexer_Admin {
         if (!in_array($hook, array('toplevel_page_rapid-url-indexer', 'rapid-url-indexer_page_rapid-url-indexer-settings', 'rapid-url-indexer_page_manage-credits', 'rapid-url-indexer_page_rapid-url-indexer-logs'))) {
             return;
         }
-        wp_enqueue_style('rui-admin-css', RUI_PLUGIN_URL . 'assets/css/admin.css');
-        wp_enqueue_script('rui-admin-js', RUI_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), null, true);
+        wp_enqueue_style('rui-admin-css', RUI_PLUGIN_URL . 'assets/css/admin.css', array(), '1.0.0', 'all');
+        wp_enqueue_script('rui-admin-js', RUI_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), '1.0.0', true);
     }
 
 
