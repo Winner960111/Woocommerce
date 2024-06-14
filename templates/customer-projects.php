@@ -42,7 +42,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                         <?php
                         $urls = json_decode($project->urls, true);
                         $total_urls = count($urls);
-                        $indexed_links = $project->indexed_links;
+                        $indexed_links = isset($project->indexed_links) ? $project->indexed_links : 0;
                         $percentage = $total_urls > 0 ? round(($indexed_links / $total_urls) * 100) : 0;
                         echo esc_html("$indexed_links/$total_urls ($percentage%)");
                         ?>
