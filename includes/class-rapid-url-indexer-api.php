@@ -122,9 +122,6 @@ class Rapid_URL_Indexer_API {
                     case 2:
                         $message = __('The SpeedyIndex API responded with code 2: The server is overloaded. Please retry later.', 'rapid-url-indexer');
                         break;
-                    default:
-                        $message = __('The SpeedyIndex API responded with an unknown issue.', 'rapid-url-indexer');
-                        break;
                 }
                 self::notify_admin(__('SpeedyIndex API Issue', 'rapid-url-indexer'), $message);
                 self::add_admin_notice($message);
