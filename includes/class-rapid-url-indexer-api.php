@@ -19,8 +19,12 @@ class Rapid_URL_Indexer_API {
         }
     }
 
-    public static function get_tasks($api_key, $page = 0) {
-        $response = self::make_api_request('GET', "/v2/task/google/indexer/list/$page", $api_key);
+    public static function get_tasks($api_key, $page = 0, $search = '') {
+        $endpoint = "/v2/task/google/indexer/list/$page";
+        if (!empty($search)) {
+            $endpoint .= "?search=" . urlencode($search);
+        }
+        $response = self::make_api_request('GET', $endpoint, $api_key);
         
         if (self::is_api_response_success($response)) {
             $data = json_decode(wp_remote_retrieve_body($response), true);
