@@ -217,12 +217,17 @@ class Rapid_URL_Indexer_Customer {
     }
 
     public static function handle_api_success($project_id, $user_id, $urls) {
-        // Subtract credits
-        Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
-
-        // Update project status
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+
+        // Check if credits have already been deducted
+        $project = $wpdb->get_row($wpdb->prepare("SELECT status FROM $table_name WHERE id = %d", $project_id));
+        if ($project && $project->status !== 'submitted') {
+            // Subtract credits
+            Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
+        }
+
+        // Update project status
         $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
     }
 
