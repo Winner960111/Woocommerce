@@ -99,6 +99,9 @@ class Rapid_URL_Indexer_API {
             
             $last_request_time = $current_time;
 
+            // Retrieve the API key from the settings
+            $api_key = get_option('speedyindex_api_key');
+
             // Make the API request
             $args = array(
                 'headers' => array(
@@ -124,6 +127,7 @@ class Rapid_URL_Indexer_API {
                 'headers' => $args['headers'],
                 'body' => isset($args['body']) ? $args['body'] : null // Log the JSON body being sent
             ), true));
+            error_log('SpeedyIndex API Key Used: ' . $api_key);
 
             // Log the raw JSON body separately for clarity
             if (isset($args['body'])) {
