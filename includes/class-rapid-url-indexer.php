@@ -8,7 +8,7 @@ class Rapid_URL_Indexer {
     public static function update_project_status() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted'");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status IN ('submitted', 'pending')");
 
         foreach ($projects as $project) {
             $api_key = get_option('speedyindex_api_key');
@@ -27,6 +27,16 @@ class Rapid_URL_Indexer {
 
                     $wpdb->update($table_name, array('status' => 'failed'), array('id' => $project->id));
                 }
+            }
+
+            // Check for pending projects older than 24 hours
+            if ($project->status === 'pending' && strtotime($project->created_at) < strtotime('-24 hours')) {
+                // Refund credits
+                $total_urls = count(json_decode($project->urls, true));
+                Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
+
+                // Update project status to failed
+                $wpdb->update($table_name, array('status' => 'failed'), array('id' => $project->id));
             }
         }
     }
