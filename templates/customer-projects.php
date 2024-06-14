@@ -17,6 +17,14 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <?php echo Rapid_URL_Indexer_Customer::credits_display(false); ?>
     </div>
     <br>
+    <h3>Project Status Explanation</h3>
+    <ul>
+        <li><strong>Pending:</strong> The project has been created but not yet submitted for indexing.</li>
+        <li><strong>Submitted:</strong> The project has been submitted and indexing is in progress.</li>
+        <li><strong>Completed:</strong> The indexing process has been completed.</li>
+        <li><strong>Failed:</strong> The indexing process failed. Credits have been refunded.</li>
+        <li><strong>Refunded:</strong> The project was not indexed within 14 days, and credits have been automatically refunded.</li>
+    </ul>
     <h2>Project List</h2>
     <table>
         <thead>
