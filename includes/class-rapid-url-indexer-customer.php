@@ -128,33 +128,17 @@ class Rapid_URL_Indexer_Customer {
         } else {
             if (count($urls) > 0 && count($urls) <= 9999) {
                 $api_key = get_option('speedyindex_api_key');
-                $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (CID' . $user_id . ')');
+                $project_id = self::submit_project($project_name, $urls, $notify);
+                if ($project_id) {
+                    // Deduct credits
+                    self::update_user_credits($user_id, -count($urls));
 
-                if ($response && isset($response['task_id'])) {
-                    $project_id = self::submit_project($project_name, $urls, $notify);
-                    if ($project_id) {
-                        // Deduct credits
-                        self::update_user_credits($user_id, -count($urls));
-
-                        wp_send_json_success(array(
-                            'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
-                            'project_id' => $project_id
-                        ));
-                    } else {
-                        wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
-                    }
+                    wp_send_json_success(array(
+                        'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
+                        'project_id' => $project_id
+                    ));
                 } else {
-                    error_log('SpeedyIndex API Response: ' . print_r($response, true));
-                    if (is_wp_error($response)) {
-                        error_log('SpeedyIndex API Error: ' . $response->get_error_message());
-                    } else {
-                        $response_body = wp_remote_retrieve_body($response);
-                        error_log('SpeedyIndex API Full Response: ' . $response_body);
-                        $response_body_json = json_decode($response_body, true);
-                        $error_message = isset($response_body_json['message']) ? $response_body_json['message'] : 'Unknown error';
-                        error_log('SpeedyIndex API Error: ' . $error_message);
-                    }
-                    wp_send_json_error(array('message' => __('Failed to create indexing task. Please try again.', 'rapid-url-indexer'), 'response' => $response));
+                    wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
                 }
             } else {
                 wp_send_json_error(array('message' => __('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer')));

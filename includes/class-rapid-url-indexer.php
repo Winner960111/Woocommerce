@@ -231,65 +231,71 @@ class Rapid_URL_Indexer {
             );
         }
     
-        // Call API to create task
-        $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (CID' . $user_id . ')');
-    
-        // Handle response and update project status
-        if ($response && isset($response['task_id'])) {
-            $task_id = $response['task_id'];
+        // Check if the project already has a task ID to prevent double submission
+        if (empty($project->task_id)) {
+            // Call API to create task
+            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $user_id . ')');
+        
+            // Handle response and update project status
+            if ($response && isset($response['task_id'])) {
+                $task_id = $response['task_id'];
 
-            // Update project with task ID
-            $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-            $wpdb->update($table_name, array('task_id' => $task_id), array('id' => $project_id));
+                // Update project with task ID
+                $wpdb->update($table_name, array('task_id' => $task_id), array('id' => $project_id));
 
-            // Deduct credits and update project status
-            Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
-            
-            // Log the action
-            $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                'user_id' => $user_id,
-                'project_id' => $project_id,
-                'action' => 'API Request',
-                'details' => json_encode($response),
-                'created_at' => current_time('mysql')
-            ));
+                // Deduct credits and update project status
+                Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
+                
+                // Log the action
+                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                    'user_id' => $user_id,
+                    'project_id' => $project_id,
+                    'action' => 'API Request',
+                    'details' => json_encode($response),
+                    'created_at' => current_time('mysql')
+                ));
 
-            do_action('rui_log_entry_created');
-    
-            // Notify user if required and not rate limited
-            if ($notify) {
-                $last_notification_time = get_post_meta($project_id, '_rui_last_notification_time', true);
-                $current_time = time();
+                do_action('rui_log_entry_created');
+        
+                // Notify user if required and not rate limited
+                if ($notify) {
+                    $last_notification_time = get_post_meta($project_id, '_rui_last_notification_time', true);
+                    $current_time = time();
 
-                if (!$last_notification_time || ($current_time - $last_notification_time) >= 86400) {
-                    $user_info = get_userdata($user_id);
-                    wp_mail(
-                        $user_info->user_email,
-                        __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
-                        __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
-                    );
-                    update_post_meta($project_id, '_rui_last_notification_time', $current_time);
+                    if (!$last_notification_time || ($current_time - $last_notification_time) >= 86400) {
+                        $user_info = get_userdata($user_id);
+                        wp_mail(
+                            $user_info->user_email,
+                            __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer'),
+                            __('Your project has been submitted and is being processed.', 'rapid-url-indexer')
+                        );
+                        update_post_meta($project_id, '_rui_last_notification_time', $current_time);
+                    }
                 }
+
+                return array(
+                    'success' => true,
+                    'error' => null
+                );
+            } else {
+                // Log the error
+                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                    'user_id' => get_current_user_id(),
+                    'project_id' => $project_id,
+                    'action' => 'API Error',
+                    'details' => json_encode($response),
+                    'created_at' => current_time('mysql')
+                ));
+
+                return array(
+                    'success' => false,
+                    'error' => __('An error occurred while submitting the project.', 'rapid-url-indexer')
+                );
             }
-
-            return array(
-                'success' => true,
-                'error' => null
-            );
         } else {
-            // Log the error
-            $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
-            $wpdb->insert($log_table, array(
-                'user_id' => get_current_user_id(),
-                'project_id' => $project_id,
-                'action' => 'API Error',
-                'details' => json_encode($response),
-                'created_at' => current_time('mysql')
-            ));
-
             return array(
                 'success' => false,
-                'error' => __('An error occurred while submitting the project.', 'rapid-url-indexer')
+                'error' => __('This project has already been submitted.', 'rapid-url-indexer')
             );
         }
     }
