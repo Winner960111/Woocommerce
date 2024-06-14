@@ -232,7 +232,7 @@ class Rapid_URL_Indexer {
         }
     
         // Call API to create task
-        $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (User ID: ' . $user_id . ')');
+        $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (CID' . $user_id . ')');
     
         // Handle response and update project status
         if ($response && isset($response['task_id'])) {
