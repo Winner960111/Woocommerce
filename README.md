@@ -1,4 +1,10 @@
-improve logging to include reasons
+user ID + user email in logs
+
+processed links vs indexed links, NOT submitted vs indexed - refund unindexed only
+
+show download report button only for submitted status
+
+improve logging to include triggers (project submission, auto refund, failed, admin, purchase)
 
 max of completed, pending, failed, and refunded orders: delete oldest, check every 24 hours, purpose is to keep the database maintainable - purge downloaded reports?
 
