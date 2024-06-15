@@ -268,7 +268,11 @@ class Rapid_URL_Indexer {
         $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
         $project_id = Rapid_URL_Indexer_Customer::submit_project($project_name, $urls, $notify, $user_id);
 
-        return new WP_REST_Response(array('message' => 'Project created', 'project_id' => $project_id), 200);
+        if ($project_id) {
+            return new WP_REST_Response(array('message' => 'Project created', 'project_id' => $project_id), 200);
+        } else {
+            return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
+        }
     }
 
     public static function get_project_status($request) {
