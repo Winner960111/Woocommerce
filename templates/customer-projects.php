@@ -175,6 +175,14 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     "submitted_links": 2,
     "indexed_links": 0
 }</code></pre>
+        <p><strong>Possible Status Values:</strong></p>
+        <ul>
+            <li><strong>pending:</strong> The project has been created but not yet submitted for indexing.</li>
+            <li><strong>submitted:</strong> The project has been submitted and indexing is in progress.</li>
+            <li><strong>completed:</strong> The indexing process has been completed.</li>
+            <li><strong>failed:</strong> The indexing process failed. Credits have been refunded.</li>
+            <li><strong>refunded:</strong> Some URLs were not indexed within 14 days, and credits have been automatically refunded.</li>
+        </ul>
 
         <h4>Download Project Report</h4>
         <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/projects/123/report \
