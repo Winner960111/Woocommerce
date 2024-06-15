@@ -164,6 +164,10 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     "message": "Project created",
     "project_id": 123
 }</code></pre>
+        <p><strong>Possible Error Response:</strong></p>
+        <pre><code>{
+    "message": "Project creation failed"
+}</code></pre>
 
         <h4>Get Project Status</h4>
         <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/projects/123 \
