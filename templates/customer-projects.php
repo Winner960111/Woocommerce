@@ -60,17 +60,29 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                     </td>
                     <td>
                         <?php
-                        $urls = json_decode($project->urls, true);
-                        $total_urls = count($urls);
-                        $indexed_links = isset($project->indexed_links) ? $project->indexed_links : 0;
-                        $indexed_links = $indexed_links === null ? 0 : $indexed_links;
-                        $percentage = $total_urls > 0 ? round(($indexed_links / $total_urls) * 100) : 0;
-                        echo esc_html("$indexed_links/$total_urls ($percentage%)");
+                        $submission_time = strtotime($project->created_at);
+                        $current_time = time();
+                        $hours_since_submission = ($current_time - $submission_time) / 3600;
+
+                        if ($hours_since_submission >= 50) {
+                            $urls = json_decode($project->urls, true);
+                            $total_urls = count($urls);
+                            $indexed_links = isset($project->indexed_links) ? $project->indexed_links : 0;
+                            $indexed_links = $indexed_links === null ? 0 : $indexed_links;
+                            $percentage = $total_urls > 0 ? round(($indexed_links / $total_urls) * 100) : 0;
+                            echo esc_html("$indexed_links/$total_urls ($percentage%)");
+                        } else {
+                            echo esc_html("Waiting...");
+                        }
                         ?>
                     </td>
                     <td><?php echo esc_html($project->created_at); ?></td>
                     <td>
-                        <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button wp-element-button">Download Report</a>
+                        <?php if ($hours_since_submission >= 50): ?>
+                            <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button wp-element-button">Download Report</a>
+                        <?php else: ?>
+                            <span>Waiting...</span>
+                        <?php endif; ?>
                     </td
                 </tr>
             <?php endforeach; ?>
