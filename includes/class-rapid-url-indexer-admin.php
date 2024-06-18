@@ -48,26 +48,30 @@ class Rapid_URL_Indexer_Admin {
         $min_projects = get_option('rui_min_projects_for_abuse', 10);
         $avg_refund_rate = get_option('rui_avg_refund_rate_for_abuse', 0.7);
 
-        // Get users with more than the minimum number of projects where the average refund rate is above the threshold
-        $results = $wpdb->get_results($wpdb->prepare("
-            SELECT user_id, COUNT(*) as project_count, AVG(refunded_credits / (indexed_links + refunded_credits)) as avg_refund_rate
-            FROM $table_name
-            WHERE status = 'refunded'
-            GROUP BY user_id
-            HAVING project_count > %d AND avg_refund_rate >= %f
-        ", $min_projects, $avg_refund_rate));
+        try {
+            // Get users with more than the minimum number of projects where the average refund rate is above the threshold
+            $results = $wpdb->get_results($wpdb->prepare("
+                SELECT user_id, COUNT(*) as project_count, AVG(refunded_credits / (indexed_links + refunded_credits)) as avg_refund_rate
+                FROM $table_name
+                WHERE status = 'refunded'
+                GROUP BY user_id
+                HAVING project_count > %d AND avg_refund_rate >= %f
+            ", $min_projects, $avg_refund_rate));
 
-        if ($results) {
-            ob_start();
-            echo '<ul>';
-            foreach ($results as $result) {
-                echo '<li>' . sprintf(__('User ID: %d, Project Count: %d, Average Refund Rate: %.2f%%', 'rapid-url-indexer'), $result->user_id, $result->project_count, $result->avg_refund_rate * 100) . '</li>';
+            if ($results) {
+                ob_start();
+                echo '<ul>';
+                foreach ($results as $result) {
+                    echo '<li>' . sprintf(__('User ID: %d, Project Count: %d, Average Refund Rate: %.2f%%', 'rapid-url-indexer'), $result->user_id, $result->project_count, $result->avg_refund_rate * 100) . '</li>';
+                }
+                echo '</ul>';
+                $output = ob_get_clean();
+                wp_send_json_success($output);
+            } else {
+                wp_send_json_error(__('No potential abusers found based on the configured criteria.', 'rapid-url-indexer'));
             }
-            echo '</ul>';
-            $output = ob_get_clean();
-            wp_send_json_success($output);
-        } else {
-            wp_send_json_error(__('No potential abusers found based on the configured criteria.', 'rapid-url-indexer'));
+        } catch (Exception $e) {
+            wp_send_json_error(__('An error occurred while checking for abusers: ', 'rapid-url-indexer') . $e->getMessage());
         }
     }
 
