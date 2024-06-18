@@ -156,12 +156,13 @@ class Rapid_URL_Indexer {
                 $status = $result['status'];
                 $indexed_links = $result['indexed_count'];
                 $processed_links = $result['processed_count'];
+                $total_urls = $result['size'];
                 $last_updated = current_time('mysql');
 
                 // Update project with latest data from API
                 $update_data = array(
                     'status' => $status,
-                    'submitted_links' => $result['size'],
+                    'submitted_links' => $total_urls,
                     'processed_links' => $processed_links,
                     'indexed_links' => $indexed_links,
                     'updated_at' => $last_updated
