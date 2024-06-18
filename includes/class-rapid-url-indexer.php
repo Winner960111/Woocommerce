@@ -8,30 +8,22 @@ class Rapid_URL_Indexer {
             wp_schedule_event(time(), 'daily', 'rui_check_abuse');
         }
         add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
+    
+        // Schedule project status update
+        if (!wp_next_scheduled('rui_update_project_status')) {
+            wp_schedule_event(time(), 'hourly', 'rui_update_project_status');
+        }
+        add_action('rui_update_project_status', array('Rapid_URL_Indexer', 'update_project_status'));
+
+        // Schedule backlog processing
+        if (!wp_next_scheduled('rui_process_backlog')) {
+            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
+        }
+        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
     }
 
     public static function process_backlog() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
-        $backlog = $wpdb->get_results("SELECT * FROM $table_name WHERE retries < " . self::API_MAX_RETRIES);
-
-        foreach ($backlog as $entry) {
-            $urls = json_decode($entry->urls, true);
-            $response = self::process_api_request($entry->project_id, $urls, $entry->notify);
-
-            if ($response['success']) {
-                // Remove from backlog
-                $wpdb->delete($table_name, array('id' => $entry->id));
-            } else {
-        add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs')); // Hourly cron job to update project status
-        add_action('rui_process_api_request', array('Rapid_URL_Indexer', 'process_api_request'), 10, 3);
-        add_action('rest_api_init', array('Rapid_URL_Indexer', 'register_rest_routes'));
-        add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
-        add_action('wp_ajax_nopriv_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
-        
-        // Add credits amount field to simple product
-        add_action('woocommerce_product_options_general_product_data', array('Rapid_URL_Indexer', 'add_credits_field'));
-        add_action('woocommerce_process_product_meta', array('Rapid_URL_Indexer', 'save_credits_field'));
         $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
         $backlog = $wpdb->get_results("SELECT * FROM $table_name WHERE retries < " . self::API_MAX_RETRIES);
 
@@ -48,7 +40,6 @@ class Rapid_URL_Indexer {
             }
         }
     }
-
     private static function add_to_backlog($project_id, $urls, $notify) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
@@ -246,6 +237,7 @@ class Rapid_URL_Indexer {
         }
     }
 
+
     private static function load_dependencies() {
         require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-admin.php';
         require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-customer.php';
@@ -253,26 +245,17 @@ class Rapid_URL_Indexer {
     }
 
     private static function define_hooks() {
-        self::schedule_cron_jobs();
-    }
-
-    private static function schedule_cron_jobs() {
-        if (!wp_next_scheduled('rui_update_project_status')) {
-            wp_schedule_event(time(), 'hourly', 'rui_update_project_status');
-        }
-        add_action('rui_update_project_status', array('Rapid_URL_Indexer', 'update_project_status'));
-
-        if (!wp_next_scheduled('rui_process_backlog')) {
-            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
-        }
-        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
-    }
-
-    public static function process_backlog() {
-        global $wpdb;
+        add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs')); // Hourly cron job to update project status
+        add_action('rui_process_api_request', array('Rapid_URL_Indexer', 'process_api_request'), 10, 3);
+        add_action('rest_api_init', array('Rapid_URL_Indexer', 'register_rest_routes'));
+        add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
+        add_action('wp_ajax_nopriv_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
+        
+        // Add credits amount field to simple product
+        add_action('woocommerce_product_options_general_product_data', array('Rapid_URL_Indexer', 'add_credits_field'));
+        add_action('woocommerce_process_product_meta', array('Rapid_URL_Indexer', 'save_credits_field'));
 
         // Admin notice for SpeedyIndex API issues
-    }
     }
     
     public static function add_credits_field() {
@@ -293,105 +276,13 @@ class Rapid_URL_Indexer {
         ));
         echo '</div>';
     }
-
-    public static function save_credits_field($post_id) {
-        $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : 0;
-        update_post_meta($post_id, '_credits_amount', $credits_amount);
-    }
-        global $post;
-        
-        echo '<div class="options_group">';
-        woocommerce_wp_text_input(array(
-            'id' => '_credits_amount',
-            'label' => __('Credits Amount', 'rapid-url-indexer'),
-            'placeholder' => '',
-            'desc_tip' => 'true',
-            'description' => __('Enter the number of credits this product will add to the customer\'s account upon purchase.', 'rapid-url-indexer'),
-            'type' => 'number',
-            'custom_attributes' => array(
-                'step' => '1',
-                'min' => '0'
-            )
-        ));
-        echo '</div>';
-    }
-
-    public static function save_credits_field($post_id) {
-        $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : 0;
-        update_post_meta($post_id, '_credits_amount', $credits_amount);
-    }
-        global $post;
-        
-        echo '<div class="options_group">';
-        woocommerce_wp_text_input(array(
-            'id' => '_credits_amount',
-            'label' => __('Credits Amount', 'rapid-url-indexer'),
-            'placeholder' => '',
-            'desc_tip' => 'true',
-            'description' => __('Enter the number of credits this product will add to the customer\'s account upon purchase.', 'rapid-url-indexer'),
-            'type' => 'number',
-            'custom_attributes' => array(
-                'step' => '1',
-                'min' => '0'
-            )
-        ));
-        echo '</div>';
-    }
-
+    
     public static function save_credits_field($post_id) {
         $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : 0;
         update_post_meta($post_id, '_credits_amount', $credits_amount);
     }
 
     public static function register_rest_routes() {
-        register_rest_route('rui/v1', '/projects', array(
-            'methods' => 'POST',
-            'callback' => array('Rapid_URL_Indexer', 'handle_project_submission'),
-            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
-        ));
-
-        register_rest_route('rui/v1', '/projects/(?P<id>\d+)', array(
-            'methods' => 'GET',
-            'callback' => array('Rapid_URL_Indexer', 'get_project_status'),
-            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
-        ));
-
-        register_rest_route('rui/v1', '/projects/(?P<id>\d+)/report', array(
-            'methods' => 'GET',
-            'callback' => array('Rapid_URL_Indexer', 'download_project_report'),
-            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
-        ));
-
-        register_rest_route('rui/v1', '/credits/balance', array(
-            'methods' => 'GET',
-            'callback' => array('Rapid_URL_Indexer', 'get_credits_balance'),
-            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
-        ));
-    }
-        register_rest_route('rui/v1', '/projects', array(
-            'methods' => 'POST',
-            'callback' => array('Rapid_URL_Indexer', 'handle_project_submission'),
-            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
-        ));
-
-        register_rest_route('rui/v1', '/projects/(?P<id>\d+)', array(
-            'methods' => 'GET',
-            'callback' => array('Rapid_URL_Indexer', 'get_project_status'),
-            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
-        ));
-
-        register_rest_route('rui/v1', '/projects/(?P<id>\d+)/report', array(
-            'methods' => 'GET',
-            'callback' => array('Rapid_URL_Indexer', 'download_project_report'),
-            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
-        ));
-
-        register_rest_route('rui/v1', '/credits/balance', array(
-            'methods' => 'GET',
-            'callback' => array('Rapid_URL_Indexer', 'get_credits_balance'),
-            'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
-        ));
-    }
         register_rest_route('rui/v1', '/projects', array(
             'methods' => 'POST',
             'callback' => array('Rapid_URL_Indexer', 'handle_project_submission'),
@@ -430,62 +321,8 @@ class Rapid_URL_Indexer {
 
         return true;
     }
-        $api_key = $request->get_header('X-API-Key');
-        if (!$api_key) {
-            return new WP_Error('rest_forbidden', 'API key is missing', array('status' => 403));
-        }
-
-        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
-        if (empty($user)) {
-            return new WP_Error('rest_forbidden', 'Invalid API key', array('status' => 403));
-        }
-
-        return true;
-    }
-        $api_key = $request->get_header('X-API-Key');
-        if (!$api_key) {
-            return new WP_Error('rest_forbidden', 'API key is missing', array('status' => 403));
-        }
-
-        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
-        if (empty($user)) {
-            return new WP_Error('rest_forbidden', 'Invalid API key', array('status' => 403));
-        }
-
-        return true;
-    }
 
     public static function handle_project_submission($request) {
-        $params = $request->get_params();
-        $project_name = sanitize_text_field($params['project_name']);
-        $urls = array_map('esc_url_raw', $params['urls']);
-        $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
-
-        // Validate and process the project submission
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
-        $project_id = Rapid_URL_Indexer_Customer::submit_project($project_name, $urls, $notify, $user_id);
-
-        if ($project_id) {
-            return new WP_REST_Response(array('message' => 'Project created', 'project_id' => $project_id), 200);
-        } else {
-            return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
-        }
-    }
-        $params = $request->get_params();
-        $project_name = sanitize_text_field($params['project_name']);
-        $urls = array_map('esc_url_raw', $params['urls']);
-        $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
-
-        // Validate and process the project submission
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
-        $project_id = Rapid_URL_Indexer_Customer::submit_project($project_name, $urls, $notify, $user_id);
-
-        if ($project_id) {
-            return new WP_REST_Response(array('message' => 'Project created', 'project_id' => $project_id), 200);
-        } else {
-            return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
-        }
-    }
         $params = $request->get_params();
         $project_name = sanitize_text_field($params['project_name']);
         $urls = array_map('esc_url_raw', $params['urls']);
@@ -520,58 +357,8 @@ class Rapid_URL_Indexer {
             return new WP_Error('no_project', 'Project not found', array('status' => 404));
         }
     }
-        $project_id = $request['id'];
-
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
-
-        if ($project) {
-            return new WP_REST_Response(array(
-                'project_id' => $project_id,
-                'status' => $project->status,
-                'submitted_links' => count(json_decode($project->urls)),
-                'indexed_links' => $project->indexed_links
-            ), 200);
-        } else {
-            return new WP_Error('no_project', 'Project not found', array('status' => 404));
-        }
-    }
-        $project_id = $request['id'];
-
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
-
-        if ($project) {
-            return new WP_REST_Response(array(
-                'project_id' => $project_id,
-                'status' => $project->status,
-                'submitted_links' => count(json_decode($project->urls)),
-                'indexed_links' => $project->indexed_links
-            ), 200);
-        } else {
-            return new WP_Error('no_project', 'Project not found', array('status' => 404));
-        }
-    }
 
     public static function download_project_report($request) {
-        $project_id = $request['id'];
-
-        // Generate and return the project report CSV
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
-        $report_csv = Rapid_URL_Indexer_API::download_task_report($user_id, $project_id);
-
-        return new WP_REST_Response($report_csv, 200, array('Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="project-report.csv"'));
-    }
-        $project_id = $request['id'];
-
-        // Generate and return the project report CSV
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
-        $report_csv = Rapid_URL_Indexer_API::download_task_report($user_id, $project_id);
-
-        return new WP_REST_Response($report_csv, 200, array('Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="project-report.csv"'));
-    }
         $project_id = $request['id'];
 
         // Generate and return the project report CSV
@@ -587,16 +374,6 @@ class Rapid_URL_Indexer {
 
         return new WP_REST_Response(array('credits' => $credits), 200);
     }
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
-        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
-
-        return new WP_REST_Response(array('credits' => $credits), 200);
-    }
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
-        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
-
-        return new WP_REST_Response(array('credits' => $credits), 200);
-    }
 
     public static function process_cron_jobs() {
         // Update project status hourly
@@ -605,240 +382,8 @@ class Rapid_URL_Indexer {
         // Process auto refunds
         self::auto_refund();
     }
-        // Update project status hourly
-        self::update_project_status();
-        
-        // Process auto refunds
-        self::auto_refund();
-    }
-        // Update project status hourly
-        self::update_project_status();
-        
-        // Process auto refunds
-        self::auto_refund();
-    }
 
     public static function process_api_request($project_id, $urls, $notify) {
-        global $wpdb;
-
-        // Get project details
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
-        
-        if (!$project) {
-            return array(
-                'success' => false,
-                'error' => __('Invalid project ID.', 'rapid-url-indexer')
-            );
-        }
-        
-        $user_id = $project->user_id;
-
-        // Get API key
-        $api_key = get_option('speedyindex_api_key');
-
-        // Check if user has enough credits
-        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
-        if ($credits < count($urls)) {
-            return array(
-                'success' => false,
-                'error' => sprintf(__('Insufficient credits to submit project. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))
-            );
-        }
-    
-        // Check if the project already has a task ID to prevent double submission
-        if (empty($project->task_id)) {
-            // Call API to create task
-            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $user_id . ')');
-        
-            // Handle response and update project status
-            if ($response && isset($response['task_id'])) {
-                $task_id = $response['task_id'];
-
-                // Update project with task ID
-                $wpdb->update($table_name, array('task_id' => $task_id), array('id' => $project_id));
-
-                // Deduct credits and update project status
-                Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
-                
-                // Log the action
-                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                    'user_id' => $user_id,
-                    'project_id' => $project_id,
-                    'action' => 'API Request',
-                    'details' => json_encode($response),
-                    'created_at' => current_time('mysql')
-                ));
-
-                do_action('rui_log_entry_created');
-        
-                // Notify user if required and not rate limited
-                if ($notify) {
-                    $last_notification_time = get_post_meta($project_id, '_rui_last_notification_time', true);
-                    $current_time = time();
-
-                    if (!$last_notification_time || ($current_time - $last_notification_time) >= 86400) {
-                        $user_info = get_userdata($user_id);
-                        $subject = __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer');
-                        $message = __('Your project has been submitted and is being processed.', 'rapid-url-indexer');
-                        wp_mail($user_info->user_email, $subject, $message);
-
-                        // Log the email notification
-                        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                            'user_id' => $user_id,
-                            'project_id' => $project_id,
-                            'action' => 'User Notification',
-                            'details' => json_encode(array(
-                                'subject' => $subject,
-                                'message' => $message
-                            )),
-                            'created_at' => current_time('mysql')
-                        ));
-                        update_post_meta($project_id, '_rui_last_notification_time', $current_time);
-                    }
-                }
-
-                // Add to backlog if API response code is 1 or 2
-                if (isset($response_body['code']) && in_array($response_body['code'], [1, 2])) {
-                    self::add_to_backlog($project_id, $urls, $notify);
-                }
-
-                $result = array(
-                    'success' => true,
-                    'error' => null
-                );
-            } else {
-                // Log the error
-                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                    'user_id' => get_current_user_id(),
-                    'project_id' => $project_id,
-                    'action' => 'API Error',
-                    'details' => json_encode($response),
-                    'created_at' => current_time('mysql')
-                ));
-
-                return array(
-                    'success' => false,
-                    'error' => __('An error occurred while submitting the project.', 'rapid-url-indexer')
-                );
-            }
-        } else {
-            return array(
-                'success' => false,
-                'error' => __('This project has already been submitted.', 'rapid-url-indexer')
-            );
-        }
-    }
-        global $wpdb;
-
-        // Get project details
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
-        
-        if (!$project) {
-            return array(
-                'success' => false,
-                'error' => __('Invalid project ID.', 'rapid-url-indexer')
-            );
-        }
-        
-        $user_id = $project->user_id;
-
-        // Get API key
-        $api_key = get_option('speedyindex_api_key');
-
-        // Check if user has enough credits
-        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
-        if ($credits < count($urls)) {
-            return array(
-                'success' => false,
-                'error' => sprintf(__('Insufficient credits to submit project. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))
-            );
-        }
-    
-        // Check if the project already has a task ID to prevent double submission
-        if (empty($project->task_id)) {
-            // Call API to create task
-            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $user_id . ')');
-        
-            // Handle response and update project status
-            if ($response && isset($response['task_id'])) {
-                $task_id = $response['task_id'];
-
-                // Update project with task ID
-                $wpdb->update($table_name, array('task_id' => $task_id), array('id' => $project_id));
-
-                // Deduct credits and update project status
-                Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
-                
-                // Log the action
-                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                    'user_id' => $user_id,
-                    'project_id' => $project_id,
-                    'action' => 'API Request',
-                    'details' => json_encode($response),
-                    'created_at' => current_time('mysql')
-                ));
-
-                do_action('rui_log_entry_created');
-        
-                // Notify user if required and not rate limited
-                if ($notify) {
-                    $last_notification_time = get_post_meta($project_id, '_rui_last_notification_time', true);
-                    $current_time = time();
-
-                    if (!$last_notification_time || ($current_time - $last_notification_time) >= 86400) {
-                        $user_info = get_userdata($user_id);
-                        $subject = __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer');
-                        $message = __('Your project has been submitted and is being processed.', 'rapid-url-indexer');
-                        wp_mail($user_info->user_email, $subject, $message);
-
-                        // Log the email notification
-                        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                            'user_id' => $user_id,
-                            'project_id' => $project_id,
-                            'action' => 'User Notification',
-                            'details' => json_encode(array(
-                                'subject' => $subject,
-                                'message' => $message
-                            )),
-                            'created_at' => current_time('mysql')
-                        ));
-                        update_post_meta($project_id, '_rui_last_notification_time', $current_time);
-                    }
-                }
-
-                // Add to backlog if API response code is 1 or 2
-                if (isset($response_body['code']) && in_array($response_body['code'], [1, 2])) {
-                    self::add_to_backlog($project_id, $urls, $notify);
-                }
-
-                $result = array(
-                    'success' => true,
-                    'error' => null
-                );
-            } else {
-                // Log the error
-                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                    'user_id' => get_current_user_id(),
-                    'project_id' => $project_id,
-                    'action' => 'API Error',
-                    'details' => json_encode($response),
-                    'created_at' => current_time('mysql')
-                ));
-
-                return array(
-                    'success' => false,
-                    'error' => __('An error occurred while submitting the project.', 'rapid-url-indexer')
-                );
-            }
-        } else {
-            return array(
-                'success' => false,
-                'error' => __('This project has already been submitted.', 'rapid-url-indexer')
-            );
-        }
-    }
         global $wpdb;
 
         // Get project details
@@ -974,49 +519,4 @@ class Rapid_URL_Indexer {
             wp_mail($user_info->user_email, $subject, $message);
         }
     }
-        if ($project->notify) {
-            $user_info = get_userdata($project->user_id);
-            $subject = sprintf(__('Project Status Update: %s', 'rapid-url-indexer'), $project->project_name);
-            $message = sprintf(__('The status of your project "%s" has changed to %s.', 'rapid-url-indexer'), $project->project_name, $status) . "\n\n";
-            $message .= sprintf(__('Number of submitted URLs: %d', 'rapid-url-indexer'), count(json_decode($project->urls, true))) . "\n";
-
-            $submission_time = strtotime($project->created_at);
-            $current_time = time();
-            $hours_since_submission = ($current_time - $submission_time) / 3600;
-
-            if ($hours_since_submission >= 50) {
-                $message .= sprintf(__('Number of processed links: %d', 'rapid-url-indexer'), $processed_links) . "\n";
-                $message .= sprintf(__('Number of indexed links: %d', 'rapid-url-indexer'), $indexed_links) . "\n";
-            }
-
-            if ($status === 'completed') {
-                $report_link = add_query_arg(array('download_report' => $project->id), home_url());
-                $message .= sprintf(__('Download your project report: %s', 'rapid-url-indexer'), $report_link) . "\n";
-            }
-
-            wp_mail($user_info->user_email, $subject, $message);
-        }
-    }
-        if ($project->notify) {
-            $user_info = get_userdata($project->user_id);
-            $subject = sprintf(__('Project Status Update: %s', 'rapid-url-indexer'), $project->project_name);
-            $message = sprintf(__('The status of your project "%s" has changed to %s.', 'rapid-url-indexer'), $project->project_name, $status) . "\n\n";
-            $message .= sprintf(__('Number of submitted URLs: %d', 'rapid-url-indexer'), count(json_decode($project->urls, true))) . "\n";
-
-            $submission_time = strtotime($project->created_at);
-            $current_time = time();
-            $hours_since_submission = ($current_time - $submission_time) / 3600;
-
-            if ($hours_since_submission >= 50) {
-                $message .= sprintf(__('Number of processed links: %d', 'rapid-url-indexer'), $processed_links) . "\n";
-                $message .= sprintf(__('Number of indexed links: %d', 'rapid-url-indexer'), $indexed_links) . "\n";
-            }
-
-            if ($status === 'completed') {
-                $report_link = add_query_arg(array('download_report' => $project->id), home_url());
-                $message .= sprintf(__('Download your project report: %s', 'rapid-url-indexer'), $report_link) . "\n";
-            }
-
-            wp_mail($user_info->user_email, $subject, $message);
-        }
-    }
+}
