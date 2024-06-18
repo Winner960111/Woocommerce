@@ -8,8 +8,6 @@ class Rapid_URL_Indexer {
         // Schedule abuse check
         add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
     
-        // Schedule project status update
-        add_action('rui_update_project_status', array('Rapid_URL_Indexer', 'update_project_status'));
 
         // Schedule backlog processing
         add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));

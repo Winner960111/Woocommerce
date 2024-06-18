@@ -57,7 +57,7 @@ class Rapid_URL_Indexer_Activator {
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
 
-        // Schedule hourly cron job to update project status
+        // Schedule hourly cron job to process cron jobs
         if (!wp_next_scheduled('rui_cron_job')) {
             wp_schedule_event(time(), 'hourly', 'rui_cron_job');
         }
@@ -66,10 +66,6 @@ class Rapid_URL_Indexer_Activator {
             wp_schedule_event(time(), 'daily', 'rui_check_abuse');
         }
 
-        // Schedule project status update
-        if (!wp_next_scheduled('rui_update_project_status')) {
-            wp_schedule_event(time(), 'hourly', 'rui_update_project_status');
-        }
 
         // Schedule backlog processing
         if (!wp_next_scheduled('rui_process_backlog')) {
