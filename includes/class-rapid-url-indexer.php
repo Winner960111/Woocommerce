@@ -170,12 +170,14 @@ class Rapid_URL_Indexer {
                 }
 
                 // Update project with latest data from API
+                $notify = isset($project->notify) ? $project->notify : 0;
                 $update_data = array(
                     'status' => $status,
                     'submitted_links' => $total_urls,
                     'processed_links' => $processed_links,
                     'indexed_links' => $indexed_links,
-                    'updated_at' => $last_updated
+                    'updated_at' => $last_updated,
+                    'notify' => $notify
                 );
 
                 $wpdb->update($table_name, $update_data, array('task_id' => $project->task_id));
