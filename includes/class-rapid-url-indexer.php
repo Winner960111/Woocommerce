@@ -150,6 +150,9 @@ class Rapid_URL_Indexer {
                 continue; // Skip if no response from API
             }
 
+            // Log the full API response for debugging
+            error_log("API response for task_id " . $project->task_id . ": " . print_r($response, true));
+
             if (isset($response['result'])) {
                 $result = $response['result'];
                 $status = $result['status'];
