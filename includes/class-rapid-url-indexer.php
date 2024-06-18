@@ -408,8 +408,9 @@ class Rapid_URL_Indexer {
             }
         } else {
             return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
+        }
     }
-
+    
     public static function get_project_status($request) {
         $project_id = $request['id'];
 
