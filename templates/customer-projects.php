@@ -215,3 +215,7 @@ http://example.org,Not Indexed</code></pre>
 }</code></pre>
     </details>
 </div>
+<?php
+// Log the project data for debugging
+error_log('Customer Projects: ' . print_r($projects, true));
+?>
