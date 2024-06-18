@@ -146,12 +146,9 @@ class Rapid_URL_Indexer {
             $api_key = get_option('speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
             if (!$response) {
-                error_log("No response from API for task_id: " . $project->task_id);
                 continue; // Skip if no response from API
             }
 
-            // Log the full API response for debugging
-            error_log("API response for task_id " . $project->task_id . ": " . print_r($response, true));
 
             if (isset($response['id'])) {
                 $status = 'submitted'; // Assuming the status is 'submitted' if the task is found
@@ -233,7 +230,6 @@ class Rapid_URL_Indexer {
                     self::send_status_change_email($project, $status, $processed_links, $indexed_links);
                 }
             } else {
-                error_log("Invalid response structure for task_id: " . $project->task_id);
             }
 
             // Check for pending projects older than 24 hours
