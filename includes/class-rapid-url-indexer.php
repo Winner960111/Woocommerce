@@ -261,15 +261,23 @@ class Rapid_URL_Indexer {
     }
 
     private static function define_hooks() {
-        add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs')); // Hourly cron job to update project status
-        add_action('rui_process_api_request', array('Rapid_URL_Indexer', 'process_api_request'), 10, 3);
-        add_action('rest_api_init', array('Rapid_URL_Indexer', 'register_rest_routes'));
-        add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
-        add_action('wp_ajax_nopriv_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
-        
-        // Add credits amount field to simple product
-        add_action('woocommerce_product_options_general_product_data', array('Rapid_URL_Indexer', 'add_credits_field'));
-        add_action('woocommerce_process_product_meta', array('Rapid_URL_Indexer', 'save_credits_field'));
+        self::schedule_cron_jobs();
+    }
+
+    private static function schedule_cron_jobs() {
+        if (!wp_next_scheduled('rui_update_project_status')) {
+            wp_schedule_event(time(), 'hourly', 'rui_update_project_status');
+        }
+        add_action('rui_update_project_status', array('Rapid_URL_Indexer', 'update_project_status'));
+
+        if (!wp_next_scheduled('rui_process_backlog')) {
+            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
+        }
+        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+    }
+
+    public static function process_backlog() {
+        global $wpdb;
 
         // Admin notice for SpeedyIndex API issues
     }
