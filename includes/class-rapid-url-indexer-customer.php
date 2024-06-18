@@ -137,7 +137,7 @@ class Rapid_URL_Indexer_Customer {
                 $project_id = self::submit_project($project_name, $urls, $notify);
                 if ($project_id) {
                     // Deduct credits
-                    self::update_user_credits($user_id, -count($urls));
+                    self::update_user_credits($user_id, -count($urls), 'Project Submission');
 
                     wp_send_json_success(array(
                         'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
@@ -152,12 +152,11 @@ class Rapid_URL_Indexer_Customer {
         }
     }
 
-    private static function log_credit_change($user_id, $amount) {
+    private static function log_credit_change($user_id, $amount, $triggered_by = 'admin') {
         global $wpdb;
         $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
-        $triggered_by = 'admin';
         if (is_user_logged_in()) {
-            $triggered_by .= ' (User ID: ' . get_current_user_id() . ')';
+            $triggered_by = 'User ID: ' . get_current_user_id();
         }
         $wpdb->insert($log_table, array(
             'triggered_by' => $triggered_by,
@@ -258,7 +257,7 @@ class Rapid_URL_Indexer_Customer {
         $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
     }
 
-    public static function update_user_credits($user_id, $amount) {
+    public static function update_user_credits($user_id, $amount, $triggered_by = 'admin') {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = self::get_user_credits($user_id);
@@ -270,7 +269,7 @@ class Rapid_URL_Indexer_Customer {
             $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
         }
         
-        self::log_credit_change($user_id, $amount);
+        self::log_credit_change($user_id, $amount, $triggered_by);
     }
 
     private static function schedule_api_request($project_id, $urls, $notify) {
