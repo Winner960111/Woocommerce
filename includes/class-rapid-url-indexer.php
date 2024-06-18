@@ -159,7 +159,7 @@ class Rapid_URL_Indexer {
                     'submitted_links' => $result['size'],
                     'processed_links' => $processed_links, 
                     'indexed_links' => $indexed_links,
-                    'updated_at' => date('Y-m-d H:i:s', strtotime($last_updated))
+                    'updated_at' => current_time('mysql')
                 ), array('id' => $project->id));
 
                 if ($status === 'completed' && $project->status !== 'completed') {
