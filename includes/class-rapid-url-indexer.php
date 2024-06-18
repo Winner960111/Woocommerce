@@ -386,29 +386,33 @@ class Rapid_URL_Indexer {
             return new WP_REST_Response(array('message' => 'Insufficient credits'), 400);
         }
 
-        // Create project
-        $project_id = Rapid_URL_Indexer_Customer::submit_project($project_name, $urls, $notify, $user_id);
+        if (count($urls) > 0 && count($urls) <= 9999) {
+            // Create project
+            $project_id = Rapid_URL_Indexer_Customer::submit_project($project_name, $urls, $notify, $user_id);
 
-        if ($project_id) {
-            // Submit to SpeedyIndex API
-            $api_key = get_option('speedyindex_api_key');
-            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (CID' . $user_id . ')');
+            if ($project_id) {
+                // Submit to SpeedyIndex API
+                $api_key = get_option('speedyindex_api_key');
+                $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (CID' . $user_id . ')');
 
-            if ($response && isset($response['task_id'])) {
-                global $wpdb;
-                $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-                $wpdb->update($table_name, array('task_id' => $response['task_id'], 'status' => 'submitted'), array('id' => $project_id));
+                if ($response && isset($response['task_id'])) {
+                    global $wpdb;
+                    $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+                    $wpdb->update($table_name, array('task_id' => $response['task_id'], 'status' => 'submitted'), array('id' => $project_id));
 
-                return new WP_REST_Response(array('message' => 'Project created and submitted', 'project_id' => $project_id), 200);
+                    // Deduct credits
+                    Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
+
+                    return new WP_REST_Response(array('message' => 'Project created and submitted', 'project_id' => $project_id), 200);
+                } else {
+                    return new WP_REST_Response(array('message' => 'Project created but submission failed'), 500);
+                }
             } else {
-                return new WP_REST_Response(array('message' => 'Project created but submission failed'), 500);
+                return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
             }
         } else {
-            return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
+            return new WP_REST_Response(array('message' => 'Invalid number of URLs. Must be between 1 and 9999.'), 400);
         }
-
-        // Deduct credits
-        Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
     }
     
     public static function get_project_status($request) {
