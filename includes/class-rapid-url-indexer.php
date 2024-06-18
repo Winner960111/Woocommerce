@@ -147,6 +147,8 @@ class Rapid_URL_Indexer {
                         )),
                         'created_at' => current_time('mysql')
                     ));
+                    // Send email notification
+                    self::send_status_change_email($project, 'completed', $processed_links, $indexed_links);
                 } elseif ($status === 'failed' && !$project->auto_refund_processed) {
                     // Log the project status change
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
@@ -178,6 +180,11 @@ class Rapid_URL_Indexer {
                         'details' => json_encode(array('refunded_credits' => $total_urls)),
                         'created_at' => current_time('mysql')
                     ));
+                    // Send email notification
+                    self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
+                } else {
+                    // Send email notification for other status changes
+                    self::send_status_change_email($project, $status, $processed_links, $indexed_links);
                 }
             }
 
@@ -488,4 +495,29 @@ class Rapid_URL_Indexer {
             );
         }
     }
-}
+    }
+
+    private static function send_status_change_email($project, $status, $processed_links, $indexed_links) {
+        if ($project->notify) {
+            $user_info = get_userdata($project->user_id);
+            $subject = sprintf(__('Project Status Update: %s', 'rapid-url-indexer'), $project->project_name);
+            $message = sprintf(__('The status of your project "%s" has changed to %s.', 'rapid-url-indexer'), $project->project_name, $status) . "\n\n";
+            $message .= sprintf(__('Number of submitted URLs: %d', 'rapid-url-indexer'), count(json_decode($project->urls, true))) . "\n";
+
+            $submission_time = strtotime($project->created_at);
+            $current_time = time();
+            $hours_since_submission = ($current_time - $submission_time) / 3600;
+
+            if ($hours_since_submission >= 50) {
+                $message .= sprintf(__('Number of processed links: %d', 'rapid-url-indexer'), $processed_links) . "\n";
+                $message .= sprintf(__('Number of indexed links: %d', 'rapid-url-indexer'), $indexed_links) . "\n";
+            }
+
+            if ($status === 'completed') {
+                $report_link = add_query_arg(array('download_report' => $project->id), home_url());
+                $message .= sprintf(__('Download your project report: %s', 'rapid-url-indexer'), $report_link) . "\n";
+            }
+
+            wp_mail($user_info->user_email, $subject, $message);
+        }
+    }
