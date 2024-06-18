@@ -15,8 +15,8 @@
                 <td><input type="checkbox" name="rui_delete_data_on_uninstall" value="1" <?php checked(get_option('rui_delete_data_on_uninstall', 0), 1); ?> /></td>
             </tr>
             <tr>
-                <th scope="row"><?php _e('Log Entry Limit', 'rapid-url-indexer'); ?></th>
-                <td><input type="number" name="rui_log_entry_limit" value="<?php echo esc_attr(get_option('rui_log_entry_limit', 1000)); ?>" /></td>
+                <th scope="row"><?php _e('Log Age Limit (days)', 'rapid-url-indexer'); ?></th>
+                <td><input type="number" name="rui_log_age_limit" value="<?php echo esc_attr(get_option('rui_log_age_limit', 30)); ?>" /></td>
             </tr>
             </table>
             <h2><?php _e('Abuse Detection Settings', 'rapid-url-indexer'); ?></h2>

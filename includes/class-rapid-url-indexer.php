@@ -30,14 +30,12 @@ class Rapid_URL_Indexer {
     public static function purge_logs() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
-        $log_entry_limit = get_option('rui_log_entry_limit', 1000);
+        $log_age_limit = get_option('rui_log_age_limit', 30); // Default to 30 days
 
-        $log_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
-
-        if ($log_count > $log_entry_limit) {
-            $logs_to_delete = $log_count - $log_entry_limit;
-            $wpdb->query("DELETE FROM $table_name ORDER BY created_at ASC LIMIT $logs_to_delete");
-        }
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM $table_name WHERE created_at < NOW() - INTERVAL %d DAY",
+            $log_age_limit
+        ));
     }
 
     public static function process_backlog() {

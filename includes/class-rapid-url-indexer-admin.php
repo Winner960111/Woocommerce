@@ -221,7 +221,7 @@ class Rapid_URL_Indexer_Admin {
             check_admin_referer('rui_settings');
             update_option('rui_speedyindex_api_key', sanitize_text_field($_POST['rui_speedyindex_api_key']));
             update_option('rui_delete_data_on_uninstall', isset($_POST['rui_delete_data_on_uninstall']) ? 1 : 0);
-            update_option('rui_log_entry_limit', intval($_POST['rui_log_entry_limit']));
+            update_option('rui_log_age_limit', intval($_POST['rui_log_age_limit']));
             echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
         }
 
@@ -231,7 +231,7 @@ class Rapid_URL_Indexer_Admin {
     public static function register_settings() {
         register_setting('rui_settings', 'rui_speedyindex_api_key');
         register_setting('rui_settings', 'rui_delete_data_on_uninstall');
-        register_setting('rui_settings', 'rui_log_entry_limit', array(
+        register_setting('rui_settings', 'rui_log_age_limit', array(
             'type' => 'integer',
             'default' => 1000,
             'sanitize_callback' => 'intval'
@@ -308,13 +308,11 @@ class Rapid_URL_Indexer_Admin {
     public static function limit_log_entries() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
-        $log_entry_limit = get_option('rui_log_entry_limit', 1000);
-        
-        $log_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
-        
-        if ($log_count > $log_entry_limit) {
-            $logs_to_delete = $log_count - $log_entry_limit;
-            $wpdb->query("DELETE FROM $table_name ORDER BY created_at ASC LIMIT $logs_to_delete");
-        }
+        $log_age_limit = get_option('rui_log_age_limit', 30); // Default to 30 days
+
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM $table_name WHERE created_at < NOW() - INTERVAL %d DAY",
+            $log_age_limit
+        ));
     }
 }
