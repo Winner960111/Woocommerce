@@ -20,6 +20,12 @@ class Rapid_URL_Indexer {
             wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
         }
         add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+        // Schedule project purging
+        if (!wp_next_scheduled('rui_purge_projects')) {
+            wp_schedule_event(time(), 'daily', 'rui_purge_projects');
+        }
+        add_action('rui_purge_projects', array('Rapid_URL_Indexer', 'purge_projects'));
+
         // Schedule log purging
         if (!wp_next_scheduled('rui_purge_logs')) {
             wp_schedule_event(time(), 'daily', 'rui_purge_logs');
@@ -38,7 +44,16 @@ class Rapid_URL_Indexer {
         ));
     }
 
-    public static function process_backlog() {
+    public static function purge_projects() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $project_age_limit = get_option('rui_project_age_limit', 30); // Default to 30 days
+
+        $wpdb->query($wpdb->prepare(
+            "DELETE FROM $table_name WHERE created_at < NOW() - INTERVAL %d DAY",
+            $project_age_limit
+        ));
+    }
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
         $backlog = $wpdb->get_results("SELECT * FROM $table_name WHERE retries < " . self::API_MAX_RETRIES);
