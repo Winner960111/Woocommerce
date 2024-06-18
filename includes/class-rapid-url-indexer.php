@@ -23,7 +23,6 @@ class Rapid_URL_Indexer {
     }
 
     public static function process_backlog() {
-        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
         $backlog = $wpdb->get_results("SELECT * FROM $table_name WHERE retries < " . self::API_MAX_RETRIES);
@@ -40,6 +39,7 @@ class Rapid_URL_Indexer {
                 $wpdb->update($table_name, array('retries' => $entry->retries + 1), array('id' => $entry->id));
             }
         }
+    }
 
     private static function add_to_backlog($project_id, $urls, $notify) {
         global $wpdb;
@@ -259,7 +259,6 @@ class Rapid_URL_Indexer {
     
     public static function add_credits_field() {
         global $post;
-    }
         
         echo '<div class="options_group">';
         woocommerce_wp_text_input(array(
@@ -276,7 +275,6 @@ class Rapid_URL_Indexer {
         ));
         echo '</div>';
     }
-    
     public static function save_credits_field($post_id) {
         $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : 0;
         update_post_meta($post_id, '_credits_amount', $credits_amount);
