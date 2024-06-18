@@ -136,13 +136,13 @@ class Rapid_URL_Indexer_Customer {
                 $api_key = get_option('speedyindex_api_key');
                 $project_id = self::submit_project($project_name, $urls, $notify);
                 if ($project_id) {
+                    // Deduct credits
+                    self::update_user_credits($user_id, -count($urls));
+
                     wp_send_json_success(array(
                         'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
                         'project_id' => $project_id
                     ));
-
-                    // Deduct credits
-                    self::update_user_credits($user_id, -count($urls));
                 } else {
                     wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
                 }

@@ -399,9 +399,6 @@ class Rapid_URL_Indexer {
                 $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
                 $wpdb->update($table_name, array('task_id' => $response['task_id'], 'status' => 'submitted'), array('id' => $project_id));
 
-                // Deduct credits
-                Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
-
                 return new WP_REST_Response(array('message' => 'Project created and submitted', 'project_id' => $project_id), 200);
             } else {
                 return new WP_REST_Response(array('message' => 'Project created but submission failed'), 500);
@@ -409,6 +406,9 @@ class Rapid_URL_Indexer {
         } else {
             return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
         }
+
+        // Deduct credits
+        Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
     }
     
     public static function get_project_status($request) {
