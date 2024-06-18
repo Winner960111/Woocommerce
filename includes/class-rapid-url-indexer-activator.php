@@ -80,11 +80,6 @@ class Rapid_URL_Indexer_Activator {
             wp_schedule_event(time(), 'daily', 'rui_purge_logs');
         }
 
-        // Schedule log purging
-        if (!wp_next_scheduled('rui_purge_logs')) {
-            wp_schedule_event(time(), 'daily', 'rui_purge_logs');
-        }
-
         // Schedule project purging based on age limit 
         if (!wp_next_scheduled('rui_purge_projects')) {
             wp_schedule_event(time(), 'daily', 'rui_purge_projects');

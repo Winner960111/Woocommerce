@@ -17,9 +17,6 @@ class Rapid_URL_Indexer {
 
         // Schedule log purging
         add_action('rui_purge_logs', array('Rapid_URL_Indexer', 'purge_logs'));
-
-        // Schedule project age limit purging
-        add_action('rui_purge_old_projects', array('Rapid_URL_Indexer', 'purge_old_projects'));
     }
 
     public static function purge_logs() {
@@ -34,17 +31,6 @@ class Rapid_URL_Indexer {
     }
 
     public static function purge_projects() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $project_age_limit = get_option('rui_project_age_limit', 90); // Default to 90 days
-
-        $wpdb->query($wpdb->prepare(
-            "DELETE FROM $table_name WHERE created_at < NOW() - INTERVAL %d DAY",
-            $project_age_limit
-        ));
-    }
-
-    public static function purge_old_projects() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
         $project_age_limit = get_option('rui_project_age_limit', 30); // Default to 30 days

@@ -7,9 +7,8 @@ class Rapid_URL_Indexer_Deactivator {
             'rui_check_abuse',
             'rui_update_project_status',
             'rui_process_backlog',
-            'rui_purge_projects',
             'rui_purge_logs',
-            'rui_purge_old_projects'
+            'rui_purge_projects'  
         ];
 
         foreach ($cron_hooks as $hook) {
