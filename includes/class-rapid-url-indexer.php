@@ -8,6 +8,12 @@ class Rapid_URL_Indexer {
             wp_schedule_event(time(), 'daily', 'rui_check_abuse');
         }
         add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
+
+        // Schedule project status update
+        if (!wp_next_scheduled('rui_update_project_status')) {
+            wp_schedule_event(time(), 'hourly', 'rui_update_project_status');
+        }
+        add_action('rui_update_project_status', array('Rapid_URL_Indexer', 'update_project_status'));
     }
 
     public static function check_abuse() {
@@ -72,9 +78,9 @@ class Rapid_URL_Indexer {
             $api_key = get_option('speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
 
-            if ($response && isset($response['result']['status'])) {
-                $status = $response['result']['status'];
-                $indexed_links = isset($response['result']['indexed_count']) ? $response['result']['indexed_count'] : 0;
+            if ($response && isset($response['status'])) {
+                $status = $response['status'];
+                $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
 
                 if ($status === 'completed') {
                     $wpdb->update($table_name, array('status' => 'completed', 'indexed_links' => $indexed_links), array('id' => $project->id));
@@ -84,7 +90,7 @@ class Rapid_URL_Indexer {
                         'project_id' => $project->id,
                         'action' => 'Project Status Change',
                         'details' => json_encode(array(
-                            'old_status' => 'pending',
+                            'old_status' => $project->status,
                             'new_status' => 'completed'
                         )),
                         'created_at' => current_time('mysql')
@@ -96,7 +102,7 @@ class Rapid_URL_Indexer {
                         'project_id' => $project->id,
                         'action' => 'Project Status Change',
                         'details' => json_encode(array(
-                            'old_status' => 'pending',
+                            'old_status' => $project->status,
                             'new_status' => 'failed'
                         )),
                         'created_at' => current_time('mysql')
