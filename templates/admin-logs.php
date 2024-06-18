@@ -31,6 +31,7 @@
                 <th>Project ID</th>
                 <th>Action</th>
                 <th>Details</th>
+                <th>Triggered By</th>
                 <th>Created At</th>
             </tr>
         </thead>
@@ -43,6 +44,7 @@
                     <td><?php echo esc_html($log->project_id); ?></td>
                     <td><?php echo esc_html($log->action); ?></td>
                     <td><?php echo esc_html($log->details); ?></td>
+                    <td><?php echo esc_html($log->triggered_by); ?></td>
                     <td><?php echo esc_html($log->created_at); ?></td>
                 </tr>
             <?php endforeach; ?>

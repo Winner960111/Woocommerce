@@ -23,6 +23,7 @@ class Rapid_URL_Indexer_Activator {
             urls longtext NOT NULL,
             task_id varchar(255) DEFAULT NULL,
             status varchar(50) DEFAULT 'pending',
+            triggered_by varchar(255) DEFAULT NULL,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             auto_refund_processed tinyint(1) DEFAULT 0,
             PRIMARY KEY  (id)

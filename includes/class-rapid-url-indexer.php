@@ -41,7 +41,9 @@ class Rapid_URL_Indexer {
                 $message .= sprintf(__('User ID: %d, Project Count: %d, Average Refund Rate: %.2f%%', 'rapid-url-indexer'), $result->user_id, $result->project_count, $result->avg_refund_rate * 100) . "\n";
 
                 // Log the detected abuser
+                $triggered_by = 'system';
                 $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                    'triggered_by' => $triggered_by,
                     'user_id' => $result->user_id,
                     'project_id' => 0,
                     'action' => 'Abuse Detected',
@@ -56,7 +58,12 @@ class Rapid_URL_Indexer {
             wp_mail($admin_email, $subject, $message);
 
             // Log the email notification
+            $triggered_by = 'admin';
+            if (is_user_logged_in()) {
+                $triggered_by .= ' (User ID: ' . get_current_user_id() . ')';
+            }
             $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                'triggered_by' => $triggered_by,
                 'user_id' => 0,
                 'project_id' => 0,
                 'action' => 'Admin Notification',

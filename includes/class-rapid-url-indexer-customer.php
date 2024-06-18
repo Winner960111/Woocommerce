@@ -155,7 +155,12 @@ class Rapid_URL_Indexer_Customer {
     private static function log_credit_change($user_id, $amount) {
         global $wpdb;
         $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
+        $triggered_by = 'admin';
+        if (is_user_logged_in()) {
+            $triggered_by .= ' (User ID: ' . get_current_user_id() . ')';
+        }
         $wpdb->insert($log_table, array(
+            'triggered_by' => $triggered_by,
             'user_id' => $user_id,
             'project_id' => 0,
             'action' => 'Credit Change',
