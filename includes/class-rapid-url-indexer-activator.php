@@ -30,6 +30,7 @@ class Rapid_URL_Indexer_Activator {
             triggered_by varchar(255) DEFAULT NULL,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             auto_refund_processed tinyint(1) DEFAULT 0,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP,
             refunded_credits int DEFAULT 0,
             PRIMARY KEY  (id)
         ) $charset_collate;";
