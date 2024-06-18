@@ -77,3 +77,25 @@ jQuery(document).ready(function($) {
         });
     });
 });
+jQuery(document).ready(function($) {
+    $('#check-abuse-button').on('click', function() {
+        $.ajax({
+            url: rui_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'check_abuse',
+                _ajax_nonce: rui_ajax.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#abuse-results').html(response.data);
+                } else {
+                    $('#abuse-results').html('<p>' + response.data + '</p>');
+                }
+            },
+            error: function() {
+                $('#abuse-results').html('<p>An error occurred while checking for abusers.</p>');
+            }
+        });
+    });
+});

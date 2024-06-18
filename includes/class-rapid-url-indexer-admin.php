@@ -5,6 +5,7 @@ class Rapid_URL_Indexer_Admin {
         add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
         add_action('rui_log_entry_created', array(__CLASS__, 'limit_log_entries'));
         add_action('wp_ajax_check_abuse', array(__CLASS__, 'ajax_check_abuse'));
+        add_action('wp_ajax_nopriv_check_abuse', array(__CLASS__, 'ajax_check_abuse'));
         add_action('admin_init', array(__CLASS__, 'handle_download_project_report'));
     }
 
