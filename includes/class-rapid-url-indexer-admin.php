@@ -61,7 +61,10 @@ class Rapid_URL_Indexer_Admin {
             $output = ob_get_clean();
             wp_send_json_success($output);
         } else {
-            wp_send_json_error(__('No potential abusers found.', 'rapid-url-indexer'));
+            $min_projects = get_option('rui_min_projects_for_abuse', 10);
+            $avg_refund_rate = get_option('rui_avg_refund_rate_for_abuse', 0.7);
+            $message = sprintf(__('No potential abusers found based on the configured criteria: Minimum Projects: %d, Average Refund Rate: %.2f%%', 'rapid-url-indexer'), $min_projects, $avg_refund_rate * 100);
+            wp_send_json_error($message);
         }
     }
 
