@@ -142,13 +142,16 @@ class Rapid_URL_Indexer {
     public static function update_project_status() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status IN ('submitted', 'pending', 'completed')");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status IN ('submitted', 'pending', 'completed') AND task_id IS NOT NULL");
 
         foreach ($projects as $project) {
             $api_key = get_option('speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
+            if (!$response) {
+                continue; // Skip if no response from API
+            }
 
-            if ($response && isset($response['result'])) {
+            if (isset($response['result'])) {
                 $result = $response['result'];
                 $status = $result['status'];
                 $indexed_links = $result['indexed_count'];
@@ -164,7 +167,7 @@ class Rapid_URL_Indexer {
                     'updated_at' => $last_updated
                 );
 
-                $wpdb->update($table_name, $update_data, array('id' => $project->id));
+                $wpdb->update($table_name, $update_data, array('task_id' => $project->task_id));
 
                 if ($status === 'completed' && $project->status !== 'completed') {
                     // Log the project status change
@@ -200,7 +203,7 @@ class Rapid_URL_Indexer {
                     $wpdb->update($table_name, array(
                         'auto_refund_processed' => 1,
                         'refunded_credits' => $total_urls
-                    ), array('id' => $project->id));
+                    ), array('task_id' => $project->task_id));
 
                     // Log the action
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
