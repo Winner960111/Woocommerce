@@ -153,7 +153,7 @@ class Rapid_URL_Indexer {
                 $status = $result['status'];
                 $indexed_links = $result['indexed_count'];
                 $processed_links = $result['processed_count'];
-                $last_updated = date('Y-m-d H:i:s', strtotime($result['created_at']));
+                $last_updated = current_time('mysql');
 
                 // Update project with latest data from API
                 $update_data = array(
