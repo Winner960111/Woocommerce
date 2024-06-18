@@ -20,11 +20,10 @@ class Rapid_URL_Indexer {
         if (!wp_next_scheduled('rui_process_backlog')) {
             wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
         }
-        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
     }
 
-
     public static function process_backlog() {
+        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
         $backlog = $wpdb->get_results("SELECT * FROM $table_name WHERE retries < " . self::API_MAX_RETRIES);
