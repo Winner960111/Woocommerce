@@ -5,6 +5,34 @@ class Rapid_URL_Indexer_Admin {
         add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
         add_action('rui_log_entry_created', array(__CLASS__, 'limit_log_entries'));
         add_action('wp_ajax_check_abuse', array(__CLASS__, 'ajax_check_abuse'));
+        add_action('admin_init', array(__CLASS__, 'handle_download_project_report'));
+    }
+
+    public static function handle_download_project_report() {
+        if (isset($_GET['download_project_report'])) {
+            $project_id = intval($_GET['download_project_report']);
+
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
+
+            if ($project) {
+                $api_key = get_option('speedyindex_api_key');
+                $report_csv = Rapid_URL_Indexer_API::download_task_report($api_key, $project->task_id);
+
+                if ($report_csv) {
+                    header('Content-Type: text/csv');
+                    $filename = sanitize_file_name($project->project_name) . '-report.csv';
+                    header('Content-Disposition: attachment; filename="' . $filename . '"');
+                    echo $report_csv;
+                    exit;
+                } else {
+                    wp_die(__('Failed to generate report. Please try again later.', 'rapid-url-indexer'));
+                }
+            } else {
+                wp_die(__('You do not have permission to download this report.', 'rapid-url-indexer'));
+            }
+        }
     }
 
     public static function ajax_check_abuse() {
@@ -37,7 +65,29 @@ class Rapid_URL_Indexer_Admin {
         }
     }
 
-    public static function view_tasks_page() {
+    public static function view_projects_page() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+
+        $projects_per_page = 50;
+        $paged = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+        $offset = ($paged - 1) * $projects_per_page;
+
+        $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+        $where = $search ? $wpdb->prepare(" WHERE project_name LIKE %s OR task_id LIKE %s OR users.user_email LIKE %s", '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%') : '';
+
+        $total_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name $where");
+        $projects = $wpdb->get_results("
+            SELECT projects.*, users.user_email 
+            FROM $table_name projects 
+            LEFT JOIN {$wpdb->users} users ON projects.user_id = users.ID 
+            $where 
+            ORDER BY created_at DESC 
+            LIMIT $offset, $projects_per_page
+        ");
+
+        include RUI_PLUGIN_DIR . 'templates/admin-projects.php';
+    }
         $api_key = get_option('rui_speedyindex_api_key');
         $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
         $tasks = Rapid_URL_Indexer_API::get_tasks($api_key, 0, $search);
@@ -62,6 +112,15 @@ class Rapid_URL_Indexer_Admin {
             'rapid-url-indexer',
             array(__CLASS__, 'admin_page'),
             'dashicons-admin-site'
+        );
+
+        add_submenu_page(
+            'rapid-url-indexer',
+            'Projects',
+            'Projects',
+            'manage_options',
+            'rapid-url-indexer-projects',
+            array(__CLASS__, 'view_projects_page')
         );
 
         add_submenu_page(
