@@ -9,7 +9,7 @@ class Rapid_URL_Indexer_Admin {
         add_action('admin_init', array(__CLASS__, 'handle_download_project_report'));
         register_setting('rui_settings', 'rui_project_age_limit', array(
             'type' => 'integer',
-            'default' => 30,
+            'default' => 90,
             'sanitize_callback' => 'intval'
         ));
     }
