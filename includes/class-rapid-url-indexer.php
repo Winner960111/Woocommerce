@@ -14,6 +14,49 @@ class Rapid_URL_Indexer {
             wp_schedule_event(time(), 'hourly', 'rui_update_project_status');
         }
         add_action('rui_update_project_status', array('Rapid_URL_Indexer', 'update_project_status'));
+
+        // Schedule backlog processing
+        if (!wp_next_scheduled('rui_process_backlog')) {
+            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
+        }
+        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+    }
+
+    public static function process_backlog() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
+        $backlog = $wpdb->get_results("SELECT * FROM $table_name WHERE retries < " . self::API_MAX_RETRIES);
+
+        foreach ($backlog as $entry) {
+            $urls = json_decode($entry->urls, true);
+            $response = self::process_api_request($entry->project_id, $urls, $entry->notify);
+
+            if ($response['success']) {
+                // Remove from backlog
+                $wpdb->delete($table_name, array('id' => $entry->id));
+            } else {
+                // Increment retries
+                $wpdb->update($table_name, array('retries' => $entry->retries + 1), array('id' => $entry->id));
+            }
+        }
+    }
+
+    private static function add_to_backlog($project_id, $urls, $notify) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
+
+        // Check if the request is already in the backlog
+        $exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE project_id = %d", $project_id));
+
+        if (!$exists) {
+            $wpdb->insert($table_name, array(
+                'project_id' => $project_id,
+                'urls' => json_encode($urls),
+                'notify' => $notify,
+                'retries' => 0,
+                'created_at' => current_time('mysql')
+            ));
+        }
     }
 
     public static function check_abuse() {
@@ -414,7 +457,12 @@ class Rapid_URL_Indexer {
                     }
                 }
 
-                return array(
+                // Add to backlog if API response code is 1 or 2
+                if (isset($response_body['code']) && in_array($response_body['code'], [1, 2])) {
+                    self::add_to_backlog($project_id, $urls, $notify);
+                }
+
+                $result = array(
                     'success' => true,
                     'error' => null
                 );
