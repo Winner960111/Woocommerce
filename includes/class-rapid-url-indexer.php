@@ -7,8 +7,8 @@ class Rapid_URL_Indexer {
         if (!wp_next_scheduled('rui_check_abuse')) {
             wp_schedule_event(time(), 'daily', 'rui_check_abuse');
         }
-    }
         add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
+    }
 
         // Schedule project status update
         if (!wp_next_scheduled('rui_update_project_status')) {
@@ -256,9 +256,9 @@ class Rapid_URL_Indexer {
         add_action('woocommerce_process_product_meta', array('Rapid_URL_Indexer', 'save_credits_field'));
 
         // Admin notice for SpeedyIndex API issues
-    }
     
     public static function add_credits_field() {
+    }
         global $post;
         
         echo '<div class="options_group">';
