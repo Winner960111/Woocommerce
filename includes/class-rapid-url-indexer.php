@@ -54,6 +54,8 @@ class Rapid_URL_Indexer {
             $project_age_limit
         ));
     }
+
+    public static function process_backlog() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
         $backlog = $wpdb->get_results("SELECT * FROM $table_name WHERE retries < " . self::API_MAX_RETRIES);
