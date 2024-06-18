@@ -239,7 +239,6 @@ class Rapid_URL_Indexer {
         }
     }
 
-
     private static function load_dependencies() {
         require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-admin.php';
         require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-customer.php';
