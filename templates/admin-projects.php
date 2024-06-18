@@ -49,8 +49,8 @@
                         <td><?php echo esc_html($project->user_email); ?></td>
                         <td><?php echo esc_html($project->status); ?></td>
                         <td><?php echo esc_html(count(json_decode($project->urls, true))); ?></td>
-                        <td><?php echo esc_html($project->processed_links); ?></td>
-                        <td><?php echo esc_html($project->indexed_links); ?></td>
+                        <td><?php echo esc_html(isset($project->processed_links) ? $project->processed_links : 'N/A'); ?></td>
+                        <td><?php echo esc_html(isset($project->indexed_links) ? $project->indexed_links : 'N/A'); ?></td>
                         <td><?php echo esc_html($project->created_at); ?></td>
                         <td><?php echo esc_html(isset($project->updated_at) ? $project->updated_at : 'N/A'); ?></td>
                         <td><a href="<?php echo esc_url(add_query_arg(array('download_project_report' => $project->id))); ?>" class="button">Download CSV</a></td>
