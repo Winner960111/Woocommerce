@@ -153,16 +153,18 @@ class Rapid_URL_Indexer {
                 $status = $result['status'];
                 $indexed_links = $result['indexed_count'];
                 $processed_links = $result['processed_count'];
-                $last_updated = $result['created_at'];
+                $last_updated = date('Y-m-d H:i:s', strtotime($result['created_at']));
 
                 // Update project with latest data from API
-                $wpdb->update($table_name, array(
+                $update_data = array(
                     'status' => $status,
                     'submitted_links' => $result['size'],
-                    'processed_links' => $processed_links, 
+                    'processed_links' => $processed_links,
                     'indexed_links' => $indexed_links,
-                    'updated_at' => current_time('mysql')
-                ), array('id' => $project->id));
+                    'updated_at' => $last_updated
+                );
+
+                $wpdb->update($table_name, $update_data, array('id' => $project->id));
 
                 if ($status === 'completed' && $project->status !== 'completed') {
                     // Log the project status change
