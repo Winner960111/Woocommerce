@@ -1,3 +1,9 @@
+potential abusers button not working
+
+triggered by not working
+
+no logging of cron execution
+
 ### Installation and Usage
 
 **Prerequisites:**
