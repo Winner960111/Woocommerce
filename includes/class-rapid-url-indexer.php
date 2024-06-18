@@ -170,7 +170,7 @@ class Rapid_URL_Indexer {
                 }
 
                 // Update project with latest data from API
-                $notify = isset($project->notify) ? $project->notify : 0;
+                $notify = isset($project->notify) ? intval($project->notify) : 0;
                 $update_data = array(
                     'status' => $status,
                     'submitted_links' => $total_urls,

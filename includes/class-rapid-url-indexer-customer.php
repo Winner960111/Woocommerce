@@ -125,7 +125,7 @@ class Rapid_URL_Indexer_Customer {
         }, explode("\n", sanitize_textarea_field($_POST['urls']))), function($url) {
             return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
         });
-        $notify = isset($_POST['notify']) ? 1 : 0;
+        $notify = isset($_POST['notify']) ? intval($_POST['notify']) : 0;
 
         if ($credits <= 0) {
             wp_send_json_error(array('message' => sprintf(__('You have no credits. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
@@ -213,7 +213,7 @@ class Rapid_URL_Indexer_Customer {
             <label for="urls">URLs (one per line, max 9999):</label>
             <textarea name="urls" id="urls" rows="10" required></textarea>
             <div class="rui-checkbox-wrapper">
-                <input type="checkbox" name="notify" id="notify">
+                <input type="checkbox" name="notify" id="notify" value="1">
                 <label for="notify">Email Notifications</label>
             </div>
             <input type="hidden" name="security" value="<?php echo wp_create_nonce('rui_project_submission'); ?>">
