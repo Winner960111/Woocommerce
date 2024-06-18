@@ -402,7 +402,7 @@ class Rapid_URL_Indexer {
                     $wpdb->update($table_name, array('task_id' => $response['task_id'], 'status' => 'submitted'), array('id' => $project_id));
 
                     // Deduct credits
-                    Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
+                    Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'Project Submission', $project_id);
 
                     return new WP_REST_Response(array('message' => 'Project created and submitted', 'project_id' => $project_id), 200);
                 } else {
