@@ -268,7 +268,7 @@ class Rapid_URL_Indexer_Admin {
 
         $total_logs = $wpdb->get_var("SELECT COUNT(*) FROM $table_name $where");
         $logs = $wpdb->get_results("
-            SELECT logs.*, users.user_email, projects.id as project_id
+            SELECT logs.*, users.user_email, projects.id as project_id, projects.user_id as project_user_id
             FROM $table_name logs 
             LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID 
             LEFT JOIN {$wpdb->prefix}rapid_url_indexer_projects projects ON logs.project_id = projects.id
