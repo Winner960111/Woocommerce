@@ -164,10 +164,16 @@ class Rapid_URL_Indexer {
                 $status = $response['status'];
                 $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
                 $processed_links = isset($response['processed_count']) ? $response['processed_count'] : 0;
-                $wpdb->update($table_name, array('processed_links' => $processed_links), array('id' => $project->id));
+                
+                // Update project with latest data from API
+                $wpdb->update($table_name, array(
+                    'status' => $status,
+                    'processed_links' => $processed_links,
+                    'indexed_links' => $indexed_links,
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $project->id));
 
                 if ($status === 'completed' && $project->status !== 'completed') {
-                    $wpdb->update($table_name, array('status' => 'completed', 'indexed_links' => $indexed_links), array('id' => $project->id));
                     // Log the project status change
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
@@ -199,7 +205,6 @@ class Rapid_URL_Indexer {
 
                     // Mark auto refund as processed and store refunded credits
                     $wpdb->update($table_name, array(
-                        'status' => 'failed',
                         'auto_refund_processed' => 1,
                         'refunded_credits' => $total_urls
                     ), array('id' => $project->id));
@@ -221,7 +226,7 @@ class Rapid_URL_Indexer {
             }
 
             // Check for pending projects older than 24 hours
-            if ($project->status === 'pending' && strtotime($project->created_at) < strtotime('-24 hours') || ($project->status === 'completed' && strtotime($project->created_at) < strtotime('-14 days'))) {
+            if ($project->status === 'pending' && strtotime($project->created_at) < strtotime('-24 hours')) {
                 // Refund credits
                 $total_urls = count(json_decode($project->urls, true));
                 Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
