@@ -1,14 +1,6 @@
-user ID + user email in logs
-
-processed links vs indexed links, NOT submitted vs indexed - refund unindexed only
-
-improve logging to include triggers (project submission, auto refund, failed, admin, purchase)
-
 max of completed, pending, failed, and refunded orders: delete oldest, check every 24 hours, purpose is to keep the database maintainable - purge downloaded reports?
 
 notifications on status change - hourly - report download link
-
-pending projects backlog for 48 hours if speedy unresponsive or 1 or 2 codes
 
 download reports to server?
 

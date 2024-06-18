@@ -64,7 +64,6 @@ class Rapid_URL_Indexer {
                 $wpdb->update($table_name, array('retries' => $entry->retries + 1), array('id' => $entry->id));
             }
         }
-    }
 
     private static function add_to_backlog($project_id, $urls, $notify) {
         global $wpdb;
