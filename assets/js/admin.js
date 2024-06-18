@@ -44,42 +44,6 @@ jQuery(document).ready(function($) {
 
     $('#check-abuse-button').on('click', function() {
         $.ajax({
-            url: ajaxurl,
-            method: 'POST',
-            data: {
-                action: 'check_abuse'
-            },
-            success: function(response) {
-                if (response.success) {
-                    $('#abuse-results').html(response.data);
-                } else {
-                    $('#abuse-results').html('<p>' + response.data + '</p>');
-                }
-            }
-        });
-    });
-});
-jQuery(document).ready(function($) {
-    $('#check-abuse-button').on('click', function() {
-        $.ajax({
-            url: ajaxurl,
-            method: 'POST',
-            data: {
-                action: 'check_abuse'
-            },
-            success: function(response) {
-                if (response.success) {
-                    $('#abuse-results').html(response.data);
-                } else {
-                    $('#abuse-results').html('<p>' + response.data + '</p>');
-                }
-            }
-        });
-    });
-});
-jQuery(document).ready(function($) {
-    $('#check-abuse-button').on('click', function() {
-        $.ajax({
             url: rui_ajax.ajax_url,
             type: 'POST',
             data: {
