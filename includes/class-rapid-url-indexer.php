@@ -23,9 +23,6 @@ class Rapid_URL_Indexer {
                 // Remove from backlog
                 $wpdb->delete($table_name, array('id' => $entry->id));
             } else {
-                // Increment retries
-                $wpdb->update($table_name, array('retries' => $entry->retries + 1), array('id' => $entry->id));
-            }
         self::schedule_cron_jobs();
     }
 
