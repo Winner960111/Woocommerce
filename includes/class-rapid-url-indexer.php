@@ -7,6 +7,7 @@ class Rapid_URL_Indexer {
         if (!wp_next_scheduled('rui_check_abuse')) {
             wp_schedule_event(time(), 'daily', 'rui_check_abuse');
         }
+    }
         add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
 
         // Schedule project status update
@@ -22,30 +23,6 @@ class Rapid_URL_Indexer {
         add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
     }
 
-    private static function send_status_change_email($project, $status, $processed_links, $indexed_links) {
-        if ($project->notify) {
-            $user_info = get_userdata($project->user_id);
-            $subject = sprintf(__('Project Status Update: %s', 'rapid-url-indexer'), $project->project_name);
-            $message = sprintf(__('The status of your project "%s" has changed to %s.', 'rapid-url-indexer'), $project->project_name, $status) . "\n\n";
-            $message .= sprintf(__('Number of submitted URLs: %d', 'rapid-url-indexer'), count(json_decode($project->urls, true))) . "\n";
-
-            $submission_time = strtotime($project->created_at);
-            $current_time = time();
-            $hours_since_submission = ($current_time - $submission_time) / 3600;
-
-            if ($hours_since_submission >= 50) {
-                $message .= sprintf(__('Number of processed links: %d', 'rapid-url-indexer'), $processed_links) . "\n";
-                $message .= sprintf(__('Number of indexed links: %d', 'rapid-url-indexer'), $indexed_links) . "\n";
-            }
-
-            if ($status === 'completed') {
-                $report_link = add_query_arg(array('download_report' => $project->id), home_url());
-                $message .= sprintf(__('Download your project report: %s', 'rapid-url-indexer'), $report_link) . "\n";
-            }
-
-            wp_mail($user_info->user_email, $subject, $message);
-        }
-    }
 
     public static function process_backlog() {
         global $wpdb;
