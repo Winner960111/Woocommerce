@@ -1,9 +1,3 @@
-max of completed, pending, failed, and refunded orders: delete oldest, check every 24 hours, purpose is to keep the database maintainable - purge downloaded reports?
-
-notifications on status change - hourly - report download link
-
-download reports to server?
-
 ### Installation and Usage
 
 **Prerequisites:**
