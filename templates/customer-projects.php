@@ -69,11 +69,9 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                         } else {
                             if ($hours_since_submission >= 50) {
                                 $urls = json_decode($project->urls, true);
-                                $urls = json_decode($project->urls, true);
                                 $total_urls = count($urls);
-                                $processed_count = isset($project->processed_links) ? $project->processed_links : $total_urls;
-                                $indexed_links = isset($project->indexed_links) ? $project->indexed_links : 0;
-                                $indexed_links = $indexed_links === null ? 0 : $indexed_links;
+                                $processed_count = $project->processed_links;
+                                $indexed_links = $project->indexed_links;
                                 $percentage = $total_urls > 0 ? round(($indexed_links / $total_urls) * 100) : 0;
                                 echo esc_html("$indexed_links/$total_urls ($percentage%)");
                             } else {
