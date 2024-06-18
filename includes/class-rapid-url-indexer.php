@@ -374,11 +374,38 @@ class Rapid_URL_Indexer {
         $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
 
         // Validate and process the project submission
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
+        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1));
+        if (empty($user)) {
+            return new WP_REST_Response(array('message' => 'Invalid API key'), 403);
+        }
+        $user_id = $user[0]->ID;
+
+        // Check if user has enough credits
+        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
+        if ($credits < count($urls)) {
+            return new WP_REST_Response(array('message' => 'Insufficient credits'), 400);
+        }
+
+        // Deduct credits
+        Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
+
+        // Create project
         $project_id = Rapid_URL_Indexer_Customer::submit_project($project_name, $urls, $notify, $user_id);
 
         if ($project_id) {
-            return new WP_REST_Response(array('message' => 'Project created', 'project_id' => $project_id), 200);
+            // Submit to SpeedyIndex API
+            $api_key = get_option('speedyindex_api_key');
+            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (CID' . $user_id . ')');
+
+            if ($response && isset($response['task_id'])) {
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+                $wpdb->update($table_name, array('task_id' => $response['task_id'], 'status' => 'submitted'), array('id' => $project_id));
+
+                return new WP_REST_Response(array('message' => 'Project created and submitted', 'project_id' => $project_id), 200);
+            } else {
+                return new WP_REST_Response(array('message' => 'Project created but submission failed'), 500);
+            }
         } else {
             return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
         }
