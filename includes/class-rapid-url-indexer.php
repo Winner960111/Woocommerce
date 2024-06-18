@@ -42,7 +42,7 @@ class Rapid_URL_Indexer {
     public static function purge_logs() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
-        $log_age_limit = get_option('rui_log_age_limit', 30); // Default to 30 days
+        $log_age_limit = get_option('rui_log_age_limit', 90); // Default to 90 days
 
         $wpdb->query($wpdb->prepare(
             "DELETE FROM $table_name WHERE created_at < NOW() - INTERVAL %d DAY",
@@ -53,7 +53,7 @@ class Rapid_URL_Indexer {
     public static function purge_projects() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $project_age_limit = get_option('rui_project_age_limit', 30); // Default to 30 days
+        $project_age_limit = get_option('rui_project_age_limit', 90); // Default to 90 days
 
         $wpdb->query($wpdb->prepare(
             "DELETE FROM $table_name WHERE created_at < NOW() - INTERVAL %d DAY",

@@ -16,11 +16,11 @@
             </tr>
             <tr>
                 <th scope="row"><?php _e('Log Age Limit (days)', 'rapid-url-indexer'); ?></th>
-                <td><input type="number" name="rui_log_age_limit" value="<?php echo esc_attr(get_option('rui_log_age_limit', 30)); ?>" /></td>
+                <td><input type="number" name="rui_log_age_limit" value="<?php echo esc_attr(get_option('rui_log_age_limit', 90)); ?>" /></td>
             </tr>
             <tr>
                 <th scope="row"><?php _e('Project Age Limit (days)', 'rapid-url-indexer'); ?></th>
-                <td><input type="number" name="rui_project_age_limit" value="<?php echo esc_attr(get_option('rui_project_age_limit', 30)); ?>" /></td>
+                <td><input type="number" name="rui_project_age_limit" value="<?php echo esc_attr(get_option('rui_project_age_limit', 90)); ?>" /></td>
             </tr>
         </table>
             <h2><?php _e('Abuse Detection Settings', 'rapid-url-indexer'); ?></h2>
