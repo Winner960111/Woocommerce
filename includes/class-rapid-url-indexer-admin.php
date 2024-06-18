@@ -277,6 +277,18 @@ class Rapid_URL_Indexer_Admin {
             LIMIT $offset, $logs_per_page
         ");
 
+        // Ensure that the logs have the correct user and project information
+        foreach ($logs as $log) {
+            if (empty($log->user_id) && !empty($log->project_id)) {
+                $project = $wpdb->get_row($wpdb->prepare("SELECT user_id FROM {$wpdb->prefix}rapid_url_indexer_projects WHERE id = %d", $log->project_id));
+                if ($project) {
+                    $log->user_id = $project->user_id;
+                    $user = get_userdata($project->user_id);
+                    $log->user_email = $user ? $user->user_email : '';
+                }
+            }
+        }
+
         include RUI_PLUGIN_DIR . 'templates/admin-logs.php';
     }
 
