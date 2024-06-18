@@ -258,8 +258,8 @@ class Rapid_URL_Indexer {
         // Admin notice for SpeedyIndex API issues
     
     public static function add_credits_field() {
-    }
         global $post;
+    }
         
         echo '<div class="options_group">';
         woocommerce_wp_text_input(array(
