@@ -40,6 +40,7 @@ class Rapid_URL_Indexer_Activator {
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             user_id mediumint(9) NOT NULL,
             project_id mediumint(9) NOT NULL,
+            triggered_by varchar(255) DEFAULT NULL,
             action varchar(255) NOT NULL,
             details longtext NOT NULL,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
@@ -60,6 +61,9 @@ class Rapid_URL_Indexer_Activator {
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
+
+        // Check and add missing columns
+        self::check_and_add_missing_columns();
 
         // Schedule hourly cron job to process cron jobs
         if (!wp_next_scheduled('rui_cron_job')) {
@@ -84,6 +88,15 @@ class Rapid_URL_Indexer_Activator {
         // Schedule project purging based on age limit 
         if (!wp_next_scheduled('rui_purge_projects')) {
             wp_schedule_event(time(), 'daily', 'rui_purge_projects');
+        }
+    }
+    private static function check_and_add_missing_columns() {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
+        $column = $wpdb->get_results("SHOW COLUMNS FROM $table_name LIKE 'triggered_by'");
+        if (empty($column)) {
+            $wpdb->query("ALTER TABLE $table_name ADD triggered_by varchar(255) DEFAULT NULL");
         }
     }
 }
