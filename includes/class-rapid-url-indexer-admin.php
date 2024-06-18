@@ -192,10 +192,17 @@ class Rapid_URL_Indexer_Admin {
         $offset = ($paged - 1) * $logs_per_page;
 
         $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
-        $where = $search ? $wpdb->prepare(" WHERE action LIKE %s OR details LIKE %s", '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%') : '';
+        $where = $search ? $wpdb->prepare(" WHERE action LIKE %s OR details LIKE %s OR users.user_email LIKE %s", '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%') : '';
 
         $total_logs = $wpdb->get_var("SELECT COUNT(*) FROM $table_name $where");
-        $logs = $wpdb->get_results("SELECT * FROM $table_name $where ORDER BY created_at DESC LIMIT $offset, $logs_per_page");
+        $logs = $wpdb->get_results("
+            SELECT logs.*, users.user_email 
+            FROM $table_name logs 
+            LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID 
+            $where 
+            ORDER BY created_at DESC 
+            LIMIT $offset, $logs_per_page
+        ");
 
         include RUI_PLUGIN_DIR . 'templates/admin-logs.php';
     }
@@ -207,7 +214,13 @@ class Rapid_URL_Indexer_Admin {
         $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
         $where = $search ? $wpdb->prepare(" WHERE action LIKE %s OR details LIKE %s", '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%') : '';
 
-        $logs = $wpdb->get_results("SELECT * FROM $table_name $where ORDER BY created_at DESC");
+        $logs = $wpdb->get_results("
+            SELECT logs.*, users.user_email 
+            FROM $table_name logs 
+            LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID 
+            $where 
+            ORDER BY created_at DESC
+        ");
 
         ob_start();
         foreach ($logs as $log) {

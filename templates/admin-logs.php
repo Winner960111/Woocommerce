@@ -27,6 +27,7 @@
             <tr>
                 <th>ID</th>
                 <th>User ID</th>
+                <th>Email</th>
                 <th>Project ID</th>
                 <th>Action</th>
                 <th>Details</th>
@@ -38,6 +39,7 @@
                 <tr>
                     <td><?php echo esc_html($log->id); ?></td>
                     <td><?php echo esc_html($log->user_id); ?></td>
+                    <td><?php echo esc_html($log->user_email); ?></td>
                     <td><?php echo esc_html($log->project_id); ?></td>
                     <td><?php echo esc_html($log->action); ?></td>
                     <td><?php echo esc_html($log->details); ?></td>
