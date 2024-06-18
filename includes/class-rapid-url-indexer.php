@@ -81,6 +81,8 @@ class Rapid_URL_Indexer {
             if ($response && isset($response['status'])) {
                 $status = $response['status'];
                 $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
+                $processed_links = isset($response['processed_count']) ? $response['processed_count'] : 0;
+                $wpdb->update($table_name, array('processed_links' => $processed_links), array('id' => $project->id));
 
                 if ($status === 'completed' && $project->status !== 'completed') {
                     $wpdb->update($table_name, array('status' => 'completed', 'indexed_links' => $indexed_links), array('id' => $project->id));
@@ -154,8 +156,8 @@ class Rapid_URL_Indexer {
 
                 if ($response && isset($response['result']['indexed_count'])) {
                     $indexed_count = $response['result']['indexed_count'];
-                    $total_urls = count(json_decode($project->urls, true));
-                    $refund_credits = $total_urls - $indexed_count;
+                    $processed_count = isset($response['result']['processed_count']) ? $response['result']['processed_count'] : 0;
+                    $refund_credits = $processed_count - $indexed_count;
 
                     // Refund credits
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refund_credits);
