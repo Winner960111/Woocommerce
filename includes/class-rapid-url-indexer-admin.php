@@ -7,6 +7,11 @@ class Rapid_URL_Indexer_Admin {
         add_action('wp_ajax_check_abuse', array(__CLASS__, 'ajax_check_abuse'));
         add_action('wp_ajax_nopriv_check_abuse', array(__CLASS__, 'ajax_check_abuse'));
         add_action('admin_init', array(__CLASS__, 'handle_download_project_report'));
+        register_setting('rui_settings', 'rui_project_age_limit', array(
+            'type' => 'integer',
+            'default' => 30,
+            'sanitize_callback' => 'intval'
+        ));
     }
 
     public static function handle_download_project_report() {
@@ -222,6 +227,7 @@ class Rapid_URL_Indexer_Admin {
             update_option('rui_speedyindex_api_key', sanitize_text_field($_POST['rui_speedyindex_api_key']));
             update_option('rui_delete_data_on_uninstall', isset($_POST['rui_delete_data_on_uninstall']) ? 1 : 0);
             update_option('rui_log_age_limit', intval($_POST['rui_log_age_limit']));
+            update_option('rui_project_age_limit', intval($_POST['rui_project_age_limit']));
             echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
         }
 
