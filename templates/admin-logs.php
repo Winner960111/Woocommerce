@@ -41,7 +41,7 @@
                     <td><?php echo esc_html($log->id); ?></td>
                     <td><?php echo esc_html($log->user_id); ?></td>
                     <td><?php echo esc_html($log->user_email); ?></td>
-                    <td><?php echo esc_html($log->project_id); ?></td>
+                    <td><?php echo esc_html(isset($log->project_id) ? $log->project_id : 'N/A'); ?></td>
                     <td><?php echo esc_html($log->action); ?></td>
                     <td><?php echo esc_html($log->details); ?></td>
                     <td><?php echo esc_html(isset($log->triggered_by) ? $log->triggered_by : 'N/A'); ?></td>

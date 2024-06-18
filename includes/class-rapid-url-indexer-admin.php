@@ -92,7 +92,7 @@ class Rapid_URL_Indexer_Admin {
             FROM $table_name projects 
             LEFT JOIN {$wpdb->users} users ON projects.user_id = users.ID 
             $where 
-            ORDER BY created_at DESC 
+            ORDER BY projects.created_at DESC 
             LIMIT $offset, $projects_per_page
         ");
 
@@ -272,7 +272,7 @@ class Rapid_URL_Indexer_Admin {
             FROM $table_name logs 
             LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID 
             $where 
-            ORDER BY created_at DESC 
+            ORDER BY logs.created_at DESC 
             LIMIT $offset, $logs_per_page
         ");
 
