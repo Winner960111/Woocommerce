@@ -275,6 +275,7 @@ class Rapid_URL_Indexer {
         ));
         echo '</div>';
     }
+
     public static function save_credits_field($post_id) {
         $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : 0;
         update_post_meta($post_id, '_credits_amount', $credits_amount);
