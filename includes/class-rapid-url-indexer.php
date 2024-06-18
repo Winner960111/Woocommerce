@@ -520,7 +520,6 @@ class Rapid_URL_Indexer {
             );
         }
     }
-    }
 
     private static function send_status_change_email($project, $status, $processed_links, $indexed_links) {
         if ($project->notify) {
