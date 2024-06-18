@@ -225,7 +225,7 @@ class Rapid_URL_Indexer_Customer {
         return ob_get_clean();
     }
 
-    private static function submit_project($project_name, $urls, $notify) {
+    public static function submit_project($project_name, $urls, $notify) {
         global $wpdb;
         $user_id = get_current_user_id();
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
