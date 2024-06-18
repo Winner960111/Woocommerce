@@ -1,5 +1,7 @@
 <?php
 class Rapid_URL_Indexer {
+    const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
+
     public static function init() {
         self::load_dependencies();
         self::define_hooks();
