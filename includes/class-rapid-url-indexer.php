@@ -155,7 +155,7 @@ class Rapid_URL_Indexer {
 
             if (isset($response['id'])) {
                 $status = 'submitted'; // Assuming the status is 'submitted' if the task is found
-                $indexed_links = $response['indexed_count'];
+                $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
                 $processed_links = $response['processed_count'];
                 $total_urls = $response['size'];
                 $last_updated = current_time('mysql');

@@ -25,6 +25,8 @@ class Rapid_URL_Indexer_Activator {
             status varchar(50) DEFAULT 'pending',
             submitted_links int DEFAULT 0,
             processed_links int DEFAULT 0,
+            processed_links int DEFAULT 0,
+            indexed_links int DEFAULT 0,
             triggered_by varchar(255) DEFAULT NULL,
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             auto_refund_processed tinyint(1) DEFAULT 0,
