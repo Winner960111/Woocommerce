@@ -26,13 +26,14 @@
             <thead>
                 <tr>
                     <th>Project ID</th>
+                    <th>Project Name</th>
                     <th>Task ID</th>
                     <th>User ID</th>
                     <th>Email</th>
                     <th>Status</th>
-                    <th>Submitted Links</th>
-                    <th>Processed Links</th>
-                    <th>Indexed Links</th>
+                    <th>Submitted</th>
+                    <th>Processed</th>
+                    <th>Indexed</th>
                     <th>Created At</th>
                     <th>Last Updated</th>
                     <th>Download</th>
@@ -42,6 +43,7 @@
                 <?php foreach ($projects as $project): ?>
                     <tr>
                         <td><?php echo esc_html($project->id); ?></td>
+                        <td><?php echo esc_html($project->project_name); ?></td>
                         <td><?php echo esc_html($project->task_id); ?></td>
                         <td><?php echo esc_html($project->user_id); ?></td>
                         <td><?php echo esc_html($project->user_email); ?></td>
