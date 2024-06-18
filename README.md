@@ -95,6 +95,38 @@ If an error occurs, the API will return an appropriate HTTP status code along wi
 
 ### Detailed Description for WooCommerce Extension: URL Indexing Credit System
 
+## Testing the RESTful API with curl
+
+### Submit URLs
+```sh
+curl -X POST https://yourdomain.com/wp-json/rui/v1/projects \
+-H "X-API-Key: your_api_key" \
+-H "Content-Type: application/json" \
+-d '{
+    "project_name": "My Project",
+    "urls": ["http://example.com", "http://example.org"],
+    "notify_on_status_change": true
+}'
+```
+
+### Get Project Status
+```sh
+curl -X GET https://yourdomain.com/wp-json/rui/v1/projects/{project_id} \
+-H "X-API-Key: your_api_key"
+```
+
+### Download Project Report
+```sh
+curl -X GET https://yourdomain.com/wp-json/rui/v1/projects/{project_id}/report \
+-H "X-API-Key: your_api_key"
+```
+
+### Get Credits Balance
+```sh
+curl -X GET https://yourdomain.com/wp-json/rui/v1/credits/balance \
+-H "X-API-Key: your_api_key"
+```
+
 **Plugin Overview:** The WooCommerce extension/plugin will enable customers to purchase credits for submitting URLs for indexing. Each credit represents one URL submission. The plugin will integrate with WooCommerce, allowing customers to manage their credits and projects within the customer area.
 
 **Key Features and Functionality:**
