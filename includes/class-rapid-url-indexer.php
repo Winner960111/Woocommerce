@@ -26,9 +26,6 @@ class Rapid_URL_Indexer {
                 // Increment retries
                 $wpdb->update($table_name, array('retries' => $entry->retries + 1), array('id' => $entry->id));
             }
-        }
-    }
-
         self::schedule_cron_jobs();
     }
 
