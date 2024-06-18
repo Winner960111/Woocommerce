@@ -146,17 +146,20 @@ class Rapid_URL_Indexer {
             $api_key = get_option('speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
 
-            if ($response && isset($response['status'])) {
-                $status = $response['status'];
-                $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
-                $processed_links = isset($response['processed_count']) ? $response['processed_count'] : 0;
-                
+            if ($response && isset($response['result'])) {
+                $result = $response['result'];
+                $status = $result['status'];
+                $indexed_links = $result['indexed_count'];
+                $processed_links = $result['processed_count'];
+                $last_updated = $result['created_at'];
+
                 // Update project with latest data from API
                 $wpdb->update($table_name, array(
                     'status' => $status,
-                    'processed_links' => $processed_links,
+                    'submitted_links' => $result['size'],
+                    'processed_links' => $processed_links, 
                     'indexed_links' => $indexed_links,
-                    'updated_at' => current_time('mysql')
+                    'updated_at' => date('Y-m-d H:i:s', strtotime($last_updated))
                 ), array('id' => $project->id));
 
                 if ($status === 'completed' && $project->status !== 'completed') {
