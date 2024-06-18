@@ -88,6 +88,8 @@ class Rapid_URL_Indexer_Admin {
 
         include RUI_PLUGIN_DIR . 'templates/admin-projects.php';
     }
+
+    public static function view_tasks_page() {
         $api_key = get_option('rui_speedyindex_api_key');
         $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
         $tasks = Rapid_URL_Indexer_API::get_tasks($api_key, 0, $search);
