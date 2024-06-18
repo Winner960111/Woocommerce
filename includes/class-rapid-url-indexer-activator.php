@@ -60,5 +60,9 @@ class Rapid_URL_Indexer_Activator {
         if (!wp_next_scheduled('rui_cron_job')) {
             wp_schedule_event(time(), 'hourly', 'rui_cron_job');
         }
+        // Schedule log purging
+        if (!wp_next_scheduled('rui_purge_logs')) {
+            wp_schedule_event(time(), 'daily', 'rui_purge_logs');
+        }
     }
 }

@@ -20,6 +20,24 @@ class Rapid_URL_Indexer {
             wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
         }
         add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+        // Schedule log purging
+        if (!wp_next_scheduled('rui_purge_logs')) {
+            wp_schedule_event(time(), 'daily', 'rui_purge_logs');
+        }
+        add_action('rui_purge_logs', array('Rapid_URL_Indexer', 'purge_logs'));
+    }
+
+    public static function purge_logs() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
+        $log_entry_limit = get_option('rui_log_entry_limit', 1000);
+
+        $log_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
+
+        if ($log_count > $log_entry_limit) {
+            $logs_to_delete = $log_count - $log_entry_limit;
+            $wpdb->query("DELETE FROM $table_name ORDER BY created_at ASC LIMIT $logs_to_delete");
+        }
     }
 
     public static function process_backlog() {
