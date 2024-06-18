@@ -4,38 +4,21 @@ class Rapid_URL_Indexer {
         self::load_dependencies();
         self::define_hooks();
         // Schedule abuse check
-        if (!wp_next_scheduled('rui_check_abuse')) {
-            wp_schedule_event(time(), 'daily', 'rui_check_abuse');
-        }
         add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
     
         // Schedule project status update
-        if (!wp_next_scheduled('rui_update_project_status')) {
-            wp_schedule_event(time(), 'hourly', 'rui_update_project_status');
-        }
         add_action('rui_update_project_status', array('Rapid_URL_Indexer', 'update_project_status'));
 
         // Schedule backlog processing
-        if (!wp_next_scheduled('rui_process_backlog')) {
-            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
-        }
         add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+
         // Schedule project purging
-        if (!wp_next_scheduled('rui_purge_projects')) {
-            wp_schedule_event(time(), 'daily', 'rui_purge_projects');
-        }
         add_action('rui_purge_projects', array('Rapid_URL_Indexer', 'purge_projects'));
 
         // Schedule log purging
-        if (!wp_next_scheduled('rui_purge_logs')) {
-            wp_schedule_event(time(), 'daily', 'rui_purge_logs');
-        }
         add_action('rui_purge_logs', array('Rapid_URL_Indexer', 'purge_logs'));
 
         // Schedule project age limit purging
-        if (!wp_next_scheduled('rui_purge_old_projects')) {
-            wp_schedule_event(time(), 'daily', 'rui_purge_old_projects');
-        }
         add_action('rui_purge_old_projects', array('Rapid_URL_Indexer', 'purge_old_projects'));
     }
 

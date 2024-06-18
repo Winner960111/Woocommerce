@@ -60,9 +60,34 @@ class Rapid_URL_Indexer_Activator {
         if (!wp_next_scheduled('rui_cron_job')) {
             wp_schedule_event(time(), 'hourly', 'rui_cron_job');
         }
+        // Schedule abuse check
+        if (!wp_next_scheduled('rui_check_abuse')) {
+            wp_schedule_event(time(), 'daily', 'rui_check_abuse');
+        }
+
+        // Schedule project status update
+        if (!wp_next_scheduled('rui_update_project_status')) {
+            wp_schedule_event(time(), 'hourly', 'rui_update_project_status');
+        }
+
+        // Schedule backlog processing
+        if (!wp_next_scheduled('rui_process_backlog')) {
+            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
+        }
+
+        // Schedule project purging
+        if (!wp_next_scheduled('rui_purge_projects')) {
+            wp_schedule_event(time(), 'daily', 'rui_purge_projects');
+        }
+
         // Schedule log purging
         if (!wp_next_scheduled('rui_purge_logs')) {
             wp_schedule_event(time(), 'daily', 'rui_purge_logs');
+        }
+
+        // Schedule project age limit purging
+        if (!wp_next_scheduled('rui_purge_old_projects')) {
+            wp_schedule_event(time(), 'daily', 'rui_purge_old_projects');
         }
     }
 }
