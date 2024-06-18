@@ -374,7 +374,8 @@ class Rapid_URL_Indexer {
         $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
 
         // Validate and process the project submission
-        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1));
+        $api_key = $request->get_header('X-API-Key');
+        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
         if (empty($user)) {
             return new WP_REST_Response(array('message' => 'Invalid API key'), 403);
         }
