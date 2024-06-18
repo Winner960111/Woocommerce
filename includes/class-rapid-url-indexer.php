@@ -160,66 +160,73 @@ class Rapid_URL_Indexer {
                 $total_urls = $response['size'];
                 $last_updated = current_time('mysql');
 
-                // Update project with latest data from API
-                $update_data = array(
-                    'status' => $status,
-                    'submitted_links' => $total_urls,
-                    'processed_links' => $processed_links,
-                    'indexed_links' => $indexed_links,
-                    'updated_at' => $last_updated
-                );
+                // Check if 13 days have passed since project creation
+                $created_at = strtotime($project->created_at);
+                $current_time = time();
+                $days_since_creation = ($current_time - $created_at) / (60 * 60 * 24);
 
-                $wpdb->update($table_name, $update_data, array('task_id' => $project->task_id));
+                if ($days_since_creation >= 13) {
+                    // Update project with latest data from API
+                    $update_data = array(
+                        'status' => $status,
+                        'submitted_links' => $total_urls,
+                        'processed_links' => $processed_links,
+                        'indexed_links' => $indexed_links,
+                        'updated_at' => $last_updated
+                    );
 
-                if ($status === 'completed' && $project->status !== 'completed') {
-                    // Log the project status change
-                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                        'user_id' => $project->user_id,
-                        'project_id' => $project->id,
-                        'action' => 'Project Status Change',
-                        'details' => json_encode(array(
-                            'old_status' => $project->status,
-                            'new_status' => 'completed'
-                        )),
-                        'created_at' => current_time('mysql')
-                    ));
-                    // Send email notification
-                    self::send_status_change_email($project, 'completed', $processed_links, $indexed_links);
-                } elseif ($status === 'failed' && !$project->auto_refund_processed) {
-                    // Log the project status change
-                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                        'user_id' => $project->user_id,
-                        'project_id' => $project->id,
-                        'action' => 'Project Status Change',
-                        'details' => json_encode(array(
-                            'old_status' => $project->status,
-                            'new_status' => 'failed'
-                        )),
-                        'created_at' => current_time('mysql')
-                    ));
-                    // Refund credits
-                    $total_urls = count(json_decode($project->urls, true));
-                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
+                    $wpdb->update($table_name, $update_data, array('task_id' => $project->task_id));
 
-                    // Mark auto refund as processed and store refunded credits
-                    $wpdb->update($table_name, array(
-                        'auto_refund_processed' => 1,
-                        'refunded_credits' => $total_urls
-                    ), array('task_id' => $project->task_id));
+                    if ($status === 'completed' && $project->status !== 'completed') {
+                        // Log the project status change
+                        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                            'user_id' => $project->user_id,
+                            'project_id' => $project->id,
+                            'action' => 'Project Status Change',
+                            'details' => json_encode(array(
+                                'old_status' => $project->status,
+                                'new_status' => 'completed'
+                            )),
+                            'created_at' => current_time('mysql')
+                        ));
+                        // Send email notification
+                        self::send_status_change_email($project, 'completed', $processed_links, $indexed_links);
+                    } elseif ($status === 'failed' && !$project->auto_refund_processed) {
+                        // Log the project status change
+                        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                            'user_id' => $project->user_id,
+                            'project_id' => $project->id,
+                            'action' => 'Project Status Change',
+                            'details' => json_encode(array(
+                                'old_status' => $project->status,
+                                'new_status' => 'failed'
+                            )),
+                            'created_at' => current_time('mysql')
+                        ));
+                        // Refund credits
+                        $total_urls = count(json_decode($project->urls, true));
+                        Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
 
-                    // Log the action
-                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                        'user_id' => $project->user_id,
-                        'project_id' => $project->id,
-                        'action' => 'Auto Refund',
-                        'details' => json_encode(array('refunded_credits' => $total_urls)),
-                        'created_at' => current_time('mysql')
-                    ));
-                    // Send email notification
-                    self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
-                } else {
-                    // Send email notification for other status changes
-                    self::send_status_change_email($project, $status, $processed_links, $indexed_links);
+                        // Mark auto refund as processed and store refunded credits
+                        $wpdb->update($table_name, array(
+                            'auto_refund_processed' => 1,
+                            'refunded_credits' => $total_urls
+                        ), array('task_id' => $project->task_id));
+
+                        // Log the action
+                        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                            'user_id' => $project->user_id,
+                            'project_id' => $project->id,
+                            'action' => 'Auto Refund',
+                            'details' => json_encode(array('refunded_credits' => $total_urls)),
+                            'created_at' => current_time('mysql')
+                        ));
+                        // Send email notification
+                        self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
+                    } else {
+                        // Send email notification for other status changes
+                        self::send_status_change_email($project, $status, $processed_links, $indexed_links);
+                    }
                 }
             } else {
                 error_log("Invalid response structure for task_id: " . $project->task_id);
