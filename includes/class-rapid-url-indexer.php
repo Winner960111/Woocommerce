@@ -23,6 +23,7 @@ class Rapid_URL_Indexer {
         add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
     }
     }
+    }
 
 
     public static function process_backlog() {
