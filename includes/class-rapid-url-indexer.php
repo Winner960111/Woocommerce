@@ -153,12 +153,11 @@ class Rapid_URL_Indexer {
             // Log the full API response for debugging
             error_log("API response for task_id " . $project->task_id . ": " . print_r($response, true));
 
-            if (isset($response['result'])) {
-                $result = $response['result'];
-                $status = $result['status'];
-                $indexed_links = $result['indexed_count'];
-                $processed_links = $result['processed_count'];
-                $total_urls = $result['size'];
+            if (isset($response['id'])) {
+                $status = 'completed'; // Assuming the status is 'completed' if the task is found
+                $indexed_links = $response['indexed_count'];
+                $processed_links = $response['processed_count'];
+                $total_urls = $response['size'];
                 $last_updated = current_time('mysql');
 
                 // Update project with latest data from API
