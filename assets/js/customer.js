@@ -64,16 +64,22 @@ jQuery(document).ready(function($) {
             window.indexingChart.destroy();
         }
 
-        // Parse dates
-        var parsedData = data.dates.map((date, index) => ({
-            x: new Date(date),
-            y: data.indexed[index]
-        }));
+        // Parse dates and ensure they are valid
+        var parsedData = data.dates.map((date, index) => {
+            var parsedDate = new Date(date);
+            return {
+                x: isNaN(parsedDate.getTime()) ? null : parsedDate,
+                y: data.indexed[index]
+            };
+        }).filter(item => item.x !== null);
 
-        var parsedUnindexedData = data.dates.map((date, index) => ({
-            x: new Date(date),
-            y: data.unindexed[index]
-        }));
+        var parsedUnindexedData = data.dates.map((date, index) => {
+            var parsedDate = new Date(date);
+            return {
+                x: isNaN(parsedDate.getTime()) ? null : parsedDate,
+                y: data.unindexed[index]
+            };
+        }).filter(item => item.x !== null);
 
         window.indexingChart = new Chart(ctx, {
             type: 'line',
