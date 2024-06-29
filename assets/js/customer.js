@@ -33,6 +33,10 @@ jQuery(function($) {
         var projectId = $(this).data('project-id');
         var modal = $('#chartModal');
         var createdAt = $(this).closest('tr').find('td:nth-child(4)').text();
+        
+        // Reset the chart container
+        modal.find('.modal-content').html('<canvas id="indexingChart"></canvas>');
+        
         $.ajax({
             url: ajax_object.ajaxurl,
             type: 'POST',
@@ -43,7 +47,7 @@ jQuery(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    showChart(response.data, new Date(createdAt));
+                    showChart(response.data);
                 } else {
                     alert('Failed to load chart data');
                 }
@@ -90,6 +94,7 @@ jQuery(function($) {
             return;
         }
 
+        // Create a new Chart instance
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
