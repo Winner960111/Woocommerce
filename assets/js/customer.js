@@ -89,6 +89,8 @@ jQuery(function($) {
         canvas.height = 400; // Fixed height or adjust as needed
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        console.log('Data received for chart:', data);
+
         if (!data || !Array.isArray(data.indexed) || !Array.isArray(data.unindexed)) {
             console.error('Invalid data format:', data);
             modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
