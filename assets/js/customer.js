@@ -53,7 +53,7 @@ jQuery(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    showChart(response);
+                    showChart(response.data);
                 } else {
                     modal.find('.modal-content').html('<p>Failed to load chart data</p>');
                 }
