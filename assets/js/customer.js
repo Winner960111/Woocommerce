@@ -1,6 +1,4 @@
 import Chart from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm';
-import { DateTime } from 'https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm';
-import 'https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/+esm';
 
 jQuery(document).ready(function($) {
     console.log('Customer JS loaded');
@@ -82,14 +80,15 @@ jQuery(document).ready(function($) {
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
+                labels: data.dates,
                 datasets: [{
                     label: 'Indexed URLs',
-                    data: parsedData,
+                    data: data.indexed,
                     borderColor: 'green',
                     fill: false
                 }, {
                     label: 'Unindexed URLs',
-                    data: parsedUnindexedData,
+                    data: data.unindexed,
                     borderColor: 'red',
                     fill: false
                 }]
@@ -98,14 +97,6 @@ jQuery(document).ready(function($) {
                 responsive: true,
                 scales: {
                     x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            parser: 'yyyy-MM-dd',
-                            displayFormats: {
-                                day: 'MMM d'
-                            }
-                        },
                         title: {
                             display: true,
                             text: 'Date'
