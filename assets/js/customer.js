@@ -95,9 +95,16 @@ jQuery(document).ready(function($) {
                 scales: {
                     x: {
                         type: 'time',
+                        adapters: {
+                            date: {
+                                locale: enUS
+                            }
+                        },
                         time: {
-                            parser: 'yyyy-MM-dd',
-                            unit: 'day'
+                            unit: 'day',
+                            displayFormats: {
+                                day: 'MMM d'
+                            }
                         },
                         title: {
                             display: true,
@@ -110,6 +117,15 @@ jQuery(document).ready(function($) {
                             display: true,
                             text: 'Number of URLs'
                         }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
                     }
                 }
             }
