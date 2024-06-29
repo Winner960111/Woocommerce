@@ -115,11 +115,10 @@ jQuery(function($) {
                         type: 'category',
                         title: {
                             display: true,
-                            text: 'Date',
-                            color: '#ffffff'
+                            text: 'Date'
                         },
                         ticks: {
-                            color: '#ffffff'
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
                         },
                         grid: {
                             color: 'rgba(255, 255, 255, 0.1)'
@@ -129,11 +128,10 @@ jQuery(function($) {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Number of URLs',
-                            color: '#ffffff'
+                            text: 'Number of URLs'
                         },
                         ticks: {
-                            color: '#ffffff'
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
                         },
                         grid: {
                             color: 'rgba(255, 255, 255, 0.1)'
@@ -144,16 +142,16 @@ jQuery(function($) {
                     legend: {
                         position: 'top',
                         labels: {
-                            color: '#ffffff'
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
                         }
                     },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
-                        backgroundColor: 'rgba(97, 97, 97, 0.9)',
-                        titleColor: '#ffffff',
-                        bodyColor: '#ffffff',
-                        borderColor: '#333333',
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputbg').trim(),
+                        titleColor: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim(),
+                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim(),
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim(),
                         borderWidth: 1
                     }
                 }
