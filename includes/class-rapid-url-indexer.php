@@ -132,19 +132,42 @@ class Rapid_URL_Indexer {
 
     public static function process_backlog() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
-        $backlog = $wpdb->get_results("SELECT * FROM $table_name WHERE retries < " . self::API_MAX_RETRIES);
+        $backlog_table = $wpdb->prefix . 'rapid_url_indexer_backlog';
+        $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
 
+        // Process backlog entries
+        $backlog = $wpdb->get_results("SELECT * FROM $backlog_table WHERE retries < " . self::API_MAX_RETRIES);
         foreach ($backlog as $entry) {
             $urls = json_decode($entry->urls, true);
             $response = self::process_api_request($entry->project_id, $urls, $entry->notify);
 
             if ($response['success']) {
-                // Remove from backlog
-                $wpdb->delete($table_name, array('id' => $entry->id));
+                $wpdb->delete($backlog_table, array('id' => $entry->id));
             } else {
-                // Increment retries
-                $wpdb->update($table_name, array('retries' => $entry->retries + 1), array('id' => $entry->id));
+                $wpdb->update($backlog_table, array('retries' => $entry->retries + 1), array('id' => $entry->id));
+            }
+        }
+
+        // Process pending projects
+        $pending_projects = $wpdb->get_results("SELECT * FROM $projects_table WHERE status = 'pending' AND created_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+        foreach ($pending_projects as $project) {
+            $urls = json_decode($project->urls, true);
+            $response = self::process_api_request($project->id, $urls, $project->notify);
+
+            if ($response['success']) {
+                $wpdb->update($projects_table, array('status' => 'submitted'), array('id' => $project->id));
+            } else {
+                // If processing fails, add to backlog if not already there
+                $existing_backlog = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $backlog_table WHERE project_id = %d", $project->id));
+                if (!$existing_backlog) {
+                    $wpdb->insert($backlog_table, array(
+                        'project_id' => $project->id,
+                        'urls' => $project->urls,
+                        'notify' => $project->notify,
+                        'retries' => 0,
+                        'created_at' => current_time('mysql')
+                    ));
+                }
             }
         }
     }
