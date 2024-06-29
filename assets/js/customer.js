@@ -32,6 +32,7 @@ jQuery(function($) {
         e.preventDefault();
         var projectId = $(this).data('project-id');
         var modal = $('#chartModal');
+        var createdAt = $(this).closest('tr').find('td:nth-child(4)').text();
         $.ajax({
             url: ajax_object.ajaxurl,
             type: 'POST',
@@ -42,7 +43,6 @@ jQuery(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    var createdAt = $(this).closest('tr').find('td:nth-child(4)').text();
                     showChart(response.data, new Date(createdAt));
                 } else {
                     alert('Failed to load chart data');
