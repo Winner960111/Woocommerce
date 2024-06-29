@@ -14,7 +14,7 @@ class Rapid_URL_Indexer_API {
             self::check_low_balance($data['balance']['indexer']);
             return $data;
         } else {
-            self::log_api_error($response);
+            self::log_api_error($response, $project_id);
             return false;
         }
     }
@@ -73,7 +73,7 @@ class Rapid_URL_Indexer_API {
         return wp_remote_retrieve_response_code($response) === 200;
     }
 
-    private static function log_api_error($response) {
+    private static function log_api_error($response, $project_id = 0) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
 
@@ -93,13 +93,13 @@ class Rapid_URL_Indexer_API {
 
         $wpdb->insert($table_name, array(
             'user_id' => get_current_user_id(),
-            'project_id' => 0, // Set to 0 if no specific project is associated
+            'project_id' => $project_id,
             'action' => 'API Error',
             'details' => json_encode($error_details),
             'created_at' => current_time('mysql')
         ));
 
-        error_log('SpeedyIndex API Error: ' . json_encode($error_details));
+        error_log('SpeedyIndex API Error for Project ID ' . $project_id . ': ' . json_encode($error_details));
     }
     public static function create_task($api_key, $urls, $title = null) {
         $body = array('urls' => $urls);
