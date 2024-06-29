@@ -1,8 +1,8 @@
 <?php
 class Rapid_URL_Indexer_API {
     const API_BASE_URL = 'https://api.speedyindex.com';
-    const API_RATE_LIMIT = 5; // Maximum number of API requests per second
-    const API_RETRY_DELAY = 15; // Delay in seconds before retrying a failed API request 
+    const API_RATE_LIMIT = 100; // Maximum number of API requests per minute
+    const API_RETRY_DELAY = 60; // Delay in seconds before retrying a failed API request 
     const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
     const LOW_BALANCE_THRESHOLD = 100000; // Threshold for low balance notification
 
@@ -174,16 +174,25 @@ class Rapid_URL_Indexer_API {
         
         while ($retries < self::API_MAX_RETRIES) {
             // Implement rate limiting
-            static $last_request_time = 0;
-            $current_time = microtime(true);
-            $elapsed_time = $current_time - $last_request_time;
+            static $request_count = 0;
+            static $minute_start = 0;
             
-            if ($elapsed_time < 1 / self::API_RATE_LIMIT) {
-                $sleep_time = (1 / self::API_RATE_LIMIT - $elapsed_time) * 1000000;
-                usleep($sleep_time);
+            $current_time = time();
+            if ($minute_start === 0 || $current_time - $minute_start >= 60) {
+                $minute_start = $current_time;
+                $request_count = 0;
             }
             
-            $last_request_time = $current_time;
+            if ($request_count >= self::API_RATE_LIMIT) {
+                $sleep_time = 60 - ($current_time - $minute_start);
+                if ($sleep_time > 0) {
+                    sleep($sleep_time);
+                }
+                $minute_start = time();
+                $request_count = 0;
+            }
+            
+            $request_count++;
 
             // Retrieve the API key from the settings
             if (empty($api_key)) {
@@ -230,7 +239,7 @@ class Rapid_URL_Indexer_API {
                     if ($retry_after) {
                         sleep($retry_after);
                     } else {
-                        sleep(1);
+                        sleep(self::API_RETRY_DELAY);
                     }
                     $retries++;
                 } else {
