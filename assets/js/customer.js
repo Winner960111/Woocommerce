@@ -182,4 +182,28 @@ jQuery(function($) {
             modal.hide();
         }
     });
+
+    // Ensure the close button is properly positioned and visible
+    function positionCloseButton() {
+        var closeButton = $('.close');
+        var modalContent = $('.modal-content');
+        closeButton.css({
+            'position': 'absolute',
+            'top': '10px',
+            'right': '10px',
+            'z-index': '1001',
+            'cursor': 'pointer',
+            'font-size': '28px',
+            'color': '#ffffff'
+        });
+        modalContent.css('position', 'relative');
+    }
+
+    // Call this function when showing the chart
+    function showChart(data) {
+        // ... (existing chart creation code) ...
+
+        modal.css({'display': 'block', 'background-color': '#121212'});
+        positionCloseButton(); // Position the close button
+    }
 });

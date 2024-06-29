@@ -130,6 +130,7 @@ details ul {
     top: 10px;
     right: 20px;
     z-index: 1001;
+    display: block; /* Ensure it's visible */
 }
 
 .close:hover,
