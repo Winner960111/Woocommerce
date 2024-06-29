@@ -1,9 +1,5 @@
 jQuery(document).ready(function($) {
     console.log('Customer JS loaded');
-    
-    // Import Chart.js and the date adapter
-    import Chart from 'chart.js/auto';
-    import 'chartjs-adapter-date-fns';
 
     $('#rui-project-submission-form').on('submit', function(e) {
         e.preventDefault();
@@ -101,6 +97,7 @@ jQuery(document).ready(function($) {
                         type: 'time',
                         time: {
                             unit: 'day',
+                            parser: 'yyyy-MM-dd',
                             displayFormats: {
                                 day: 'MMM d'
                             }
