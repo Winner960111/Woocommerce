@@ -621,7 +621,7 @@ class Rapid_URL_Indexer {
         $user_id = $project->user_id;
 
         // Get API key
-        $api_key = get_option('speedyindex_api_key');
+        $api_key = get_option('rui_speedyindex_api_key');
 
         if (empty($api_key)) {
             error_log('Rapid URL Indexer: SpeedyIndex API key is not set.');
