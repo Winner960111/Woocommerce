@@ -91,25 +91,44 @@ jQuery(function($) {
 
         console.log('Data received for chart:', JSON.stringify(data, null, 2));
 
-        console.log('Data received for chart:', JSON.stringify(data, null, 2));
-
-        if (!data || !Array.isArray(data) || data.length === 0) {
-            console.error('Invalid or empty data format:', data);
-            modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid or empty data.</p>');
+        if (!data) {
+            console.error('Data is undefined or null');
+            modal.find('.modal-content').html('<p>Error: No data received for the chart.</p>');
             modal.css('display', 'block');
             return;
         }
 
-        var labels = data.map(item => item.date || '');
-        var indexedData = data.map(item => item.indexed_count || 0);
-        var unindexedData = data.map(item => item.unindexed_count || 0);
+        if (!Array.isArray(data)) {
+            console.error('Data is not an array:', typeof data);
+            modal.find('.modal-content').html('<p>Error: Invalid data format received for the chart.</p>');
+            modal.css('display', 'block');
+            return;
+        }
+
+        if (data.length === 0) {
+            console.error('Data array is empty');
+            modal.find('.modal-content').html('<p>No data available to display in the chart.</p>');
+            modal.css('display', 'block');
+            return;
+        }
+
+        var labels = [];
+        var indexedData = [];
+        var unindexedData = [];
+
+        for (var i = 0; i < data.length; i++) {
+            var item = data[i];
+            labels.push(item.date || '');
+            indexedData.push(item.indexed_count || 0);
+            unindexedData.push(item.unindexed_count || 0);
+        }
 
         console.log('Labels:', labels);
         console.log('Indexed Data:', indexedData);
         console.log('Unindexed Data:', unindexedData);
 
         if (indexedData.length === 0 && unindexedData.length === 0) {
-            modal.find('.modal-content').html('<p>No data available to display in the chart.</p>');
+            modal.find('.modal-content').html('<p>No valid data available to display in the chart.</p>');
             modal.css('display', 'block');
             return;
         }
