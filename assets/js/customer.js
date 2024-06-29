@@ -6,8 +6,6 @@ jQuery(function($) {
     }
 
     // Register the 'date' adapter for Chart.js
-    Chart.register(ChartDataLabels);
-    Chart.register(window.chartjs.adapter.date);
 
     $('#rui-project-submission-form').on('submit', function(e) {
         e.preventDefault();
@@ -67,21 +65,19 @@ jQuery(function($) {
             window.indexingChart.destroy();
         }
 
-        var startDate = new Date(createdAt);
-        var endDate = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 days after creation
-
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
+                labels: data.indexed.map(item => new Date(item.x * 1000).toLocaleDateString()),
                 datasets: [{
                     label: 'Indexed URLs',
-                    data: data.indexed.map(item => ({x: new Date(item.x * 1000), y: item.y})),
+                    data: data.indexed.map(item => item.y),
                     borderColor: '#4caf50',
                     backgroundColor: 'rgba(76, 175, 80, 0.1)',
                     fill: true
                 }, {
                     label: 'Unindexed URLs',
-                    data: data.unindexed.map(item => ({x: new Date(item.x * 1000), y: item.y})),
+                    data: data.unindexed.map(item => item.y),
                     borderColor: '#f44336',
                     backgroundColor: 'rgba(244, 67, 54, 0.1)',
                     fill: true
@@ -91,16 +87,6 @@ jQuery(function($) {
                 responsive: true,
                 scales: {
                     x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            parser: 'yyyy-MM-dd',
-                            displayFormats: {
-                                day: 'MMM d'
-                            }
-                        },
-                        min: startDate,
-                        max: endDate,
                         title: {
                             display: true,
                             text: 'Date',
