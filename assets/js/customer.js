@@ -1,6 +1,6 @@
-import Chart from 'https://cdn.jsdelivr.net/npm/chart.js/+esm';
+import Chart from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm';
 import { DateTime } from 'https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm';
-import chartjsAdapterLuxon from 'https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/+esm';
+import 'https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/+esm';
 
 jQuery(document).ready(function($) {
     console.log('Customer JS loaded');
@@ -99,11 +99,6 @@ jQuery(document).ready(function($) {
                 scales: {
                     x: {
                         type: 'time',
-                        adapters: {
-                            date: {
-                                locale: 'en'
-                            }
-                        },
                         time: {
                             unit: 'day',
                             parser: 'yyyy-MM-dd',
