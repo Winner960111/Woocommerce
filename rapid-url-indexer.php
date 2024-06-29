@@ -35,4 +35,5 @@ function rui_flush_rewrite_rules() {
 }
 Rapid_URL_Indexer_Admin::init();
 add_action('admin_init', array('Rapid_URL_Indexer_Admin', 'register_settings'));
+add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs'));
 

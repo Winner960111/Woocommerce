@@ -166,64 +166,61 @@ class Rapid_URL_Indexer_API {
             
             $last_request_time = $current_time;
 
-        // Retrieve the API key from the settings
-        $api_key = get_option('rui_speedyindex_api_key');
-        if (empty($api_key)) {
-            error_log('SpeedyIndex API Key is empty. Please check the plugin settings.');
-            return new WP_Error('api_key_missing', __('API key is missing. Please check the plugin settings.', 'rapid-url-indexer'));
-        }
-
-        // Make the API request
-        $args = array(
-            'headers' => array(
-                'Authorization' => $api_key
-            )
-        );
-
-        if ($body !== null) {
-            $args['body'] = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-            $args['headers']['Content-Type'] = 'application/json';
-        }
-
-
-        switch ($method) {
-            case 'GET':
-                $response = wp_remote_get(self::API_BASE_URL . $endpoint, $args);
-                break;
-            case 'POST':
-                $response = wp_remote_post(self::API_BASE_URL . $endpoint, $args);
-                break;
-            default:
-                return false;
-        }
-
-
-        if (is_wp_error($response)) {
-            $retries++;
-            if ($retries < self::API_MAX_RETRIES) {
-                sleep(self::API_RETRY_DELAY);
-            } else {
-                return false;
+            // Retrieve the API key from the settings
+            if (empty($api_key)) {
+                error_log('SpeedyIndex API Key is empty. Please check the plugin settings.');
+                return new WP_Error('api_key_missing', __('API key is missing. Please check the plugin settings.', 'rapid-url-indexer'));
             }
-        } else {
-            $response_code = wp_remote_retrieve_response_code($response);
-            
-            if ($response_code === 429) {
-                // Rate limit exceeded
-                $retry_after = wp_remote_retrieve_header($response, 'retry-after');
-                if ($retry_after) {
-                    sleep($retry_after);
-                } else {
-                    sleep(1);
-                }
+
+            // Make the API request
+            $args = array(
+                'headers' => array(
+                    'Authorization' => $api_key
+                )
+            );
+
+            if ($body !== null) {
+                $args['body'] = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+                $args['headers']['Content-Type'] = 'application/json';
+            }
+
+            switch ($method) {
+                case 'GET':
+                    $response = wp_remote_get(self::API_BASE_URL . $endpoint, $args);
+                    break;
+                case 'POST':
+                    $response = wp_remote_post(self::API_BASE_URL . $endpoint, $args);
+                    break;
+                default:
+                    return false;
+            }
+
+            if (is_wp_error($response)) {
                 $retries++;
+                if ($retries < self::API_MAX_RETRIES) {
+                    sleep(self::API_RETRY_DELAY);
+                } else {
+                    return false;
+                }
             } else {
-                return $response;
+                $response_code = wp_remote_retrieve_response_code($response);
+                
+                if ($response_code === 429) {
+                    // Rate limit exceeded
+                    $retry_after = wp_remote_retrieve_header($response, 'retry-after');
+                    if ($retry_after) {
+                        sleep($retry_after);
+                    } else {
+                        sleep(1);
+                    }
+                    $retries++;
+                } else {
+                    return $response;
+                }
             }
         }
-    }
 
-    return false;
+        return false;
     }
 
 

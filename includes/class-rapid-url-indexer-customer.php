@@ -134,15 +134,17 @@ class Rapid_URL_Indexer_Customer {
         } else {
             if (count($urls) > 0 && count($urls) <= 9999) {
                 $api_key = get_option('speedyindex_api_key');
-                $project_id = self::submit_project($project_name, $urls, $notify);
+                $project_id = self::submit_project($project_name, $urls, $notify, $user_id);
                 if ($project_id) {
-                    // Deduct credits
-                    self::update_user_credits($user_id, -count($urls), 'system', $project_id);
-
-                    wp_send_json_success(array(
-                        'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
-                        'project_id' => $project_id
-                    ));
+                    $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify);
+                    if ($api_response['success']) {
+                        wp_send_json_success(array(
+                            'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
+                            'project_id' => $project_id
+                        ));
+                    } else {
+                        wp_send_json_error(array('message' => $api_response['error']));
+                    }
                 } else {
                     wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
                 }
