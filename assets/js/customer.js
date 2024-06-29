@@ -91,18 +91,16 @@ jQuery(function($) {
 
         console.log('Data received for chart:', data);
 
-        var chartData = data.data || data;
-
-        if (!chartData || !Array.isArray(chartData.indexed) || !Array.isArray(chartData.unindexed)) {
+        if (!data || !Array.isArray(data.indexed) || !Array.isArray(data.unindexed)) {
             console.error('Invalid data format:', data);
             modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
             modal.css('display', 'block');
             return;
         }
 
-        var labels = chartData.indexed.map(item => item.x);
-        var indexedData = chartData.indexed.map(item => item.y);
-        var unindexedData = chartData.unindexed.map(item => item.y);
+        var labels = data.indexed.map(item => item.x);
+        var indexedData = data.indexed.map(item => item.y);
+        var unindexedData = data.unindexed.map(item => item.y);
 
         if (!Array.isArray(labels) || !Array.isArray(indexedData) || !Array.isArray(unindexedData)) {
             console.error('Invalid data format:', data);
