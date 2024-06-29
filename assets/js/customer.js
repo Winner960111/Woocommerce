@@ -1,7 +1,5 @@
 jQuery(function($) {
-    console.log('Customer JS loaded');
     if (typeof Chart === 'undefined') {
-        console.error('Chart.js is not loaded. Please make sure it is properly included in your HTML.');
         return;
     }
 
@@ -37,7 +35,6 @@ jQuery(function($) {
         var projectId = $(this).data('project-id');
         var modal = $('#chartModal');
         
-        console.log('Show chart clicked for project ID:', projectId);
         
         // Reset the chart container
         modal.find('.modal-content').html('<span class="close">&times;</span><canvas id="indexingChart"></canvas>');
@@ -54,17 +51,13 @@ jQuery(function($) {
                 security: ajax_object.security
             },
             success: function(response) {
-                console.log('AJAX response:', response);
                 if (response.success && response.data) {
-                    console.log('Calling showChart with data:', response.data);
                     showChart(response.data);
                 } else {
-                    console.error('Failed to load chart data:', response);
                     modal.find('.modal-content').html('<p>Failed to load chart data</p>');
                 }
             },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.error('AJAX error:', textStatus, errorThrown);
+            error: function() {
                 modal.find('.modal-content').html('<p>An error occurred while fetching chart data</p>');
             }
         });
@@ -81,14 +74,12 @@ jQuery(function($) {
     });
 
     function showChart(responseData) {
-        console.log('showChart function called with data:', responseData);
         var modal = $('#chartModal');
         var canvas = document.getElementById('indexingChart');
         var ctx = canvas.getContext('2d');
 
         // Ensure the chart is destroyed if it exists
         if (window.indexingChart instanceof Chart) {
-            console.log('Destroying existing chart');
             window.indexingChart.destroy();
         }
 
@@ -115,10 +106,8 @@ jQuery(function($) {
         canvas.height = 400; // Fixed height or adjust as needed
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        console.log('Data received for chart:', JSON.stringify(responseData, null, 2));
 
         if (!responseData || !responseData.data || !responseData.data.data || !Array.isArray(responseData.data.data)) {
-            console.error('Invalid data structure:', responseData);
             modal.find('.modal-content').html('<p style="color: #ffffff;">Error: Invalid data structure received for the chart.</p>');
             return;
         }
@@ -126,7 +115,6 @@ jQuery(function($) {
         var data = responseData.data.data;
 
         if (data.length === 0) {
-            console.error('Data array is empty');
             modal.find('.modal-content').html('<p style="color: #ffffff;">No data available to display in the chart.</p>');
             return;
         }
@@ -135,21 +123,14 @@ jQuery(function($) {
         var indexedData = [];
         var unindexedData = [];
 
-        console.log('Processing data array of length:', data.length);
         for (var i = 0; i < data.length; i++) {
             var item = data[i];
-            console.log('Processing item:', item);
             labels.push(item.date || '');
             indexedData.push(parseInt(item.indexed_count) || 0);
             unindexedData.push(parseInt(item.unindexed_count) || 0);
         }
 
-        console.log('Labels:', labels);
-        console.log('Indexed Data:', indexedData);
-        console.log('Unindexed Data:', unindexedData);
-
         if (indexedData.length === 0 && unindexedData.length === 0) {
-            console.error('No valid data to display');
             modal.find('.modal-content').html('<p style="color: #ffffff;">No valid data available to display in the chart.</p>');
             return;
         }
