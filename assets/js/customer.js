@@ -93,7 +93,7 @@ jQuery(function($) {
 
         console.log('Data received for chart:', JSON.stringify(data, null, 2));
 
-        if (!Array.isArray(data)) {
+        if (!data || !Array.isArray(data)) {
             console.error('Invalid data format:', data);
             modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
             modal.css('display', 'block');
