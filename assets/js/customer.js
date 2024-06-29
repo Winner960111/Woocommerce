@@ -65,19 +65,33 @@ jQuery(function($) {
             window.indexingChart.destroy();
         }
 
+        // Check if data.indexed and data.unindexed exist and are arrays
+        var labels = [];
+        var indexedData = [];
+        var unindexedData = [];
+
+        if (Array.isArray(data.indexed)) {
+            labels = data.indexed.map(item => new Date(item.x * 1000).toLocaleDateString());
+            indexedData = data.indexed.map(item => item.y);
+        }
+
+        if (Array.isArray(data.unindexed)) {
+            unindexedData = data.unindexed.map(item => item.y);
+        }
+
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.indexed.map(item => new Date(item.x * 1000).toLocaleDateString()),
+                labels: labels,
                 datasets: [{
                     label: 'Indexed URLs',
-                    data: data.indexed.map(item => item.y),
+                    data: indexedData,
                     borderColor: '#4caf50',
                     backgroundColor: 'rgba(76, 175, 80, 0.1)',
                     fill: true
                 }, {
                     label: 'Unindexed URLs',
-                    data: data.unindexed.map(item => item.y),
+                    data: unindexedData,
                     borderColor: '#f44336',
                     backgroundColor: 'rgba(244, 67, 54, 0.1)',
                     fill: true
