@@ -57,8 +57,8 @@ jQuery(document).ready(function($) {
         var canvas = document.getElementById('indexingChart');
         var ctx = canvas.getContext('2d');
 
-        // Clear any existing chart
-        if (window.indexingChart instanceof Chart) {
+        // Destroy any existing chart
+        if (window.indexingChart && window.indexingChart.destroy) {
             window.indexingChart.destroy();
         }
 
