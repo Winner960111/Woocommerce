@@ -60,9 +60,12 @@ jQuery(function($) {
         var ctx = canvas.getContext('2d');
 
         // Destroy any existing chart
-        if (window.indexingChart && window.indexingChart.destroy) {
+        if (window.indexingChart instanceof Chart) {
             window.indexingChart.destroy();
         }
+
+        // Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         var labels = [];
         var indexedData = [];
