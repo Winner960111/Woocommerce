@@ -109,11 +109,11 @@ details ul {
 }
 
 .modal-content {
-    background-color: #121212;
-    color: #ffffff;
+    background-color: var(--wp--preset--color--inputbg);
+    color: var(--wp--preset--color--inputtext);
     margin: 5% auto;
     padding: 20px;
-    border: 1px solid #333;
+    border: 1px solid var(--wp--preset--color--inputtext);
     width: 90%;
     max-width: 800px;
     max-height: 90vh;
@@ -121,7 +121,7 @@ details ul {
 }
 
 .close {
-    color: #aaa;
+    color: var(--wp--preset--color--inputtext);
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -150,9 +150,10 @@ details ul {
 .chart-data-table th, .chart-data-table td {
     padding: 8px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--wp--preset--color--inputtext);
 }
 
 .chart-data-table th {
-    background-color: #f2f2f2;
+    background-color: var(--wp--preset--color--inputbg);
+    color: var(--wp--preset--color--inputtext);
 }
