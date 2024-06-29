@@ -68,16 +68,16 @@ jQuery(document).ready(function($) {
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.dates.map(date => new Date(date).toLocaleDateString()),
+                labels: data.dates,
                 datasets: [{
                     label: 'Indexed URLs',
-                    data: data.indexed,
+                    data: data.indexed.map((value, index) => ({x: data.dates[index], y: value})),
                     borderColor: '#4caf50',
                     backgroundColor: 'rgba(76, 175, 80, 0.1)',
                     fill: true
                 }, {
                     label: 'Unindexed URLs',
-                    data: data.unindexed,
+                    data: data.unindexed.map((value, index) => ({x: data.dates[index], y: value})),
                     borderColor: '#f44336',
                     backgroundColor: 'rgba(244, 67, 54, 0.1)',
                     fill: true
@@ -89,7 +89,10 @@ jQuery(document).ready(function($) {
                     x: {
                         type: 'time',
                         time: {
-                            unit: 'day'
+                            unit: 'day',
+                            displayFormats: {
+                                day: 'MMM d'
+                            }
                         },
                         min: startDate,
                         max: endDate,
