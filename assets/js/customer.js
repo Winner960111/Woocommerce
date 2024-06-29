@@ -93,16 +93,16 @@ jQuery(function($) {
 
         console.log('Data received for chart:', JSON.stringify(data, null, 2));
 
-        if (!data || !Array.isArray(data)) {
-            console.error('Invalid data format:', data);
-            modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            console.error('Invalid or empty data format:', data);
+            modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid or empty data.</p>');
             modal.css('display', 'block');
             return;
         }
 
-        var labels = data?.map(item => item.date) || [];
-        var indexedData = data?.map(item => item.indexed_count) || [];
-        var unindexedData = data?.map(item => item.unindexed_count) || [];
+        var labels = data.map(item => item.date || '');
+        var indexedData = data.map(item => item.indexed_count || 0);
+        var unindexedData = data.map(item => item.unindexed_count || 0);
 
         console.log('Labels:', labels);
         console.log('Indexed Data:', indexedData);
