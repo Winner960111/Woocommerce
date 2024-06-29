@@ -375,7 +375,19 @@ class Rapid_URL_Indexer_Customer {
             if (!empty($stats)) {
                 wp_send_json_success(array('data' => $stats));
             } else {
-                wp_send_json_error(array('message' => 'No data available for the project'));
+                // Fallback to project data if no stats are available
+                $total_urls = count(json_decode($project->urls));
+                $indexed_urls = count(json_decode($project->indexed_urls));
+                $unindexed_urls = $total_urls - $indexed_urls;
+
+                $fallback_data = array(
+                    array(
+                        'date' => $created_at->format('Y-m-d'),
+                        'indexed_count' => $indexed_urls,
+                        'unindexed_count' => $unindexed_urls
+                    )
+                );
+                wp_send_json_success(array('data' => $fallback_data, 'is_fallback' => true));
             }
         } else {
             wp_send_json_error('Project not found or access denied');
