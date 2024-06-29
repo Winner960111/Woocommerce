@@ -565,7 +565,15 @@ class Rapid_URL_Indexer {
         $user_id = $project->user_id;
 
         // Get API key
-        $api_key = get_option('speedyindex_api_key');
+        $api_key = get_option('rui_speedyindex_api_key');
+
+        if (empty($api_key)) {
+            error_log('Rapid URL Indexer: SpeedyIndex API key is not set.');
+            return array(
+                'success' => false,
+                'error' => __('API key is not set. Please contact the administrator.', 'rapid-url-indexer')
+            );
+        }
 
         // Check if user has enough credits
         $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
@@ -629,27 +637,30 @@ class Rapid_URL_Indexer {
                 }
 
                 // Add to backlog if API response code is 1 or 2
-                if (isset($response_body['code']) && in_array($response_body['code'], [1, 2])) {
+                if (isset($response['code']) && in_array($response['code'], [1, 2])) {
                     self::add_to_backlog($project_id, $urls, $notify);
                 }
 
-                $result = array(
+                return array(
                     'success' => true,
                     'error' => null
                 );
             } else {
                 // Log the error
+                $error_details = is_wp_error($response) ? $response->get_error_message() : json_encode($response);
+                error_log('Rapid URL Indexer API Error: ' . $error_details);
+                
                 $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                    'user_id' => get_current_user_id(),
+                    'user_id' => $user_id,
                     'project_id' => $project_id,
                     'action' => 'API Error',
-                    'details' => json_encode($response),
+                    'details' => $error_details,
                     'created_at' => current_time('mysql')
                 ));
 
                 return array(
                     'success' => false,
-                    'error' => __('An error occurred while submitting the project.', 'rapid-url-indexer')
+                    'error' => __('An error occurred while submitting the project. Please try again later or contact support.', 'rapid-url-indexer')
                 );
             }
         } else {
