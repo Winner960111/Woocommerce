@@ -29,6 +29,7 @@ register_deactivation_hook(__FILE__, array('Rapid_URL_Indexer_Deactivator', 'dea
 
 add_action('plugins_loaded', array('Rapid_URL_Indexer', 'init'));
 add_action('plugins_loaded', array('Rapid_URL_Indexer_Customer', 'init'));
+add_action('plugins_loaded', array('Rapid_URL_Indexer_Cron', 'init'));
 register_activation_hook(__FILE__, 'rui_flush_rewrite_rules');
 function rui_flush_rewrite_rules() {
     Rapid_URL_Indexer_Customer::add_my_account_endpoints();
