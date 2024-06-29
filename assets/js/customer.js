@@ -68,7 +68,9 @@ jQuery(function($) {
             window.indexingChart.destroy();
         }
 
-        // Clear the canvas
+        // Clear the canvas and reset its dimensions
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         var labels = [];
