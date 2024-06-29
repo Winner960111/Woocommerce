@@ -120,7 +120,10 @@ jQuery(function($) {
                 responsive: true,
                 scales: {
                     x: {
-                        type: 'category',
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        },
                         title: {
                             display: true,
                             text: 'Date',
