@@ -288,7 +288,7 @@ class Rapid_URL_Indexer_Customer {
 
     public static function enqueue_scripts() {
         wp_enqueue_style('rui-customer-css', RUI_PLUGIN_URL . 'assets/css/customer.css');
-        wp_enqueue_script('chart-js', 'https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js', array(), '4.3.0', true);
+        wp_enqueue_script('chart-js', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js', array(), '4.4.1', true);
         wp_enqueue_script('rui-customer-js', RUI_PLUGIN_URL . 'assets/js/customer.js', array('jquery', 'chart-js'), null, true);
         wp_localize_script('rui-customer-js', 'ajax_object', array(
             'ajaxurl' => admin_url('admin-ajax.php'),

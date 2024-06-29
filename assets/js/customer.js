@@ -95,11 +95,6 @@ jQuery(document).ready(function($) {
                 scales: {
                     x: {
                         type: 'time',
-                        adapters: {
-                            date: {
-                                locale: enUS
-                            }
-                        },
                         time: {
                             unit: 'day',
                             displayFormats: {
