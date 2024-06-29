@@ -77,7 +77,11 @@ jQuery(function($) {
 
         if (data && Array.isArray(data.indexed) && Array.isArray(data.unindexed)) {
             data.indexed.forEach((item, index) => {
-                labels.push(item.x);
+                var date = new Date(item.x);
+                var formattedDate = date.getFullYear() + '-' + 
+                                    ('0' + (date.getMonth() + 1)).slice(-2) + '-' + 
+                                    ('0' + date.getDate()).slice(-2);
+                labels.push(formattedDate);
                 indexedData.push(item.y);
                 unindexedData.push(data.unindexed[index].y);
             });
