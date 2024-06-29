@@ -21,6 +21,9 @@ require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-admin.php';
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-customer.php';
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-cron.php';
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-api.php';
+
+// Initialize the cron job
+Rapid_URL_Indexer_Cron::init();
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer.php';
 
 // Activation/Deactivation hooks
