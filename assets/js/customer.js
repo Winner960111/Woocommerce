@@ -172,14 +172,16 @@ jQuery(function($) {
         modal.css({'display': 'block', 'background-color': '#121212'});
     }
 
-    $(document).on('click', '.close', function() {
+    function closeModal() {
         $('#chartModal').hide();
-    });
+    }
+
+    $(document).on('click', '.close', closeModal);
 
     $(document).on('click', function(event) {
         var modal = $('#chartModal');
         if (event.target === modal[0]) {
-            modal.hide();
+            closeModal();
         }
     });
 
@@ -199,11 +201,17 @@ jQuery(function($) {
         modalContent.css('position', 'relative');
     }
 
-    // Call this function when showing the chart
     function showChart(data) {
+        var modal = $('#chartModal');
+        var canvas = document.getElementById('indexingChart');
+        var ctx = canvas.getContext('2d');
+
         // ... (existing chart creation code) ...
 
         modal.css({'display': 'block', 'background-color': '#121212'});
         positionCloseButton(); // Position the close button
+
+        // Ensure the close button is clickable
+        $('.close').off('click').on('click', closeModal);
     }
 });
