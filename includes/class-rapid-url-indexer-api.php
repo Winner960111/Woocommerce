@@ -74,13 +74,32 @@ class Rapid_URL_Indexer_API {
     }
 
     private static function log_api_error($response) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
+
         if (is_wp_error($response)) {
-            error_log('SpeedyIndex API Error: ' . $response->get_error_message());
+            $error_details = array(
+                'error_message' => $response->get_error_message(),
+                'error_code' => $response->get_error_code(),
+                'error_data' => $response->get_error_data()
+            );
         } else {
-            $response_body = json_decode(wp_remote_retrieve_body($response), true);
-            $error_message = isset($response_body['message']) ? $response_body['message'] : 'Unknown error';
-            error_log('SpeedyIndex API Error: ' . $error_message);
+            $error_details = array(
+                'response_code' => wp_remote_retrieve_response_code($response),
+                'response_message' => wp_remote_retrieve_response_message($response),
+                'response_body' => wp_remote_retrieve_body($response)
+            );
         }
+
+        $wpdb->insert($table_name, array(
+            'user_id' => get_current_user_id(),
+            'project_id' => 0, // Set to 0 if no specific project is associated
+            'action' => 'API Error',
+            'details' => json_encode($error_details),
+            'created_at' => current_time('mysql')
+        ));
+
+        error_log('SpeedyIndex API Error: ' . json_encode($error_details));
     }
     public static function create_task($api_key, $urls, $title = null) {
         $body = array('urls' => $urls);
