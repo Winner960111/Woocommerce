@@ -70,7 +70,7 @@ jQuery(function($) {
 
         if (data && Array.isArray(data.indexed) && Array.isArray(data.unindexed)) {
             data.indexed.forEach((item, index) => {
-                labels.push(new Date(item.x).toISOString().split('T')[0]);
+                labels.push(item.x);
                 indexedData.push(item.y);
                 unindexedData.push(data.unindexed[index].y);
             });
