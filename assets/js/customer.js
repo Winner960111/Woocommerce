@@ -100,13 +100,22 @@ jQuery(function($) {
             return;
         }
 
-        try {
-            var labels = data.map(item => item.date);
-            var indexedData = data.map(item => item.indexed_count);
-            var unindexedData = data.map(item => item.unindexed_count);
-        } catch (error) {
-            console.error('Error mapping data properties:', error);
-            modal.find('.modal-content').html('<p>Error: Unable to process data for chart.</p>');
+        var labels = [];
+        var indexedData = [];
+        var unindexedData = [];
+
+        if (Array.isArray(data)) {
+            data.forEach(item => {
+                if (item.hasOwnProperty('date') && item.hasOwnProperty('indexed_count') && item.hasOwnProperty('unindexed_count')) {
+                    labels.push(item.date);
+                    indexedData.push(item.indexed_count);
+                    unindexedData.push(item.unindexed_count);
+                }
+            });
+        }
+
+        if (labels.length === 0) {
+            modal.find('.modal-content').html('<p>No valid data available to display in the chart.</p>');
             modal.css('display', 'block');
             return;
         }
