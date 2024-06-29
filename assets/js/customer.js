@@ -89,18 +89,29 @@ jQuery(function($) {
         canvas.height = 400; // Fixed height or adjust as needed
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        console.log('Data received for chart:', data);
+        console.log('Data received for chart:', JSON.stringify(data, null, 2));
 
-        if (!data || !Array.isArray(data.indexed) || !Array.isArray(data.unindexed)) {
+        if (!data || !data.indexed || !data.unindexed || !Array.isArray(data.indexed) || !Array.isArray(data.unindexed)) {
             console.error('Invalid data format:', data);
             modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
             modal.css('display', 'block');
             return;
         }
 
-        var labels = data.indexed.map(item => item.x);
-        var indexedData = data.indexed.map(item => item.y);
-        var unindexedData = data.unindexed.map(item => item.y);
+        var labels = [];
+        var indexedData = [];
+        var unindexedData = [];
+
+        try {
+            labels = data.indexed.map(item => item.x);
+            indexedData = data.indexed.map(item => item.y);
+            unindexedData = data.unindexed.map(item => item.y);
+        } catch (error) {
+            console.error('Error mapping data:', error);
+            modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
+            modal.css('display', 'block');
+            return;
+        }
 
         if (!Array.isArray(labels) || !Array.isArray(indexedData) || !Array.isArray(unindexedData)) {
             console.error('Invalid data format:', data);
