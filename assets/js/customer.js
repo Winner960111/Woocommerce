@@ -203,7 +203,10 @@ jQuery(function($) {
         positionCloseButton(); // Position the close button
 
         // Ensure the close button is clickable
-        $('.close').off('click').on('click', closeModal);
+        $('.close').off('click').on('click', function(event) {
+            event.stopPropagation();
+            closeModal();
+        });
 
         // Add click event listener to close modal when clicking outside
         $(document).on('click', function(event) {
@@ -214,5 +217,8 @@ jQuery(function($) {
     }
 
     // Add this line at the end of the jQuery(function($) { ... }) block
-    $(document).on('click', '.close', closeModal);
+    $(document).on('click', '.close', function(event) {
+        event.stopPropagation();
+        closeModal();
+    });
 });
