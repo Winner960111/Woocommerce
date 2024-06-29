@@ -92,6 +92,24 @@ jQuery(function($) {
             window.indexingChart.destroy();
         }
 
+        // Set modal styles
+        modal.css({
+            'display': 'block',
+            'background-color': '#121212',
+            'color': '#ffffff'
+        });
+
+        // Set modal content styles
+        modal.find('.modal-content').css({
+            'background-color': '#1e1e1e',
+            'color': '#ffffff',
+            'padding': '20px',
+            'border-radius': '5px'
+        });
+
+        // Position close button
+        positionCloseButton();
+
         // Reset canvas dimensions and clear it
         canvas.width = modal.width() * 0.9; // 90% of modal width
         canvas.height = 400; // Fixed height or adjust as needed
@@ -101,8 +119,7 @@ jQuery(function($) {
 
         if (!responseData || !responseData.data || !responseData.data.data || !Array.isArray(responseData.data.data)) {
             console.error('Invalid data structure:', responseData);
-            modal.find('.modal-content').html('<p>Error: Invalid data structure received for the chart.</p>');
-            modal.css('display', 'block');
+            modal.find('.modal-content').html('<p style="color: #ffffff;">Error: Invalid data structure received for the chart.</p>');
             return;
         }
 
@@ -110,8 +127,7 @@ jQuery(function($) {
 
         if (data.length === 0) {
             console.error('Data array is empty');
-            modal.find('.modal-content').html('<p>No data available to display in the chart.</p>');
-            modal.css('display', 'block');
+            modal.find('.modal-content').html('<p style="color: #ffffff;">No data available to display in the chart.</p>');
             return;
         }
 
@@ -134,8 +150,7 @@ jQuery(function($) {
 
         if (indexedData.length === 0 && unindexedData.length === 0) {
             console.error('No valid data to display');
-            modal.find('.modal-content').html('<p>No valid data available to display in the chart.</p>');
-            modal.css('display', 'block');
+            modal.find('.modal-content').html('<p style="color: #ffffff;">No valid data available to display in the chart.</p>');
             return;
         }
 
@@ -160,6 +175,7 @@ jQuery(function($) {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         type: 'category',
@@ -194,30 +210,30 @@ jQuery(function($) {
                     legend: {
                         position: 'top',
                         labels: {
-                            color: '#ffffff' // White text for legend labels
+                            color: '#ffffff'
                         }
                     },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
-                        backgroundColor: '#1e1e1e', // Dark background for tooltip
-                        titleColor: '#ffffff', // White text for tooltip title
-                        bodyColor: '#ffffff', // White text for tooltip body
-                        borderColor: '#424242', // Dark grey border for tooltip
+                        backgroundColor: '#1e1e1e',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#424242',
                         borderWidth: 1
                     }
                 }
             }
         });
-
-        modal.css({'display': 'block', 'background-color': '#121212'});
     }
 
     function closeModal() {
         $('#chartModal').hide();
+        if (window.indexingChart instanceof Chart) {
+            window.indexingChart.destroy();
+        }
     }
 
-    // Ensure the close button is properly positioned and visible
     function positionCloseButton() {
         var closeButton = $('.close');
         var modalContent = $('.modal-content');
@@ -233,33 +249,16 @@ jQuery(function($) {
         modalContent.css('position', 'relative');
     }
 
-    function showChart(data) {
-        var modal = $('#chartModal');
-        var canvas = document.getElementById('indexingChart');
-        var ctx = canvas.getContext('2d');
-
-        // ... (existing chart creation code) ...
-
-        modal.css({'display': 'block', 'background-color': '#121212'});
-        positionCloseButton(); // Position the close button
-
-        // Ensure the close button is clickable
-        $('.close').off('click').on('click', function(event) {
-            event.stopPropagation();
-            closeModal();
-        });
-
-        // Add click event listener to close modal when clicking outside
-        $(document).on('click', function(event) {
-            if (event.target === modal[0]) {
-                closeModal();
-            }
-        });
-    }
-
-    // Add this line at the end of the jQuery(function($) { ... }) block
+    // Ensure the close button is clickable
     $(document).on('click', '.close', function(event) {
         event.stopPropagation();
         closeModal();
+    });
+
+    // Add click event listener to close modal when clicking outside
+    $(document).on('click', '#chartModal', function(event) {
+        if (event.target === this) {
+            closeModal();
+        }
     });
 });
