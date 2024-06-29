@@ -109,7 +109,6 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         <div class="modal-content">
             <span class="close">&times;</span>
             <canvas id="indexingChart"></canvas>
-            <div id="chartDataTable"></div>
         </div>
     </div>
 
