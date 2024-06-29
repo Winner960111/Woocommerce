@@ -62,21 +62,33 @@ class Rapid_URL_Indexer {
         }
     }
 
-    public static function update_daily_stats($project_id, $indexed_count, $unindexed_count) {
+    public static function update_daily_stats($project_id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
+        $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
         $date = current_time('Y-m-d');
 
-        $wpdb->replace(
-            $table_name,
-            array(
-                'project_id' => $project_id,
-                'date' => $date,
-                'indexed_count' => $indexed_count,
-                'unindexed_count' => $unindexed_count
-            ),
-            array('%d', '%s', '%d', '%d')
-        );
+        // Get the latest project data
+        $project = $wpdb->get_row($wpdb->prepare(
+            "SELECT indexed_links, submitted_links FROM $projects_table WHERE id = %d",
+            $project_id
+        ));
+
+        if ($project) {
+            $indexed_count = $project->indexed_links;
+            $unindexed_count = $project->submitted_links - $project->indexed_links;
+
+            $wpdb->replace(
+                $stats_table,
+                array(
+                    'project_id' => $project_id,
+                    'date' => $date,
+                    'indexed_count' => $indexed_count,
+                    'unindexed_count' => $unindexed_count
+                ),
+                array('%d', '%s', '%d', '%d')
+            );
+        }
     }
 
     public static function get_project_stats($project_id) {
@@ -253,7 +265,7 @@ class Rapid_URL_Indexer {
                 $wpdb->update($table_name, $update_data, array('task_id' => $project->task_id));
 
                 // Update daily stats
-                self::update_daily_stats($project->id, $indexed_links, $total_urls - $indexed_links);
+                self::update_daily_stats($project->id);
 
                 if ($status === 'completed' && $project->status !== 'completed') {
                     // Log the project status change
