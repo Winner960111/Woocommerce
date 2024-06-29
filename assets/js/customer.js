@@ -64,18 +64,28 @@ jQuery(document).ready(function($) {
             window.indexingChart.destroy();
         }
 
+        // Parse dates
+        var parsedData = data.dates.map((date, index) => ({
+            x: new Date(date),
+            y: data.indexed[index]
+        }));
+
+        var parsedUnindexedData = data.dates.map((date, index) => ({
+            x: new Date(date),
+            y: data.unindexed[index]
+        }));
+
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.dates,
                 datasets: [{
                     label: 'Indexed URLs',
-                    data: data.dates.map((date, index) => ({x: date, y: data.indexed[index]})),
+                    data: parsedData,
                     borderColor: 'green',
                     fill: false
                 }, {
                     label: 'Unindexed URLs',
-                    data: data.dates.map((date, index) => ({x: date, y: data.unindexed[index]})),
+                    data: parsedUnindexedData,
                     borderColor: 'red',
                     fill: false
                 }]

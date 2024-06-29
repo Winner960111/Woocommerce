@@ -289,7 +289,8 @@ class Rapid_URL_Indexer_Customer {
     public static function enqueue_scripts() {
         wp_enqueue_style('rui-customer-css', RUI_PLUGIN_URL . 'assets/css/customer.css');
         wp_enqueue_script('chart-js', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js', array(), '3.7.0', true);
-        wp_enqueue_script('chart-js-adapter', 'https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.min.js', array('chart-js'), '3.0.0', true);
+        wp_enqueue_script('date-fns', 'https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/date-fns.min.js', array(), '2.29.3', true);
+        wp_enqueue_script('chart-js-adapter', 'https://cdnjs.cloudflare.com/ajax/libs/chartjs-adapter-date-fns/3.0.0/chartjs-adapter-date-fns.min.js', array('chart-js', 'date-fns'), '3.0.0', true);
         wp_enqueue_script('rui-customer-js', RUI_PLUGIN_URL . 'assets/js/customer.js', array('jquery', 'chart-js', 'chart-js-adapter'), null, true);
         wp_localize_script('rui-customer-js', 'ajax_object', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
