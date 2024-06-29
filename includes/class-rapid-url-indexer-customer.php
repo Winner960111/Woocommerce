@@ -333,8 +333,15 @@ class Rapid_URL_Indexer_Customer {
 
             foreach ($stats as $stat) {
                 $dates[] = $stat['date'];
-                $indexed[] = $stat['indexed_count'];
-                $unindexed[] = $stat['unindexed_count'];
+                $indexed[] = intval($stat['indexed_count']);
+                $unindexed[] = intval($stat['unindexed_count']);
+            }
+
+            // If there are no stats yet, use the project's current values
+            if (empty($stats)) {
+                $dates[] = date('Y-m-d');
+                $indexed[] = intval($project->indexed_links);
+                $unindexed[] = intval($project->submitted_links) - intval($project->indexed_links);
             }
 
             wp_send_json_success(array(

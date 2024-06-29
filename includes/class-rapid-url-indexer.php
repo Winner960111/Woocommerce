@@ -81,15 +81,35 @@ class Rapid_URL_Indexer {
 
     public static function get_project_stats($project_id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
+        $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
+        $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
+        
         $stats = $wpdb->get_results($wpdb->prepare(
             "SELECT date, indexed_count, unindexed_count 
-            FROM $table_name 
+            FROM $stats_table 
             WHERE project_id = %d 
             ORDER BY date ASC 
             LIMIT 14",
             $project_id
         ), ARRAY_A);
+
+        if (empty($stats)) {
+            // If no stats are available, get the current project data
+            $project = $wpdb->get_row($wpdb->prepare(
+                "SELECT indexed_links, submitted_links, created_at 
+                FROM $projects_table 
+                WHERE id = %d",
+                $project_id
+            ));
+
+            if ($project) {
+                $stats[] = array(
+                    'date' => $project->created_at,
+                    'indexed_count' => $project->indexed_links,
+                    'unindexed_count' => $project->submitted_links - $project->indexed_links
+                );
+            }
+        }
 
         return $stats;
     }
