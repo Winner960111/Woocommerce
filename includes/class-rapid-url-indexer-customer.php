@@ -351,13 +351,29 @@ class Rapid_URL_Indexer_Customer {
         $user_id = get_current_user_id();
 
         global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d AND user_id = %d", $project_id, $user_id));
+        $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
+
+        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d AND user_id = %d", $project_id, $user_id));
 
         if ($project) {
-            $stats = Rapid_URL_Indexer::get_project_stats($project_id);
+            $created_at = new DateTime($project->created_at);
+            $end_date = clone $created_at;
+            $end_date->modify('+13 days');
+
+            $stats = $wpdb->get_results($wpdb->prepare(
+                "SELECT date, indexed_count, unindexed_count 
+                FROM $stats_table 
+                WHERE project_id = %d 
+                AND date BETWEEN %s AND %s 
+                ORDER BY date ASC",
+                $project_id,
+                $created_at->format('Y-m-d'),
+                $end_date->format('Y-m-d')
+            ));
+
             if (!empty($stats)) {
-                wp_send_json_success(array('data' => array('data' => $stats)));
+                wp_send_json_success(array('data' => $stats));
             } else {
                 wp_send_json_error(array('message' => 'No data available for the project'));
             }

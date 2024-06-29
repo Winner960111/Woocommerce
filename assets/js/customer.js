@@ -106,13 +106,12 @@ jQuery(function($) {
         canvas.height = 400; // Fixed height or adjust as needed
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-
-        if (!responseData || !responseData.data || !responseData.data.data || !Array.isArray(responseData.data.data)) {
+        if (!responseData || !responseData.data || !Array.isArray(responseData.data)) {
             modal.find('.modal-content').html('<p style="color: #ffffff;">Error: Invalid data structure received for the chart.</p>');
             return;
         }
 
-        var data = responseData.data.data;
+        var data = responseData.data;
 
         if (data.length === 0) {
             modal.find('.modal-content').html('<p style="color: #ffffff;">No data available to display in the chart.</p>');
