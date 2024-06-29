@@ -89,21 +89,11 @@ jQuery(function($) {
         canvas.height = 400; // Fixed height or adjust as needed
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        var labels = [];
-        var indexedData = [];
-        var unindexedData = [];
+        var labels = data.indexed.map(item => item.x);
+        var indexedData = data.indexed.map(item => item.y);
+        var unindexedData = data.unindexed.map(item => item.y);
 
-        if (data && Array.isArray(data.indexed) && Array.isArray(data.unindexed)) {
-            data.indexed.forEach((item, index) => {
-                var date = new Date(item.x);
-                var formattedDate = date.getFullYear() + '-' + 
-                                    ('0' + (date.getMonth() + 1)).slice(-2) + '-' + 
-                                    ('0' + date.getDate()).slice(-2);
-                labels.push(formattedDate);
-                indexedData.push(item.y);
-                unindexedData.push(data.unindexed[index].y);
-            });
-        } else {
+        if (!Array.isArray(labels) || !Array.isArray(indexedData) || !Array.isArray(unindexedData)) {
             console.error('Invalid data format:', data);
             modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
             modal.css('display', 'block');
