@@ -1,6 +1,8 @@
-import Chart from 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm';
-
 jQuery(document).ready(function($) {
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded. Please make sure it is properly included in your HTML.');
+        return;
+    }
     console.log('Customer JS loaded');
 
     $('#rui-project-submission-form').on('submit', function(e) {
