@@ -1,6 +1,6 @@
 import Chart from 'https://cdn.jsdelivr.net/npm/chart.js/+esm';
-import 'https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js';
-import 'https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js';
+import { DateTime } from 'https://cdn.jsdelivr.net/npm/luxon@3.4.4/+esm';
+import chartjsAdapterLuxon from 'https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/+esm';
 
 jQuery(document).ready(function($) {
     console.log('Customer JS loaded');
