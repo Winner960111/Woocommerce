@@ -5,18 +5,33 @@ class Rapid_URL_Indexer {
     public static function init() {
         self::load_dependencies();
         self::define_hooks();
-        // Schedule abuse check
+        self::initialize_cron_jobs();
+    }
+
+    private static function initialize_cron_jobs() {
+        // Schedule cron jobs if they're not already scheduled
+        if (!wp_next_scheduled('rui_cron_job')) {
+            wp_schedule_event(time(), 'hourly', 'rui_cron_job');
+        }
+        if (!wp_next_scheduled('rui_check_abuse')) {
+            wp_schedule_event(time(), 'daily', 'rui_check_abuse');
+        }
+        if (!wp_next_scheduled('rui_process_backlog')) {
+            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
+        }
+        if (!wp_next_scheduled('rui_purge_logs')) {
+            wp_schedule_event(time(), 'daily', 'rui_purge_logs');
+        }
+        if (!wp_next_scheduled('rui_purge_projects')) {
+            wp_schedule_event(time(), 'daily', 'rui_purge_projects');
+        }
+
+        // Add actions for cron jobs
+        add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs'));
         add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
-    
-
-        // Schedule backlog processing
         add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
-
-        // Schedule project purging
-        add_action('rui_purge_projects', array('Rapid_URL_Indexer', 'purge_projects'));
-
-        // Schedule log purging
         add_action('rui_purge_logs', array('Rapid_URL_Indexer', 'purge_logs'));
+        add_action('rui_purge_projects', array('Rapid_URL_Indexer', 'purge_projects'));
     }
 
     public static function purge_logs() {
