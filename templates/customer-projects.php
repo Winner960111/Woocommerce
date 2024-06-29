@@ -89,15 +89,25 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                         <?php else: ?>
                             <?php if ($hours_since_submission >= 50): ?>
                                 <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button wp-element-button">Download Report</a>
+                                <br>
+                                <a href="#" class="show-chart" data-project-id="<?php echo esc_attr($project->id); ?>">Show Chart</a>
                             <?php else: ?>
                                 <span>Waiting...</span>
                             <?php endif; ?>
                         <?php endif; ?>
-                    </td
+                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
+
+    <!-- Chart Modal -->
+    <div id="chartModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <canvas id="indexingChart"></canvas>
+        </div>
+    </div>
     <br>
     <ul>
         <li><strong>Pending:</strong> The project has been created but not yet submitted for indexing.</li>

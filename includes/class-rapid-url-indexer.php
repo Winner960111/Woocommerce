@@ -47,13 +47,51 @@ class Rapid_URL_Indexer {
 
     public static function purge_projects() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
         $project_age_limit = get_option('rui_project_age_limit', 30); // Default to 30 days
 
-        $wpdb->query($wpdb->prepare(
-            "DELETE FROM $table_name WHERE created_at < NOW() - INTERVAL %d DAY",
+        $old_projects = $wpdb->get_col($wpdb->prepare(
+            "SELECT id FROM $projects_table WHERE created_at < NOW() - INTERVAL %d DAY",
             $project_age_limit
         ));
+
+        if (!empty($old_projects)) {
+            $wpdb->query("DELETE FROM $stats_table WHERE project_id IN (" . implode(',', $old_projects) . ")");
+            $wpdb->query("DELETE FROM $projects_table WHERE id IN (" . implode(',', $old_projects) . ")");
+        }
+    }
+
+    public static function update_daily_stats($project_id, $indexed_count, $unindexed_count) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
+        $date = current_time('Y-m-d');
+
+        $wpdb->replace(
+            $table_name,
+            array(
+                'project_id' => $project_id,
+                'date' => $date,
+                'indexed_count' => $indexed_count,
+                'unindexed_count' => $unindexed_count
+            ),
+            array('%d', '%s', '%d', '%d')
+        );
+    }
+
+    public static function get_project_stats($project_id) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
+        $stats = $wpdb->get_results($wpdb->prepare(
+            "SELECT date, indexed_count, unindexed_count 
+            FROM $table_name 
+            WHERE project_id = %d 
+            ORDER BY date ASC 
+            LIMIT 14",
+            $project_id
+        ), ARRAY_A);
+
+        return $stats;
     }
 
     public static function process_backlog() {
@@ -193,6 +231,9 @@ class Rapid_URL_Indexer {
                 );
 
                 $wpdb->update($table_name, $update_data, array('task_id' => $project->task_id));
+
+                // Update daily stats
+                self::update_daily_stats($project->id, $indexed_links, $total_urls - $indexed_links);
 
                 if ($status === 'completed' && $project->status !== 'completed') {
                     // Log the project status change

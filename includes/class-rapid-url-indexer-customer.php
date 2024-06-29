@@ -9,6 +9,7 @@ class Rapid_URL_Indexer_Customer {
         add_action('wp_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
         add_filter('the_title', array(__CLASS__, 'replace_my_account_title'), 10, 2);
         add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
+        add_action('wp_ajax_rui_get_project_stats', array(__CLASS__, 'handle_ajax_get_project_stats'));
         add_action('woocommerce_order_status_completed', array(__CLASS__, 'handle_order_completed'));
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
 
@@ -307,5 +308,36 @@ class Rapid_URL_Indexer_Customer {
 
     public static function buy_credits_endpoint_content() {
         include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
+    }
+
+    public static function handle_ajax_get_project_stats() {
+        check_ajax_referer('rui_ajax_nonce', 'security');
+        $project_id = intval($_POST['project_id']);
+        $user_id = get_current_user_id();
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d AND user_id = %d", $project_id, $user_id));
+
+        if ($project) {
+            $stats = Rapid_URL_Indexer::get_project_stats($project_id);
+            $dates = array();
+            $indexed = array();
+            $unindexed = array();
+
+            foreach ($stats as $stat) {
+                $dates[] = $stat['date'];
+                $indexed[] = $stat['indexed_count'];
+                $unindexed[] = $stat['unindexed_count'];
+            }
+
+            wp_send_json_success(array(
+                'dates' => $dates,
+                'indexed' => $indexed,
+                'unindexed' => $unindexed
+            ));
+        } else {
+            wp_send_json_error('Project not found or access denied');
+        }
     }
 }
