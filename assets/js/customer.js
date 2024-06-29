@@ -63,18 +63,19 @@ jQuery(function($) {
             window.indexingChart.destroy();
         }
 
-        // Check if data.indexed and data.unindexed exist and are arrays
         var labels = [];
         var indexedData = [];
         var unindexedData = [];
 
-        if (Array.isArray(data.indexed)) {
-            labels = data.indexed.map(item => new Date(item.x * 1000).toLocaleDateString());
-            indexedData = data.indexed.map(item => item.y);
-        }
-
-        if (Array.isArray(data.unindexed)) {
-            unindexedData = data.unindexed.map(item => item.y);
+        if (Array.isArray(data)) {
+            data.forEach(item => {
+                labels.push(item.date);
+                indexedData.push(parseInt(item.indexed_count));
+                unindexedData.push(parseInt(item.unindexed_count));
+            });
+        } else {
+            console.error('Invalid data format:', data);
+            return;
         }
 
         window.indexingChart = new Chart(ctx, {
