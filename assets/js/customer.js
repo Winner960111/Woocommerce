@@ -169,7 +169,7 @@ jQuery(function($) {
             }
         });
 
-        modal.css('display', 'block');
+        modal.css({'display': 'block', 'background-color': '#121212'});
     }
 
     $('.close').on('click', function() {
