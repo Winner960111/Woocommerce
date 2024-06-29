@@ -125,10 +125,10 @@ jQuery(function($) {
                         title: {
                             display: true,
                             text: 'Date',
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
+                            color: '#ffffff'
                         },
                         ticks: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
+                            color: '#ffffff'
                         },
                         grid: {
                             color: 'rgba(255, 255, 255, 0.1)'
@@ -139,10 +139,10 @@ jQuery(function($) {
                         title: {
                             display: true,
                             text: 'Number of URLs',
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
+                            color: '#ffffff'
                         },
                         ticks: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
+                            color: '#ffffff'
                         },
                         grid: {
                             color: 'rgba(255, 255, 255, 0.1)'
