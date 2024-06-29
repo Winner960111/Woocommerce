@@ -300,6 +300,27 @@ class Rapid_URL_Indexer_Customer {
         self::log_credit_change($user_id, $amount, $triggered_by, $project_id, $is_reservation);
     }
 
+    private static function log_credit_change($user_id, $amount, $triggered_by, $project_id, $is_reservation) {
+        global $wpdb;
+        $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
+        
+        if ($triggered_by === 'system') {
+            $triggered_by = 'System';
+        } elseif (is_user_logged_in()) {
+            $current_user = wp_get_current_user();
+            $triggered_by = $current_user->roles[0] === 'administrator' ? 'Admin' : 'User ID: ' . get_current_user_id();
+        }
+
+        $wpdb->insert($log_table, array(
+            'triggered_by' => $triggered_by,
+            'user_id' => $user_id,
+            'project_id' => $project_id,
+            'action' => 'Credit Change',
+            'details' => json_encode(array('amount' => $amount, 'is_reservation' => $is_reservation)),
+            'created_at' => current_time('mysql')
+        ));
+    }
+
     private static function schedule_api_request($project_id, $urls, $notify) {
         wp_schedule_single_event(time() + 60, 'rui_process_api_request', array($project_id, $urls, $notify));
     }
