@@ -142,16 +142,16 @@ jQuery(function($) {
                     legend: {
                         position: 'top',
                         labels: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
+                            color: '#ffffff' // White text for legend labels
                         }
                     },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
-                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputbg').trim(),
-                        titleColor: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim(),
-                        bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim(),
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim(),
+                        backgroundColor: '#1e1e1e', // Dark background for tooltip
+                        titleColor: '#ffffff', // White text for tooltip title
+                        bodyColor: '#ffffff', // White text for tooltip body
+                        borderColor: '#424242', // Dark grey border for tooltip
                         borderWidth: 1
                     }
                 }
