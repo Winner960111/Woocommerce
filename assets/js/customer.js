@@ -28,14 +28,20 @@ jQuery(function($) {
     });
 
     // Chart functionality
+    // Remove existing event listener
+    $(document).off('click', '.show-chart');
+
+    // Add new event listener
     $(document).on('click', '.show-chart', function(e) {
         e.preventDefault();
         var projectId = $(this).data('project-id');
         var modal = $('#chartModal');
-        var createdAt = $(this).closest('tr').find('td:nth-child(4)').text();
         
         // Reset the chart container
         modal.find('.modal-content').html('<span class="close">&times;</span><canvas id="indexingChart"></canvas>');
+        
+        // Show the modal before fetching data
+        modal.css('display', 'block');
         
         $.ajax({
             url: ajax_object.ajaxurl,
@@ -49,13 +55,23 @@ jQuery(function($) {
                 if (response.success) {
                     showChart(response.data);
                 } else {
-                    alert('Failed to load chart data');
+                    modal.find('.modal-content').html('<p>Failed to load chart data</p>');
                 }
             },
             error: function() {
-                alert('An error occurred while fetching chart data');
+                modal.find('.modal-content').html('<p>An error occurred while fetching chart data</p>');
             }
         });
+    });
+
+    // Ensure the modal can be closed
+    $(document).on('click', '.close, #chartModal', function(event) {
+        if (event.target === this || $(event.target).hasClass('close')) {
+            $('#chartModal').hide();
+            if (window.indexingChart instanceof Chart) {
+                window.indexingChart.destroy();
+            }
+        }
     });
 
     function showChart(data) {
