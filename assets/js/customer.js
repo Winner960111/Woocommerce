@@ -89,6 +89,13 @@ jQuery(function($) {
         canvas.height = 400; // Fixed height or adjust as needed
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        if (!data || !Array.isArray(data.indexed) || !Array.isArray(data.unindexed)) {
+            console.error('Invalid data format:', data);
+            modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
+            modal.css('display', 'block');
+            return;
+        }
+
         var labels = data.indexed.map(item => item.x);
         var indexedData = data.indexed.map(item => item.y);
         var unindexedData = data.unindexed.map(item => item.y);
