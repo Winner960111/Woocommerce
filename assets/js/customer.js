@@ -1,3 +1,5 @@
+import Chart from 'https://cdn.jsdelivr.net/npm/chart.js/+esm';
+
 jQuery(document).ready(function($) {
     console.log('Customer JS loaded');
 
