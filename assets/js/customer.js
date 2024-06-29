@@ -69,7 +69,7 @@ jQuery(function($) {
 
         if (Array.isArray(data)) {
             data.forEach(item => {
-                labels.push(item.date);
+                labels.push(new Date(item.date).toISOString().split('T')[0]);
                 indexedData.push(parseInt(item.indexed_count));
                 unindexedData.push(parseInt(item.unindexed_count));
             });
