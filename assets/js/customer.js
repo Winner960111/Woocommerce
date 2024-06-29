@@ -76,17 +76,27 @@ jQuery(document).ready(function($) {
                 }
             }
         });
+
+        // Generate the table
+        var tableHtml = '<table class="chart-data-table"><thead><tr><th>Date</th><th>Indexed URLs</th><th>Unindexed URLs</th></tr></thead><tbody>';
+        for (var i = 0; i < data.dates.length; i++) {
+            tableHtml += '<tr><td>' + data.dates[i] + '</td><td>' + data.indexed[i] + '</td><td>' + data.unindexed[i] + '</td></tr>';
+        }
+        tableHtml += '</tbody></table>';
+
+        $('.modal-content').html('<canvas id="indexingChart"></canvas>' + tableHtml);
         $('#chartModal').show();
     }
 
-    // Generate the table
-    var tableHtml = '<table class="chart-data-table"><thead><tr><th>Date</th><th>Indexed URLs</th><th>Unindexed URLs</th></tr></thead><tbody>';
-    for (var i = 0; i < data.dates.length; i++) {
-        tableHtml += '<tr><td>' + data.dates[i] + '</td><td>' + data.indexed[i] + '</td><td>' + data.unindexed[i] + '</td></tr>';
-    }
-    tableHtml += '</tbody></table>';
+    $('.close').on('click', function() {
+        $('#chartModal').hide();
+    });
 
-    $('.modal-content').append(tableHtml);
+    $(window).on('click', function(event) {
+        if (event.target == document.getElementById('chartModal')) {
+            $('#chartModal').hide();
+        }
+    });
 
     $('.close').on('click', function() {
         $('#chartModal').hide();

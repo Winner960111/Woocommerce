@@ -101,11 +101,29 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         </tbody>
     </table>
 
+</tbody>
+    </table>
+
     <!-- Chart Modal -->
     <div id="chartModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <canvas id="indexingChart"></canvas>
+        </div>
+    </div>
+
+    <div class="tablenav">
+        <div class="tablenav-pages">
+            <?php
+            echo paginate_links(array(
+                'base' => add_query_arg('paged', '%#%'),
+                'format' => '',
+                'prev_text' => __('&laquo;'),
+                'next_text' => __('&raquo;'),
+                'total' => ceil($total_projects / $projects_per_page),
+                'current' => $paged
+            ));
+            ?>
         </div>
     </div>
     <br>
