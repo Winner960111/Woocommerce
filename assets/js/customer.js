@@ -73,7 +73,11 @@ jQuery(function($) {
 
         if (data && Array.isArray(data.indexed) && Array.isArray(data.unindexed)) {
             data.indexed.forEach((item, index) => {
-                labels.push(item.x);
+                // Convert timestamp to Date object
+                let date = new Date(item.x * 1000);
+                // Format date as d/m/Y
+                let formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                labels.push(formattedDate);
                 indexedData.push(item.y);
                 unindexedData.push(data.unindexed[index].y);
             });
