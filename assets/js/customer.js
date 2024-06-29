@@ -70,12 +70,12 @@ jQuery(document).ready(function($) {
                 labels: data.dates,
                 datasets: [{
                     label: 'Indexed URLs',
-                    data: data.indexed,
+                    data: data.dates.map((date, index) => ({x: date, y: data.indexed[index]})),
                     borderColor: 'green',
                     fill: false
                 }, {
                     label: 'Unindexed URLs',
-                    data: data.unindexed,
+                    data: data.dates.map((date, index) => ({x: date, y: data.unindexed[index]})),
                     borderColor: 'red',
                     fill: false
                 }]
@@ -87,10 +87,18 @@ jQuery(document).ready(function($) {
                         type: 'time',
                         time: {
                             unit: 'day'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
                         }
                     },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of URLs'
+                        }
                     }
                 }
             }
