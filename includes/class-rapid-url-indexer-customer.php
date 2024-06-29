@@ -155,21 +155,6 @@ class Rapid_URL_Indexer_Customer {
         }
     }
 
-    private static function log_credit_change($user_id, $amount, $triggered_by = 'system', $project_id = 0) {
-        global $wpdb;
-        $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
-        if (is_user_logged_in()) {
-            $triggered_by = 'User ID: ' . get_current_user_id();
-        }
-        $wpdb->insert($log_table, array(
-            'triggered_by' => $triggered_by,
-            'user_id' => $user_id,
-            'project_id' => $project_id,
-            'action' => 'Credit Change',
-            'details' => json_encode(array('amount' => $amount)),
-            'created_at' => current_time('mysql')
-        ));
-    }
 
     public static function customer_menu() {
         add_rewrite_rule('^my-account/projects/?', 'index.php?is_projects_page=1', 'top');
