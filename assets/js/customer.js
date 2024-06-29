@@ -91,6 +91,8 @@ jQuery(function($) {
 
         console.log('Data received for chart:', JSON.stringify(data, null, 2));
 
+        console.log('Data received for chart:', JSON.stringify(data, null, 2));
+
         if (!data || !data.indexed || !data.unindexed) {
             console.error('Invalid data format:', data);
             modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
@@ -115,6 +117,10 @@ jQuery(function($) {
             modal.css('display', 'block');
             return;
         }
+
+        console.log('Labels:', labels);
+        console.log('Indexed Data:', indexedData);
+        console.log('Unindexed Data:', unindexedData);
 
         if (indexedData.length === 0 && unindexedData.length === 0) {
             modal.find('.modal-content').html('<p>No data available to display in the chart.</p>');
