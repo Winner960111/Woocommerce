@@ -91,16 +91,30 @@ jQuery(function($) {
 
         console.log('Data received for chart:', JSON.stringify(data, null, 2));
 
-        if (!data || !Array.isArray(data.indexed) || !Array.isArray(data.unindexed)) {
+        if (!data || !data.indexed || !data.unindexed) {
             console.error('Invalid data format:', data);
             modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
             modal.css('display', 'block');
             return;
         }
 
-        var labels = data.indexed.map(item => item.x);
-        var indexedData = data.indexed.map(item => item.y);
-        var unindexedData = data.unindexed.map(item => item.y);
+        if (!Array.isArray(data.indexed) || !Array.isArray(data.unindexed)) {
+            console.error('Data properties are not arrays:', data);
+            modal.find('.modal-content').html('<p>Error: Data properties are not arrays.</p>');
+            modal.css('display', 'block');
+            return;
+        }
+
+        try {
+            var labels = data.indexed.map(item => item.x);
+            var indexedData = data.indexed.map(item => item.y);
+            var unindexedData = data.unindexed.map(item => item.y);
+        } catch (error) {
+            console.error('Error mapping data properties:', error);
+            modal.find('.modal-content').html('<p>Error: Unable to process data for chart.</p>');
+            modal.css('display', 'block');
+            return;
+        }
 
         if (indexedData.length === 0 && unindexedData.length === 0) {
             modal.find('.modal-content').html('<p>No data available to display in the chart.</p>');
