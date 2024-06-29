@@ -19,6 +19,7 @@ require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-activator.php';
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-deactivator.php';
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-admin.php';
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-customer.php';
+require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-cron.php';
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-api.php';
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer.php';
 
