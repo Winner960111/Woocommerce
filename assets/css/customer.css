@@ -127,6 +127,9 @@ details ul {
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 20px;
 }
 
 .close:hover,
@@ -134,6 +137,10 @@ details ul {
     color: #bb86fc; /* Material Design purple */
     text-decoration: none;
     cursor: pointer;
+}
+
+.modal-content {
+    position: relative;
 }
 
 #indexingChart {
