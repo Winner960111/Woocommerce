@@ -356,7 +356,11 @@ class Rapid_URL_Indexer_Customer {
 
         if ($project) {
             $stats = Rapid_URL_Indexer::get_project_stats($project_id);
-            wp_send_json_success(array('data' => $stats));
+            if (!empty($stats)) {
+                wp_send_json_success(array('data' => $stats));
+            } else {
+                wp_send_json_error('No data available for the project');
+            }
         } else {
             wp_send_json_error('Project not found or access denied');
         }
