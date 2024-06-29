@@ -93,6 +93,7 @@ jQuery(function($) {
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
+                labels: labels,
                 datasets: [{
                     label: 'Indexed URLs',
                     data: indexedData,
