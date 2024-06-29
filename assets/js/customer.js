@@ -172,13 +172,13 @@ jQuery(function($) {
         modal.css({'display': 'block', 'background-color': '#121212'});
     }
 
-    $('.close').on('click', function() {
+    $(document).on('click', '.close', function() {
         $('#chartModal').hide();
     });
 
-    $(window).on('click', function(event) {
+    $(document).on('click', function(event) {
         var modal = $('#chartModal');
-        if (event.target == modal[0]) {
+        if (event.target === modal[0]) {
             modal.hide();
         }
     });
