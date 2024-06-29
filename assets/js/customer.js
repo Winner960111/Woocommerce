@@ -28,9 +28,10 @@ jQuery(function($) {
     });
 
     // Chart functionality
-    $('.show-chart').on('click', function(e) {
+    $(document).on('click', '.show-chart', function(e) {
         e.preventDefault();
         var projectId = $(this).data('project-id');
+        var modal = $('#chartModal');
         $.ajax({
             url: ajax_object.ajaxurl,
             type: 'POST',
@@ -147,7 +148,7 @@ jQuery(function($) {
             }
         });
 
-        modal.show();
+        modal.css('display', 'block');
     }
 
     $('.close').on('click', function() {
