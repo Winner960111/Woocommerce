@@ -123,13 +123,13 @@ details ul {
 
 .close {
     color: #ffffff;
-    float: right;
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
     position: absolute;
     top: 10px;
     right: 20px;
+    z-index: 1001;
 }
 
 .close:hover,

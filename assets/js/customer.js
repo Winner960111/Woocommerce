@@ -35,7 +35,7 @@ jQuery(function($) {
         var createdAt = $(this).closest('tr').find('td:nth-child(4)').text();
         
         // Reset the chart container
-        modal.find('.modal-content').html('<canvas id="indexingChart"></canvas>');
+        modal.find('.modal-content').html('<span class="close">&times;</span><canvas id="indexingChart"></canvas>');
         
         $.ajax({
             url: ajax_object.ajaxurl,
