@@ -90,7 +90,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                             <?php if ($hours_since_submission >= 50): ?>
                                 <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button wp-element-button">Download Report</a>
                                 <br>
-                                <a href="#" class="show-chart" data-project-id="<?php echo esc_attr($project->id); ?>">Show Chart</a>
+                                <a href="#" class="show-chart" data-project-id="<?php echo esc_attr($project->id); ?>" style="margin-top: 5px; display: inline-block;">Show Chart</a>
                             <?php else: ?>
                                 <span>Waiting...</span>
                             <?php endif; ?>
