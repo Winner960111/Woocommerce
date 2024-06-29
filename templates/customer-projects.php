@@ -82,7 +82,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                         }
                         ?>
                     </td>
-                    <td><?php echo esc_html(date('Y-m-d', strtotime($project->created_at))); ?></td>
+                    <td><?php echo esc_html($project->created_at); ?></td>
                     <td>
                         <?php if ($project->status == 'pending' || $project->status == 'failed'): ?>
                             <span>N/A</span>
