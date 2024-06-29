@@ -72,14 +72,6 @@ jQuery(function($) {
         var unindexedData = [];
 
         if (data && Array.isArray(data.indexed) && Array.isArray(data.unindexed)) {
-            // Convert timestamps to JavaScript Date objects
-            data.indexed = data.indexed.map(function(point) {
-                return {x: new Date(point.x * 1000), y: point.y};
-            });
-            data.unindexed = data.unindexed.map(function(point) {
-                return {x: new Date(point.x * 1000), y: point.y};
-            });
-
             data.indexed.forEach((item, index) => {
                 labels.push(item.x);
                 indexedData.push(item.y);
@@ -120,10 +112,7 @@ jQuery(function($) {
                 responsive: true,
                 scales: {
                     x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day'
-                        },
+                        type: 'category',
                         title: {
                             display: true,
                             text: 'Date',

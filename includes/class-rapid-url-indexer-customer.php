@@ -356,31 +356,17 @@ class Rapid_URL_Indexer_Customer {
 
         if ($project) {
             $stats = Rapid_URL_Indexer::get_project_stats($project_id);
-            $dates = array();
             $indexed = array();
             $unindexed = array();
 
             foreach ($stats as $stat) {
                 $indexed[] = array(
-                    'x' => strtotime($stat['date']),
+                    'x' => $stat['date'],
                     'y' => intval($stat['indexed_count'])
                 );
                 $unindexed[] = array(
-                    'x' => strtotime($stat['date']),
+                    'x' => $stat['date'],
                     'y' => intval($stat['unindexed_count'])
-                );
-            }
-
-            // If there are no stats yet, use the project's current values
-            if (empty($stats)) {
-                $created_at = strtotime($project->created_at);
-                $indexed[] = array(
-                    'x' => $created_at,
-                    'y' => intval($project->indexed_links)
-                );
-                $unindexed[] = array(
-                    'x' => $created_at,
-                    'y' => intval($project->submitted_links) - intval($project->indexed_links)
                 );
             }
 
