@@ -229,42 +229,67 @@ class Rapid_URL_Indexer_Customer {
 
     public static function submit_project($project_name, $urls, $notify, $user_id) {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $wpdb->insert($table_name, array(
-            'user_id' => $user_id,
-            'project_name' => $project_name,
-            'urls' => json_encode($urls),
-            'status' => 'pending',
-            'created_at' => current_time('mysql')
-        ));
+        $wpdb->query('START TRANSACTION');
 
-        $project_id = $wpdb->insert_id;
+        try {
+            $credits_needed = count($urls);
+            $available_credits = self::get_user_credits($user_id);
 
-        // Schedule API request
-        self::schedule_api_request($project_id, $urls, $notify);
-        return $project_id;
+            if ($available_credits < $credits_needed) {
+                throw new Exception(__('Insufficient credits', 'rapid-url-indexer'));
+            }
+
+            // Reserve credits
+            self::update_user_credits($user_id, -$credits_needed, 'system', 0, true);
+
+            $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+            $wpdb->insert($table_name, array(
+                'user_id' => $user_id,
+                'project_name' => $project_name,
+                'urls' => json_encode($urls),
+                'status' => 'pending',
+                'created_at' => current_time('mysql'),
+                'reserved_credits' => $credits_needed
+            ));
+
+            $project_id = $wpdb->insert_id;
+
+            // Schedule API request
+            self::schedule_api_request($project_id, $urls, $notify);
+
+            $wpdb->query('COMMIT');
+            return $project_id;
+        } catch (Exception $e) {
+            $wpdb->query('ROLLBACK');
+            error_log('Project submission failed: ' . $e->getMessage());
+            return false;
+        }
     }
 
     public static function handle_api_success($project_id, $user_id, $urls) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 
-        // Check if credits have already been deducted
-        $project = $wpdb->get_row($wpdb->prepare("SELECT status FROM $table_name WHERE id = %d", $project_id));
-        if ($project && $project->status !== 'submitted') {
-            // Subtract credits
-            Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls));
-        }
-
         // Update project status
         $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
+
+        // Credits have already been reserved, so we don't need to subtract them again
+        // Instead, we'll update the project to show that the reserved credits have been used
+        $wpdb->update($table_name, array('reserved_credits' => 0), array('id' => $project_id));
+
+        // Log the credit usage
+        self::log_credit_change($user_id, -count($urls), 'system', $project_id, false);
     }
 
-    public static function update_user_credits($user_id, $amount, $triggered_by = 'system', $project_id = 0) {
+    public static function update_user_credits($user_id, $amount, $triggered_by = 'system', $project_id = 0, $is_reservation = false) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = self::get_user_credits($user_id);
-        $new_credits = max(0, $credits + $amount);
+        $new_credits = $credits + $amount;
+
+        if ($new_credits < 0 && !$is_reservation) {
+            throw new Exception(__('Insufficient credits', 'rapid-url-indexer'));
+        }
 
         if ($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE user_id = %d", $user_id)) > 0) {
             $wpdb->update($table_name, array('credits' => $new_credits), array('user_id' => $user_id));
@@ -272,7 +297,7 @@ class Rapid_URL_Indexer_Customer {
             $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
         }
         
-        self::log_credit_change($user_id, $amount, 'system', $project_id);
+        self::log_credit_change($user_id, $amount, $triggered_by, $project_id, $is_reservation);
     }
 
     private static function schedule_api_request($project_id, $urls, $notify) {

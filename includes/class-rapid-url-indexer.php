@@ -575,14 +575,7 @@ class Rapid_URL_Indexer {
             );
         }
 
-        // Check if user has enough credits
-        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
-        if ($credits < count($urls)) {
-            return array(
-                'success' => false,
-                'error' => sprintf(__('Insufficient credits to submit project. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))
-            );
-        }
+        // Credits have already been reserved, no need to check again
     
         // Check if the project already has a task ID to prevent double submission
         if (empty($project->task_id)) {
