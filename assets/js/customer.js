@@ -1,9 +1,9 @@
 jQuery(function($) {
+    console.log('Customer JS loaded');
     if (typeof Chart === 'undefined') {
         console.error('Chart.js is not loaded. Please make sure it is properly included in your HTML.');
         return;
     }
-    console.log('Customer JS loaded');
 
     $('#rui-project-submission-form').on('submit', function(e) {
         e.preventDefault();
