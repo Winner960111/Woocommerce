@@ -68,7 +68,7 @@ jQuery(function($) {
         var indexedData = [];
         var unindexedData = [];
 
-        if (Array.isArray(data)) {
+        if (data && Array.isArray(data)) {
             data.forEach(item => {
                 labels.push(new Date(item.date).toISOString().split('T')[0]);
                 indexedData.push(parseInt(item.indexed_count));
@@ -76,6 +76,14 @@ jQuery(function($) {
             });
         } else {
             console.error('Invalid data format:', data);
+            modal.find('.modal-content').html('<p>Error: Unable to display chart due to invalid data.</p>');
+            modal.css('display', 'block');
+            return;
+        }
+
+        if (indexedData.length === 0 && unindexedData.length === 0) {
+            modal.find('.modal-content').html('<p>No data available to display in the chart.</p>');
+            modal.css('display', 'block');
             return;
         }
 
