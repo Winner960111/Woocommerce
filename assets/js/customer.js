@@ -52,8 +52,8 @@ jQuery(function($) {
                 security: ajax_object.security
             },
             success: function(response) {
-                if (response.success && response.data && response.data.data) {
-                    showChart(response.data.data);
+                if (response.success && response.data) {
+                    showChart(response.data);
                 } else {
                     modal.find('.modal-content').html('<p>Failed to load chart data</p>');
                 }
@@ -74,7 +74,7 @@ jQuery(function($) {
         }
     });
 
-    function showChart(data) {
+    function showChart(responseData) {
         var modal = $('#chartModal');
         var canvas = document.getElementById('indexingChart');
         var ctx = canvas.getContext('2d');
@@ -89,21 +89,16 @@ jQuery(function($) {
         canvas.height = 400; // Fixed height or adjust as needed
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        console.log('Data received for chart:', JSON.stringify(data, null, 2));
+        console.log('Data received for chart:', JSON.stringify(responseData, null, 2));
 
-        if (!data) {
-            console.error('Data is undefined or null');
-            modal.find('.modal-content').html('<p>Error: No data received for the chart.</p>');
+        if (!responseData || !responseData.data || !responseData.data.data || !Array.isArray(responseData.data.data)) {
+            console.error('Invalid data structure:', responseData);
+            modal.find('.modal-content').html('<p>Error: Invalid data structure received for the chart.</p>');
             modal.css('display', 'block');
             return;
         }
 
-        if (!Array.isArray(data)) {
-            console.error('Data is not an array:', typeof data);
-            modal.find('.modal-content').html('<p>Error: Invalid data format received for the chart.</p>');
-            modal.css('display', 'block');
-            return;
-        }
+        var data = responseData.data.data;
 
         if (data.length === 0) {
             console.error('Data array is empty');
@@ -119,8 +114,8 @@ jQuery(function($) {
         for (var i = 0; i < data.length; i++) {
             var item = data[i];
             labels.push(item.date || '');
-            indexedData.push(item.indexed_count || 0);
-            unindexedData.push(item.unindexed_count || 0);
+            indexedData.push(parseInt(item.indexed_count) || 0);
+            unindexedData.push(parseInt(item.unindexed_count) || 0);
         }
 
         console.log('Labels:', labels);
