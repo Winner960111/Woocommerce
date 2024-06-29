@@ -65,21 +65,15 @@ jQuery(document).ready(function($) {
         }
 
         // Parse dates and ensure they are valid
-        var parsedData = data.dates.map((date, index) => {
-            var parsedDate = new Date(date);
-            return {
-                x: isNaN(parsedDate.getTime()) ? null : parsedDate,
-                y: data.indexed[index]
-            };
-        }).filter(item => item.x !== null);
+        var parsedData = data.dates.map((date, index) => ({
+            x: date,
+            y: data.indexed[index]
+        }));
 
-        var parsedUnindexedData = data.dates.map((date, index) => {
-            var parsedDate = new Date(date);
-            return {
-                x: isNaN(parsedDate.getTime()) ? null : parsedDate,
-                y: data.unindexed[index]
-            };
-        }).filter(item => item.x !== null);
+        var parsedUnindexedData = data.dates.map((date, index) => ({
+            x: date,
+            y: data.unindexed[index]
+        }));
 
         window.indexingChart = new Chart(ctx, {
             type: 'line',
@@ -102,6 +96,7 @@ jQuery(document).ready(function($) {
                     x: {
                         type: 'time',
                         time: {
+                            parser: 'yyyy-MM-dd',
                             unit: 'day'
                         },
                         title: {
