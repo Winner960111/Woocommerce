@@ -52,8 +52,8 @@ jQuery(function($) {
                 security: ajax_object.security
             },
             success: function(response) {
-                if (response.success) {
-                    showChart(response.data);
+                if (response.success && response.data) {
+                    showChart(response.data.data);
                 } else {
                     modal.find('.modal-content').html('<p>Failed to load chart data</p>');
                 }
