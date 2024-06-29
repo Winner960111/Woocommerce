@@ -330,16 +330,29 @@ class Rapid_URL_Indexer_Customer {
             $unindexed = array();
 
             foreach ($stats as $stat) {
-                $dates[] = strtotime($stat['date']) * 1000; // Convert to milliseconds for Chart.js
-                $indexed[] = intval($stat['indexed_count']);
-                $unindexed[] = intval($stat['unindexed_count']);
+                $dates[] = strtotime($stat['date']);
+                $indexed[] = array(
+                    'x' => strtotime($stat['date']),
+                    'y' => intval($stat['indexed_count'])
+                );
+                $unindexed[] = array(
+                    'x' => strtotime($stat['date']),
+                    'y' => intval($stat['unindexed_count'])
+                );
             }
 
             // If there are no stats yet, use the project's current values
             if (empty($stats)) {
-                $dates[] = strtotime($project->created_at) * 1000;
-                $indexed[] = intval($project->indexed_links);
-                $unindexed[] = intval($project->submitted_links) - intval($project->indexed_links);
+                $created_at = strtotime($project->created_at);
+                $dates[] = $created_at;
+                $indexed[] = array(
+                    'x' => $created_at,
+                    'y' => intval($project->indexed_links)
+                );
+                $unindexed[] = array(
+                    'x' => $created_at,
+                    'y' => intval($project->submitted_links) - intval($project->indexed_links)
+                );
             }
 
             wp_send_json_success(array(

@@ -62,22 +62,21 @@ jQuery(document).ready(function($) {
             window.indexingChart.destroy();
         }
 
-        var startDate = new Date(createdAt);
+        var startDate = new Date(data.dates[0]);
         var endDate = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 days after creation
 
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.dates,
                 datasets: [{
                     label: 'Indexed URLs',
-                    data: data.indexed.map((value, index) => ({x: data.dates[index], y: value})),
+                    data: data.indexed,
                     borderColor: '#4caf50',
                     backgroundColor: 'rgba(76, 175, 80, 0.1)',
                     fill: true
                 }, {
                     label: 'Unindexed URLs',
-                    data: data.unindexed.map((value, index) => ({x: data.dates[index], y: value})),
+                    data: data.unindexed,
                     borderColor: '#f44336',
                     backgroundColor: 'rgba(244, 67, 54, 0.1)',
                     fill: true
@@ -90,6 +89,7 @@ jQuery(document).ready(function($) {
                         type: 'time',
                         time: {
                             unit: 'day',
+                            parser: 'X',
                             displayFormats: {
                                 day: 'MMM d'
                             }
