@@ -134,7 +134,7 @@ class Rapid_URL_Indexer_Customer {
             wp_send_json_error(array('message' => sprintf(__('You do not have enough credits to submit %d URLs. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), count($urls), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
         } else {
             if (count($urls) > 0 && count($urls) <= 9999) {
-                $api_key = get_option('speedyindex_api_key');
+                $api_key = get_option('rui_speedyindex_api_key');
                 $project_id = self::submit_project($project_name, $urls, $notify, $user_id);
                 if ($project_id) {
                     $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify);
