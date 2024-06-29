@@ -5,6 +5,10 @@ jQuery(function($) {
         return;
     }
 
+    // Register the 'date' adapter for Chart.js
+    Chart.register(ChartDataLabels);
+    Chart.register(window.chartjs.adapter.date);
+
     $('#rui-project-submission-form').on('submit', function(e) {
         e.preventDefault();
 
@@ -90,6 +94,7 @@ jQuery(function($) {
                         type: 'time',
                         time: {
                             unit: 'day',
+                            parser: 'yyyy-MM-dd',
                             displayFormats: {
                                 day: 'MMM d'
                             }
