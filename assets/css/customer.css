@@ -134,7 +134,7 @@ details ul {
 
 .close:hover,
 .close:focus {
-    color: #bb86fc; /* Material Design purple */
+    color: #ffffff; /* White */
     text-decoration: none;
     cursor: pointer;
 }
