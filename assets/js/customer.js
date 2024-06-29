@@ -68,11 +68,11 @@ jQuery(function($) {
         var indexedData = [];
         var unindexedData = [];
 
-        if (data && Array.isArray(data)) {
-            data.forEach(item => {
-                labels.push(item.date);
-                indexedData.push(parseInt(item.indexed_count));
-                unindexedData.push(parseInt(item.unindexed_count));
+        if (data && Array.isArray(data.indexed) && Array.isArray(data.unindexed)) {
+            data.indexed.forEach((item, index) => {
+                labels.push(new Date(item.x).toISOString().split('T')[0]);
+                indexedData.push(item.y);
+                unindexedData.push(data.unindexed[index].y);
             });
         } else {
             console.error('Invalid data format:', data);
