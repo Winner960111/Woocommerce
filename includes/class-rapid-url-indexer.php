@@ -538,6 +538,43 @@ class Rapid_URL_Indexer {
         
         // Process auto refunds
         self::auto_refund();
+
+        // Retry failed submissions
+        self::retry_failed_submissions();
+    }
+
+    private static function retry_failed_submissions() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending' AND created_at <= DATE_SUB(NOW(), INTERVAL 48 HOUR)");
+
+        foreach ($projects as $project) {
+            $api_key = get_option('rui_speedyindex_api_key');
+            $urls = json_decode($project->urls, true);
+            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $project->user_id . ')');
+
+            if ($response && isset($response['task_id'])) {
+                $wpdb->update($table_name, array(
+                    'task_id' => $response['task_id'],
+                    'status' => 'submitted',
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $project->id));
+
+                // Deduct reserved credits
+                Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, -count($urls), 'system', $project->id);
+            } else {
+                // If still failing after 48 hours, mark as failed and unreserve credits
+                if (strtotime($project->created_at) <= strtotime('-48 hours')) {
+                    $wpdb->update($table_name, array(
+                        'status' => 'failed',
+                        'updated_at' => current_time('mysql')
+                    ), array('id' => $project->id));
+
+                    // Unreserve credits
+                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
+                }
+            }
+        }
     }
 
     public static function process_api_request($project_id, $urls, $notify) {
@@ -567,8 +604,6 @@ class Rapid_URL_Indexer {
             );
         }
 
-        // Credits have already been reserved, no need to check again
-    
         // Check if the project already has a task ID to prevent double submission
         if (empty($project->task_id)) {
             // Call API to create task
@@ -578,11 +613,15 @@ class Rapid_URL_Indexer {
             if ($response && isset($response['task_id'])) {
                 $task_id = $response['task_id'];
 
-                // Update project with task ID
-                $wpdb->update($table_name, array('task_id' => $task_id), array('id' => $project_id));
+                // Update project with task ID and status
+                $wpdb->update($table_name, array(
+                    'task_id' => $task_id,
+                    'status' => 'submitted',
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $project_id));
 
-                // Deduct credits and update project status
-                Rapid_URL_Indexer_Customer::handle_api_success($project_id, $user_id, $urls);
+                // Deduct credits
+                Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'system', $project_id);
                 
                 // Log the action
                 $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
@@ -595,35 +634,24 @@ class Rapid_URL_Indexer {
 
                 do_action('rui_log_entry_created');
         
-                // Notify user if required and not rate limited
+                // Notify user if required
                 if ($notify) {
-                    $last_notification_time = get_post_meta($project_id, '_rui_last_notification_time', true);
-                    $current_time = time();
+                    $user_info = get_userdata($user_id);
+                    $subject = __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer');
+                    $message = __('Your project has been submitted and is being processed.', 'rapid-url-indexer');
+                    wp_mail($user_info->user_email, $subject, $message);
 
-                    if (!$last_notification_time || ($current_time - $last_notification_time) >= 86400) {
-                        $user_info = get_userdata($user_id);
-                        $subject = __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer');
-                        $message = __('Your project has been submitted and is being processed.', 'rapid-url-indexer');
-                        wp_mail($user_info->user_email, $subject, $message);
-
-                        // Log the email notification
-                        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                            'user_id' => $user_id,
-                            'project_id' => $project_id,
-                            'action' => 'User Notification',
-                            'details' => json_encode(array(
-                                'subject' => $subject,
-                                'message' => $message
-                            )),
-                            'created_at' => current_time('mysql')
-                        ));
-                        update_post_meta($project_id, '_rui_last_notification_time', $current_time);
-                    }
-                }
-
-                // Add to backlog if API response code is 1 or 2
-                if (isset($response['code']) && in_array($response['code'], [1, 2])) {
-                    self::add_to_backlog($project_id, $urls, $notify);
+                    // Log the email notification
+                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                        'user_id' => $user_id,
+                        'project_id' => $project_id,
+                        'action' => 'User Notification',
+                        'details' => json_encode(array(
+                            'subject' => $subject,
+                            'message' => $message
+                        )),
+                        'created_at' => current_time('mysql')
+                    ));
                 }
 
                 return array(
@@ -645,7 +673,7 @@ class Rapid_URL_Indexer {
 
                 return array(
                     'success' => false,
-                    'error' => __('An error occurred while submitting the project. Please try again later or contact support.', 'rapid-url-indexer')
+                    'error' => __('An error occurred while submitting the project. It will be retried automatically.', 'rapid-url-indexer')
                 );
             }
         } else {
