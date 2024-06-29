@@ -1,17 +1,9 @@
-import { Chart, registerables } from 'chart.js';
-import { DateTime } from 'luxon';
-import { DateAdapter } from 'chartjs-adapter-luxon';
-
-Chart.register(...registerables, DateAdapter);
-
 jQuery(document).ready(function($) {
     if (typeof Chart === 'undefined') {
         console.error('Chart.js is not loaded. Please make sure it is properly included in your HTML.');
         return;
     }
     console.log('Customer JS loaded');
-
-    Chart.defaults.locale = 'en';
 
     $('#rui-project-submission-form').on('submit', function(e) {
         e.preventDefault();
@@ -107,6 +99,13 @@ jQuery(document).ready(function($) {
                 responsive: true,
                 scales: {
                     x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            displayFormats: {
+                                day: 'MMM D'
+                            }
+                        },
                         title: {
                             display: true,
                             text: 'Date'
@@ -127,6 +126,11 @@ jQuery(document).ready(function($) {
                     tooltip: {
                         mode: 'index',
                         intersect: false,
+                        callbacks: {
+                            title: function(context) {
+                                return new Date(context[0].parsed.x).toLocaleDateString();
+                            }
+                        }
                     }
                 }
             }

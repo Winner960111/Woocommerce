@@ -332,14 +332,14 @@ class Rapid_URL_Indexer_Customer {
             $unindexed = array();
 
             foreach ($stats as $stat) {
-                $dates[] = $stat['date'];
+                $dates[] = strtotime($stat['date']) * 1000; // Convert to milliseconds for Chart.js
                 $indexed[] = intval($stat['indexed_count']);
                 $unindexed[] = intval($stat['unindexed_count']);
             }
 
             // If there are no stats yet, use the project's current values
             if (empty($stats)) {
-                $dates[] = date('Y-m-d');
+                $dates[] = strtotime($project->created_at) * 1000;
                 $indexed[] = intval($project->indexed_links);
                 $unindexed[] = intval($project->submitted_links) - intval($project->indexed_links);
             }
