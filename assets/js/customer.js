@@ -82,7 +82,7 @@ jQuery(document).ready(function($) {
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: data.dates,
+                labels: data.dates.map(date => new Date(date).toLocaleDateString()),
                 datasets: [{
                     label: 'Indexed URLs',
                     data: data.indexed,
@@ -99,13 +99,6 @@ jQuery(document).ready(function($) {
                 responsive: true,
                 scales: {
                     x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            displayFormats: {
-                                day: 'MMM D'
-                            }
-                        },
                         title: {
                             display: true,
                             text: 'Date'
@@ -125,12 +118,7 @@ jQuery(document).ready(function($) {
                     },
                     tooltip: {
                         mode: 'index',
-                        intersect: false,
-                        callbacks: {
-                            title: function(context) {
-                                return new Date(context[0].parsed.x).toLocaleDateString();
-                            }
-                        }
+                        intersect: false
                     }
                 }
             }
