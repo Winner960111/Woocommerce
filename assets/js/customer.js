@@ -89,7 +89,9 @@ jQuery(document).ready(function($) {
                         type: 'time',
                         time: {
                             unit: 'day',
-                            parser: 'X',
+                            parser: function(value) {
+                                return new Date(value * 1000);
+                            },
                             displayFormats: {
                                 day: 'MMM d'
                             }
@@ -106,11 +108,6 @@ jQuery(document).ready(function($) {
                         },
                         grid: {
                             color: 'rgba(255, 255, 255, 0.1)'
-                        },
-                        adapters: {
-                            date: {
-                                locale: 'en'
-                            }
                         }
                     },
                     y: {
