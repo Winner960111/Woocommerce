@@ -356,24 +356,7 @@ class Rapid_URL_Indexer_Customer {
 
         if ($project) {
             $stats = Rapid_URL_Indexer::get_project_stats($project_id);
-            $indexed = array();
-            $unindexed = array();
-
-            foreach ($stats as $stat) {
-                $indexed[] = array(
-                    'x' => $stat['date'],
-                    'y' => intval($stat['indexed_count'])
-                );
-                $unindexed[] = array(
-                    'x' => $stat['date'],
-                    'y' => intval($stat['unindexed_count'])
-                );
-            }
-
-            wp_send_json_success(array(
-                'indexed' => $indexed,
-                'unindexed' => $unindexed
-            ));
+            wp_send_json_success($stats);
         } else {
             wp_send_json_error('Project not found or access denied');
         }
