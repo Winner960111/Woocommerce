@@ -54,7 +54,7 @@ jQuery(function($) {
         });
     });
 
-    function showChart(data, createdAt) {
+    function showChart(data) {
         var modal = $('#chartModal');
         var canvas = document.getElementById('indexingChart');
         var ctx = canvas.getContext('2d');
@@ -63,6 +63,14 @@ jQuery(function($) {
         if (window.indexingChart instanceof Chart) {
             window.indexingChart.destroy();
         }
+
+        // Convert timestamps to JavaScript Date objects
+        data.indexed = data.indexed.map(function(point) {
+            return {x: new Date(point.x * 1000), y: point.y};
+        });
+        data.unindexed = data.unindexed.map(function(point) {
+            return {x: new Date(point.x * 1000), y: point.y};
+        });
 
         // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
