@@ -1,4 +1,6 @@
 jQuery(document).ready(function($) {
+    console.log('Customer JS loaded');
+
     $('#rui-project-submission-form').on('submit', function(e) {
         e.preventDefault();
 
@@ -24,7 +26,9 @@ jQuery(document).ready(function($) {
     // Chart functionality
     $('.show-chart').on('click', function(e) {
         e.preventDefault();
+        console.log('Show chart clicked');
         var projectId = $(this).data('project-id');
+        console.log('Project ID:', projectId);
         $.ajax({
             url: ajax_object.ajaxurl,
             type: 'POST',
@@ -34,18 +38,33 @@ jQuery(document).ready(function($) {
                 security: ajax_object.security
             },
             success: function(response) {
+                console.log('AJAX response:', response);
                 if (response.success) {
                     showChart(response.data);
                 } else {
+                    console.error('Failed to load chart data:', response);
                     alert('Failed to load chart data');
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', status, error);
+                alert('An error occurred while fetching chart data');
             }
         });
     });
 
     function showChart(data) {
-        var ctx = document.getElementById('indexingChart').getContext('2d');
-        new Chart(ctx, {
+        console.log('Showing chart with data:', data);
+        var modal = $('#chartModal');
+        var canvas = document.getElementById('indexingChart');
+        var ctx = canvas.getContext('2d');
+
+        // Clear any existing chart
+        if (window.indexingChart instanceof Chart) {
+            window.indexingChart.destroy();
+        }
+
+        window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: data.dates,
@@ -84,21 +103,21 @@ jQuery(document).ready(function($) {
         }
         tableHtml += '</tbody></table>';
 
-        $('.modal-content').html('<canvas id="indexingChart"></canvas>' + tableHtml);
-        $('#chartModal').show();
+        $('.modal-content').append(tableHtml);
+        modal.show();
+        console.log('Modal shown');
     }
 
     $('.close').on('click', function() {
         $('#chartModal').hide();
+        console.log('Modal closed');
     });
 
     $(window).on('click', function(event) {
-        if (event.target == document.getElementById('chartModal')) {
-            $('#chartModal').hide();
+        var modal = $('#chartModal');
+        if (event.target == modal[0]) {
+            modal.hide();
+            console.log('Modal closed by clicking outside');
         }
-    });
-
-    $('.close').on('click', function() {
-        $('#chartModal').hide();
     });
 });
