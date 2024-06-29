@@ -64,14 +64,6 @@ jQuery(function($) {
             window.indexingChart.destroy();
         }
 
-        // Convert timestamps to JavaScript Date objects
-        data.indexed = data.indexed.map(function(point) {
-            return {x: new Date(point.x * 1000), y: point.y};
-        });
-        data.unindexed = data.unindexed.map(function(point) {
-            return {x: new Date(point.x * 1000), y: point.y};
-        });
-
         // Clear the canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -80,6 +72,14 @@ jQuery(function($) {
         var unindexedData = [];
 
         if (data && Array.isArray(data.indexed) && Array.isArray(data.unindexed)) {
+            // Convert timestamps to JavaScript Date objects
+            data.indexed = data.indexed.map(function(point) {
+                return {x: new Date(point.x * 1000), y: point.y};
+            });
+            data.unindexed = data.unindexed.map(function(point) {
+                return {x: new Date(point.x * 1000), y: point.y};
+            });
+
             data.indexed.forEach((item, index) => {
                 labels.push(item.x);
                 indexedData.push(item.y);
