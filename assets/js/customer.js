@@ -30,7 +30,8 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: {
                 action: 'rui_get_project_stats',
-                project_id: projectId
+                project_id: projectId,
+                security: ajax_object.security
             },
             success: function(response) {
                 if (response.success) {
@@ -77,6 +78,15 @@ jQuery(document).ready(function($) {
         });
         $('#chartModal').show();
     }
+
+    // Generate the table
+    var tableHtml = '<table class="chart-data-table"><thead><tr><th>Date</th><th>Indexed URLs</th><th>Unindexed URLs</th></tr></thead><tbody>';
+    for (var i = 0; i < data.dates.length; i++) {
+        tableHtml += '<tr><td>' + data.dates[i] + '</td><td>' + data.indexed[i] + '</td><td>' + data.unindexed[i] + '</td></tr>';
+    }
+    tableHtml += '</tbody></table>';
+
+    $('.modal-content').append(tableHtml);
 
     $('.close').on('click', function() {
         $('#chartModal').hide();

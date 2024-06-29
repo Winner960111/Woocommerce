@@ -130,3 +130,19 @@ details ul {
     text-decoration: none;
     cursor: pointer;
 }
+
+.chart-data-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.chart-data-table th, .chart-data-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.chart-data-table th {
+    background-color: #f2f2f2;
+}
