@@ -82,7 +82,6 @@ jQuery(function($) {
         window.indexingChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
                 datasets: [{
                     label: 'Indexed URLs',
                     data: indexedData,
@@ -101,6 +100,13 @@ jQuery(function($) {
                 responsive: true,
                 scales: {
                     x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            displayFormats: {
+                                day: 'yyyy-MM-dd'
+                            }
+                        },
                         title: {
                             display: true,
                             text: 'Date',
