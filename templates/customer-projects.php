@@ -184,62 +184,104 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         <ul>
             <li><strong>400 Bad Request</strong> - The request was malformed or missing required parameters.</li>
             <li><strong>401 Unauthorized</strong> - The API key is missing or invalid.</li>
+            <li><strong>403 Forbidden</strong> - The API key is valid but does not have permission to access the requested resource.</li>
             <li><strong>404 Not Found</strong> - The requested resource (e.g., project) does not exist.</li>
+            <li><strong>429 Too Many Requests</strong> - The rate limit for API requests has been exceeded.</li>
             <li><strong>500 Internal Server Error</strong> - An unexpected error occurred on the server.</li>
         </ul>
 
-        <h3>Example Requests and Responses</h3>
-        <h4>Submit a New Project</h4>
-        <pre><code>curl -X POST https://rapidurlindexer.com/api/v1/projects \
--H "X-API-Key: your_api_key" \
--H "Content-Type: application/json" \
--d '{
-    "project_name": "My Project",
-    "urls": ["http://example.com", "http://example.org"]
-}'</code></pre>
-        <p><strong>Response:</strong></p>
+        <h3>Endpoints</h3>
+
+        <h4>1. Submit a New Project</h4>
+        <p><strong>Endpoint:</strong> <code>POST /api/v1/projects</code></p>
+        <p><strong>Request Body:</strong></p>
         <pre><code>{
-    "message": "Project created",
+    "project_name": "My Project",
+    "urls": ["http://example.com", "http://example.org"],
+    "notify_on_status_change": true
+}</code></pre>
+        <p><strong>Successful Response (201 Created):</strong></p>
+        <pre><code>{
+    "message": "Project created successfully",
     "project_id": 123
 }</code></pre>
-        <p><strong>Possible Error Response:</strong></p>
-        <pre><code>{
-    "message": "Project creation failed"
+        <p><strong>Error Responses:</strong></p>
+        <pre><code>400 Bad Request
+{
+    "message": "Invalid project name or URLs"
+}
+
+401 Unauthorized
+{
+    "message": "Invalid API key"
+}
+
+403 Forbidden
+{
+    "message": "Insufficient credits"
 }</code></pre>
 
-        <h4>Get Project Status</h4>
-        <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/projects/123 \
--H "X-API-Key: your_api_key"</code></pre>
-        <p><strong>Response:</strong></p>
+        <h4>2. Get Project Status</h4>
+        <p><strong>Endpoint:</strong> <code>GET /api/v1/projects/{project_id}</code></p>
+        <p><strong>Successful Response (200 OK):</strong></p>
         <pre><code>{
     "project_id": 123,
+    "project_name": "My Project",
     "status": "submitted",
     "submitted_links": 2,
-    "indexed_links": 0
+    "processed_links": 1,
+    "indexed_links": 1,
+    "created_at": "2023-06-01T12:00:00Z",
+    "updated_at": "2023-06-01T12:05:00Z"
 }</code></pre>
         <p><strong>Possible Status Values:</strong></p>
         <ul>
-            <li><strong>pending</strong> The project has been created but not yet submitted for indexing.</li>
-            <li><strong>submitted</strong> The project has been submitted and indexing is in progress.</li>
-            <li><strong>completed</strong> The indexing process has been completed.</li>
-            <li><strong>failed</strong> The indexing process failed. Credits have been refunded.</li>
-            <li><strong>refunded</strong> Some URLs were not indexed within 14 days, and credits have been automatically refunded.</li>
+            <li><strong>pending:</strong> The project has been created but not yet submitted for indexing.</li>
+            <li><strong>submitted:</strong> The project has been submitted and indexing is in progress.</li>
+            <li><strong>completed:</strong> The indexing process has been completed.</li>
+            <li><strong>failed:</strong> The indexing process failed. Credits have been refunded.</li>
+            <li><strong>refunded:</strong> Some URLs were not indexed within 14 days, and credits have been automatically refunded.</li>
         </ul>
+        <p><strong>Error Response (404 Not Found):</strong></p>
+        <pre><code>{
+    "message": "Project not found"
+}</code></pre>
 
-        <h4>Download Project Report</h4>
-        <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/projects/123/report \
--H "X-API-Key: your_api_key"</code></pre>
-        <p><strong>Response:</strong></p>
-        <pre><code>URL,Status
-http://example.com,Indexed
-http://example.org,Not Indexed</code></pre>
+        <h4>3. Download Project Report</h4>
+        <p><strong>Endpoint:</strong> <code>GET /api/v1/projects/{project_id}/report</code></p>
+        <p><strong>Successful Response (200 OK):</strong></p>
+        <p>Returns a CSV file with the following format:</p>
+        <pre><code>URL,Status,Indexed At
+http://example.com,Indexed,2023-06-01T12:05:00Z
+http://example.org,Not Indexed,</code></pre>
+        <p><strong>Error Response (404 Not Found):</strong></p>
+        <pre><code>{
+    "message": "Project report not available"
+}</code></pre>
 
-        <h4>Get Credit Balance</h4>
-        <pre><code>curl -X GET https://rapidurlindexer.com/api/v1/credits/balance \
--H "X-API-Key: your_api_key"</code></pre>
-        <p><strong>Response:</strong></p>
+        <h4>4. Get Credit Balance</h4>
+        <p><strong>Endpoint:</strong> <code>GET /api/v1/credits/balance</code></p>
+        <p><strong>Successful Response (200 OK):</strong></p>
         <pre><code>{
     "credits": 100
+}</code></pre>
+        <p><strong>Error Response (401 Unauthorized):</strong></p>
+        <pre><code>{
+    "message": "Invalid API key"
+}</code></pre>
+
+        <h3>Rate Limiting</h3>
+        <p>API requests are limited to 100 requests per minute per API key. If you exceed this limit, you'll receive a 429 Too Many Requests response.</p>
+
+        <h3>Webhook Notifications</h3>
+        <p>If you've enabled notifications for a project, you'll receive webhook notifications for important status changes. Ensure your server is configured to receive POST requests at the specified webhook URL.</p>
+        <p><strong>Example Webhook Payload:</strong></p>
+        <pre><code>{
+    "project_id": 123,
+    "status": "completed",
+    "indexed_links": 2,
+    "total_links": 2,
+    "timestamp": "2023-06-01T13:00:00Z"
 }</code></pre>
     </details>
 </div>
