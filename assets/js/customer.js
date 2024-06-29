@@ -72,13 +72,15 @@ jQuery(document).ready(function($) {
                 datasets: [{
                     label: 'Indexed URLs',
                     data: data.indexed,
-                    borderColor: 'green',
-                    fill: false
+                    borderColor: '#4caf50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    fill: true
                 }, {
                     label: 'Unindexed URLs',
                     data: data.unindexed,
-                    borderColor: 'red',
-                    fill: false
+                    borderColor: '#f44336',
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    fill: true
                 }]
             },
             options: {
@@ -93,24 +95,46 @@ jQuery(document).ready(function($) {
                         max: endDate,
                         title: {
                             display: true,
-                            text: 'Date'
+                            text: 'Date',
+                            color: '#ffffff'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
                         }
                     },
                     y: {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Number of URLs'
+                            text: 'Number of URLs',
+                            color: '#ffffff'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
                         }
                     }
                 },
                 plugins: {
                     legend: {
                         position: 'top',
+                        labels: {
+                            color: '#ffffff'
+                        }
                     },
                     tooltip: {
                         mode: 'index',
-                        intersect: false
+                        intersect: false,
+                        backgroundColor: 'rgba(97, 97, 97, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#333333',
+                        borderWidth: 1
                     }
                 }
             }
