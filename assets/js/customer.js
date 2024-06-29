@@ -74,8 +74,8 @@ jQuery(function($) {
         if (data && Array.isArray(data.indexed) && Array.isArray(data.unindexed)) {
             data.indexed.forEach((item, index) => {
                 labels.push(item.x);
-                indexedData.push(item.y);
-                unindexedData.push(data.unindexed[index].y);
+                indexedData.push({x: item.x, y: item.y});
+                unindexedData.push({x: item.x, y: data.unindexed[index].y});
             });
         } else {
             console.error('Invalid data format:', data);
