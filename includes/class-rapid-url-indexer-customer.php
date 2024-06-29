@@ -330,7 +330,6 @@ class Rapid_URL_Indexer_Customer {
             $unindexed = array();
 
             foreach ($stats as $stat) {
-                $dates[] = strtotime($stat['date']);
                 $indexed[] = array(
                     'x' => strtotime($stat['date']),
                     'y' => intval($stat['indexed_count'])
@@ -344,7 +343,6 @@ class Rapid_URL_Indexer_Customer {
             // If there are no stats yet, use the project's current values
             if (empty($stats)) {
                 $created_at = strtotime($project->created_at);
-                $dates[] = $created_at;
                 $indexed[] = array(
                     'x' => $created_at,
                     'y' => intval($project->indexed_links)
@@ -356,7 +354,6 @@ class Rapid_URL_Indexer_Customer {
             }
 
             wp_send_json_success(array(
-                'dates' => $dates,
                 'indexed' => $indexed,
                 'unindexed' => $unindexed
             ));

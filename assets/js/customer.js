@@ -41,7 +41,8 @@ jQuery(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    showChart(response.data, $(this).closest('tr').find('td:nth-child(4)').text());
+                    var createdAt = $(this).closest('tr').find('td:nth-child(4)').text();
+                    showChart(response.data, new Date(createdAt));
                 } else {
                     alert('Failed to load chart data');
                 }
@@ -62,7 +63,7 @@ jQuery(function($) {
             window.indexingChart.destroy();
         }
 
-        var startDate = new Date(data.dates[0]);
+        var startDate = new Date(createdAt);
         var endDate = new Date(startDate.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 days after creation
 
         window.indexingChart = new Chart(ctx, {
@@ -70,13 +71,13 @@ jQuery(function($) {
             data: {
                 datasets: [{
                     label: 'Indexed URLs',
-                    data: data.indexed,
+                    data: data.indexed.map(item => ({x: new Date(item.x * 1000), y: item.y})),
                     borderColor: '#4caf50',
                     backgroundColor: 'rgba(76, 175, 80, 0.1)',
                     fill: true
                 }, {
                     label: 'Unindexed URLs',
-                    data: data.unindexed,
+                    data: data.unindexed.map(item => ({x: new Date(item.x * 1000), y: item.y})),
                     borderColor: '#f44336',
                     backgroundColor: 'rgba(244, 67, 54, 0.1)',
                     fill: true
@@ -89,9 +90,6 @@ jQuery(function($) {
                         type: 'time',
                         time: {
                             unit: 'day',
-                            parser: function(value) {
-                                return new Date(value * 1000);
-                            },
                             displayFormats: {
                                 day: 'MMM d'
                             }
