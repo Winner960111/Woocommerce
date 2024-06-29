@@ -115,7 +115,8 @@ jQuery(function($) {
                         type: 'category',
                         title: {
                             display: true,
-                            text: 'Date'
+                            text: 'Date',
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
                         },
                         ticks: {
                             color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
@@ -128,7 +129,8 @@ jQuery(function($) {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: 'Number of URLs'
+                            text: 'Number of URLs',
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
                         },
                         ticks: {
                             color: getComputedStyle(document.documentElement).getPropertyValue('--wp--preset--color--inputtext').trim()
