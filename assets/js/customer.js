@@ -70,7 +70,7 @@ jQuery(function($) {
 
         if (data && Array.isArray(data)) {
             data.forEach(item => {
-                labels.push(new Date(item.date).toISOString().split('T')[0]);
+                labels.push(item.date);
                 indexedData.push(parseInt(item.indexed_count));
                 unindexedData.push(parseInt(item.unindexed_count));
             });
@@ -108,13 +108,7 @@ jQuery(function($) {
                 responsive: true,
                 scales: {
                     x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            displayFormats: {
-                                day: 'yyyy-MM-dd'
-                            }
-                        },
+                        type: 'category',
                         title: {
                             display: true,
                             text: 'Date',
