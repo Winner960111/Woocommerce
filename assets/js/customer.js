@@ -79,17 +79,15 @@ jQuery(function($) {
         var canvas = document.getElementById('indexingChart');
         var ctx = canvas.getContext('2d');
 
-        // Destroy any existing chart
+        // Ensure the chart is destroyed if it exists
         if (window.indexingChart instanceof Chart) {
             window.indexingChart.destroy();
         }
 
-        // Clear the canvas
+        // Reset canvas dimensions and clear it
+        canvas.width = modal.width() * 0.9; // 90% of modal width
+        canvas.height = 400; // Fixed height or adjust as needed
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Reset canvas dimensions
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
 
         var labels = [];
         var indexedData = [];
