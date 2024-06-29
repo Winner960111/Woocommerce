@@ -176,15 +176,6 @@ jQuery(function($) {
         $('#chartModal').hide();
     }
 
-    $(document).on('click', '.close', closeModal);
-
-    $(document).on('click', function(event) {
-        var modal = $('#chartModal');
-        if (event.target === modal[0]) {
-            closeModal();
-        }
-    });
-
     // Ensure the close button is properly positioned and visible
     function positionCloseButton() {
         var closeButton = $('.close');
@@ -213,5 +204,15 @@ jQuery(function($) {
 
         // Ensure the close button is clickable
         $('.close').off('click').on('click', closeModal);
+
+        // Add click event listener to close modal when clicking outside
+        $(document).on('click', function(event) {
+            if (event.target === modal[0]) {
+                closeModal();
+            }
+        });
     }
+
+    // Add this line at the end of the jQuery(function($) { ... }) block
+    $(document).on('click', '.close', closeModal);
 });
