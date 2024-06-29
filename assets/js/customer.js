@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(function($) {
     if (typeof Chart === 'undefined') {
         console.error('Chart.js is not loaded. Please make sure it is properly included in your HTML.');
         return;
