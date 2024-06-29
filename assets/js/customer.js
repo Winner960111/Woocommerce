@@ -106,6 +106,11 @@ jQuery(document).ready(function($) {
                         },
                         grid: {
                             color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        adapters: {
+                            date: {
+                                locale: 'en'
+                            }
                         }
                     },
                     y: {
