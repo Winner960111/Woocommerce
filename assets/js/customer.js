@@ -5,8 +5,6 @@ jQuery(function($) {
         return;
     }
 
-    // Register the 'date' adapter for Chart.js
-
     $('#rui-project-submission-form').on('submit', function(e) {
         e.preventDefault();
 
