@@ -272,17 +272,6 @@ http://example.org,Not Indexed,</code></pre>
 
         <h3>Rate Limiting</h3>
         <p>API requests are limited to 100 requests per minute per API key. If you exceed this limit, you'll receive a 429 Too Many Requests response.</p>
-
-        <h3>Webhook Notifications</h3>
-        <p>If you've enabled notifications for a project, you'll receive webhook notifications for important status changes. Ensure your server is configured to receive POST requests at the specified webhook URL.</p>
-        <p><strong>Example Webhook Payload:</strong></p>
-        <pre><code>{
-    "project_id": 123,
-    "status": "completed",
-    "indexed_links": 2,
-    "total_links": 2,
-    "timestamp": "2023-06-01T13:00:00Z"
-}</code></pre>
     </details>
 </div>
 <?php
