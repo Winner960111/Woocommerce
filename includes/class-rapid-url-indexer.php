@@ -804,6 +804,17 @@ class Rapid_URL_Indexer {
 
         // Check if the project already has a task ID to prevent double submission
         if (empty($project->task_id)) {
+            // Check if user has enough credits
+            $credits_needed = count($urls);
+            $available_credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
+
+            if ($available_credits < $credits_needed) {
+                return array(
+                    'success' => false,
+                    'error' => __('Insufficient credits to submit the project.', 'rapid-url-indexer')
+                );
+            }
+
             // Call API to create task
             $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $user_id . ')');
         
@@ -819,7 +830,7 @@ class Rapid_URL_Indexer {
                 ), array('id' => $project_id));
 
                 // Deduct credits only when the project is successfully submitted
-                Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'system', $project_id);
+                Rapid_URL_Indexer_Customer::update_user_credits($user_id, -$credits_needed, 'system', $project_id);
                 
                 // Log the action
                 $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
