@@ -239,11 +239,9 @@ class Rapid_URL_Indexer {
                         'updated_at' => current_time('mysql')
                     ), array('id' => $project->id));
 
-                    // Refund reserved credits
-                    $reserved_credits = $wpdb->get_var($wpdb->prepare("SELECT SUM(amount) FROM {$wpdb->prefix}rapid_url_indexer_logs WHERE project_id = %d AND action = 'Credit Reservation'", $project->id));
-                    if ($reserved_credits > 0) {
-                        Rapid_URL_Indexer_Customer::update_user_credits($entry->user_id, $reserved_credits, 'system', $project->id);
-                    }
+                    // Refund credits
+                    $total_urls = count(json_decode($project->urls, true));
+                    Rapid_URL_Indexer_Customer::update_user_credits($entry->user_id, $total_urls, 'system', $project->id);
 
                     self::log_action($project->id, 'Submission Failed', 'Failed after 12 hours of retries');
                 }
