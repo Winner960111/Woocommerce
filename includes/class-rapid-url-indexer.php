@@ -182,10 +182,9 @@ class Rapid_URL_Indexer {
                 if ($entry->type === 'backlog') {
                     $wpdb->delete($backlog_table, array('id' => $entry->id));
                     self::log_action($entry->project_id, 'Backlog Entry Processed', json_encode($response));
-                } else {
-                    $wpdb->update($projects_table, array('status' => 'submitted', 'updated_at' => current_time('mysql')), array('id' => $entry->project_id));
-                    self::log_action($entry->project_id, 'Pending Project Processed', json_encode($response));
                 }
+                $wpdb->update($projects_table, array('status' => 'submitted', 'updated_at' => current_time('mysql')), array('id' => $entry->project_id));
+                self::log_action($entry->project_id, 'Project Processed', json_encode($response));
             } else {
                 if ($entry->type === 'backlog') {
                     $wpdb->update($backlog_table, array('retries' => $entry->retries + 1), array('id' => $entry->id));
@@ -206,8 +205,15 @@ class Rapid_URL_Indexer {
                 }
             }
 
-            // Handle long-pending projects (12 hours or more)
-            if ($entry->type === 'pending' && strtotime($entry->created_at) <= strtotime('-12 hours')) {
+            // Check if the project has a task_id
+            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d", $entry->project_id));
+            if (!empty($project->task_id)) {
+                $wpdb->update($projects_table, array(
+                    'status' => 'submitted',
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $entry->project_id));
+                self::log_action($entry->project_id, 'Project Status Updated', 'Project has a task_id, status set to submitted');
+            } elseif ($entry->type === 'pending' && strtotime($entry->created_at) <= strtotime('-12 hours') && $response['success'] === false) {
                 $wpdb->update($projects_table, array(
                     'status' => 'failed',
                     'updated_at' => current_time('mysql')
