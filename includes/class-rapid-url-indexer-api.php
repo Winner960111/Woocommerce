@@ -54,7 +54,9 @@ class Rapid_URL_Indexer_API {
         if ($balance < $low_balance_threshold) {
             $message = sprintf(__('The balance for URL indexing is below the threshold of %d.', 'rapid-url-indexer'), $low_balance_threshold);
             self::notify_admin(__('Low URL Indexing Balance', 'rapid-url-indexer'), $message);
-            self::add_admin_notice($message, 'warning');
+            add_action('admin_notices', function() use ($message) {
+                echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html($message) . '</p></div>';
+            });
         }
     }
 
@@ -165,11 +167,6 @@ class Rapid_URL_Indexer_API {
         }
     }
 
-    private static function add_admin_notice($message) {
-        add_action('admin_notices', function() use ($message) {
-            echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($message) . '</p></div>';
-        });
-    }
 
     private static function make_api_request($method, $endpoint, $api_key, $body = null) {
         $retries = 0;
