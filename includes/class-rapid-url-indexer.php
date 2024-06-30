@@ -593,8 +593,8 @@ class Rapid_URL_Indexer {
                 // Log the successful submission
                 self::log_action($project->user_id, $project->id, 'Retry Submission', json_encode($response));
             } else {
-                // If still failing after 48 hours, mark as failed and unreserve credits
-                if (strtotime($project->created_at) <= strtotime('-48 hours')) {
+                // If still failing after 12 hours, mark as failed and unreserve credits
+                if (strtotime($project->created_at) <= strtotime('-12 hours')) {
                     $wpdb->update($table_name, array(
                         'status' => 'failed',
                         'updated_at' => current_time('mysql')
