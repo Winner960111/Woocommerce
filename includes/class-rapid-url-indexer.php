@@ -31,11 +31,11 @@ class Rapid_URL_Indexer {
         }
 
         // Add actions for cron jobs
-        add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs'));
-        add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
-        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
-        add_action('rui_purge_logs', array('Rapid_URL_Indexer', 'purge_logs'));
-        add_action('rui_purge_projects', array('Rapid_URL_Indexer', 'purge_projects'));
+        add_action('rui_cron_job', array(__CLASS__, 'process_cron_jobs'));
+        add_action('rui_check_abuse', array(__CLASS__, 'check_abuse'));
+        add_action('rui_process_backlog', array(__CLASS__, 'process_backlog'));
+        add_action('rui_purge_logs', array(__CLASS__, 'purge_logs'));
+        add_action('rui_purge_projects', array(__CLASS__, 'purge_projects'));
     }
 
     public static function purge_logs() {
@@ -640,6 +640,15 @@ class Rapid_URL_Indexer {
         // Process backlog
         self::process_backlog();
 
+        // Check for abuse
+        self::check_abuse();
+
+        // Purge old logs
+        self::purge_logs();
+
+        // Purge old projects
+        self::purge_projects();
+
         self::log_cron_execution('Cron Job Completed');
     }
 
@@ -653,6 +662,10 @@ class Rapid_URL_Indexer {
             'details' => '',
             'created_at' => current_time('mysql')
         ));
+
+        if ($wpdb->last_error) {
+            error_log('Error logging cron execution: ' . $wpdb->last_error);
+        }
     }
 
 
