@@ -200,6 +200,12 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     "urls": ["http://example.com", "http://example.org"],
     "notify_on_status_change": true
 }</code></pre>
+        <p><strong>Arguments:</strong></p>
+        <ul>
+            <li><strong>project_name</strong> (string, required): The name of your project.</li>
+            <li><strong>urls</strong> (array of strings, required): An array of URLs to be indexed. Each URL must start with "http://" or "https://".</li>
+            <li><strong>notify_on_status_change</strong> (boolean, optional, default: false): If set to true, you will receive email notifications when the project status changes.</li>
+        </ul>
         <p><strong>Successful Response (201 Created):</strong></p>
         <pre><code>{
     "message": "Project created successfully",
@@ -223,6 +229,10 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 
         <h4>Get Project Status</h4>
         <p><strong>Endpoint:</strong> <code>GET /api/v1/projects/{project_id}</code></p>
+        <p><strong>Arguments:</strong></p>
+        <ul>
+            <li><strong>project_id</strong> (integer, required): The ID of the project you want to check.</li>
+        </ul>
         <p><strong>Successful Response (200 OK):</strong></p>
         <pre><code>{
     "project_id": 123,
@@ -249,6 +259,10 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 
         <h4>Download Project Report</h4>
         <p><strong>Endpoint:</strong> <code>GET /api/v1/projects/{project_id}/report</code></p>
+        <p><strong>Arguments:</strong></p>
+        <ul>
+            <li><strong>project_id</strong> (integer, required): The ID of the project for which you want to download the report.</li>
+        </ul>
         <p><strong>Successful Response (200 OK):</strong></p>
         <p>Returns a CSV file with the following format:</p>
         <pre><code>URL,Status,Indexed At
