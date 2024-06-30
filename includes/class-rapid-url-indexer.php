@@ -763,7 +763,7 @@ class Rapid_URL_Indexer {
         // Check if the project already has a task ID to prevent double submission
         if (empty($project->task_id)) {
             // Call API to create task
-            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name, $user_id);
+            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $user_id . ')', $user_id);
         
             // Handle response and update project status
             if ($response && isset($response['task_id'])) {
