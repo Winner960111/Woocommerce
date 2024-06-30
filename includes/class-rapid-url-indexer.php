@@ -155,12 +155,13 @@ class Rapid_URL_Indexer {
 
         // Process all projects, regardless of status
         $entries = $wpdb->get_results("
-            SELECT 'project' as type, id, id as project_id, urls, notify, 0 as retries, created_at 
+            SELECT 'project' as type, id, id as project_id, urls, notify, 0 as retries, created_at, user_id
             FROM $projects_table
             UNION ALL
-            SELECT 'backlog' as type, b.id, b.project_id, b.urls, b.notify, b.retries, b.created_at 
+            SELECT 'backlog' as type, b.id, b.project_id, b.urls, b.notify, b.retries, b.created_at, p.user_id
             FROM $backlog_table b 
-            WHERE retries < " . self::API_MAX_RETRIES
+            JOIN $projects_table p ON b.project_id = p.id
+            WHERE b.retries < " . self::API_MAX_RETRIES
         );
 
         foreach ($entries as $entry) {
@@ -182,9 +183,28 @@ class Rapid_URL_Indexer {
                 continue; // Skip to the next entry
             }
 
-            // If the project doesn't have a task ID, process it
+            // Check if user has enough credits
             $urls = json_decode($project->urls, true);
-            $response = self::process_api_request($project->id, $urls, $project->notify, $project->user_id);
+            $user_credits = Rapid_URL_Indexer_Customer::get_user_credits($entry->user_id);
+            if ($user_credits < count($urls)) {
+                // Mark project as failed and refund any reserved credits
+                $wpdb->update($projects_table, array(
+                    'status' => 'failed',
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $project->id));
+
+                // Refund reserved credits if any
+                $reserved_credits = $wpdb->get_var($wpdb->prepare("SELECT SUM(amount) FROM {$wpdb->prefix}rapid_url_indexer_logs WHERE project_id = %d AND action = 'Credit Reservation'", $project->id));
+                if ($reserved_credits > 0) {
+                    Rapid_URL_Indexer_Customer::update_user_credits($entry->user_id, $reserved_credits, 'system', $project->id);
+                }
+
+                self::log_action($project->id, 'Project Failed', 'Insufficient credits');
+                continue;
+            }
+
+            // If the project doesn't have a task ID, process it
+            $response = self::process_api_request($project->id, $urls, $project->notify, $entry->user_id);
 
             if ($response['success']) {
                 if ($entry->type === 'backlog') {
@@ -219,8 +239,11 @@ class Rapid_URL_Indexer {
                         'updated_at' => current_time('mysql')
                     ), array('id' => $project->id));
 
-                    // Unreserve credits
-                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
+                    // Refund reserved credits
+                    $reserved_credits = $wpdb->get_var($wpdb->prepare("SELECT SUM(amount) FROM {$wpdb->prefix}rapid_url_indexer_logs WHERE project_id = %d AND action = 'Credit Reservation'", $project->id));
+                    if ($reserved_credits > 0) {
+                        Rapid_URL_Indexer_Customer::update_user_credits($entry->user_id, $reserved_credits, 'system', $project->id);
+                    }
 
                     self::log_action($project->id, 'Submission Failed', 'Failed after 12 hours of retries');
                 }
