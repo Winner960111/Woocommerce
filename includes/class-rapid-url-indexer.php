@@ -150,93 +150,80 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Process Backlog Started');
         
         // Log the number of pending projects
-        $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM $projects_table WHERE status = 'pending' AND task_id IS NULL");
+        $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM $projects_table WHERE status = 'pending'");
         self::log_action(0, 'Pending Projects Count', "Number of pending projects: $pending_count");
 
-        // Process backlog entries and pending projects
+        // Process all projects, regardless of status
         $entries = $wpdb->get_results("
+            SELECT 'project' as type, id, id as project_id, urls, notify, 0 as retries, created_at 
+            FROM $projects_table
+            UNION ALL
             SELECT 'backlog' as type, b.id, b.project_id, b.urls, b.notify, b.retries, b.created_at 
             FROM $backlog_table b 
-            WHERE retries < " . self::API_MAX_RETRIES . "
-            UNION ALL
-            SELECT 'pending' as type, p.id, p.id as project_id, p.urls, p.notify, 0 as retries, p.created_at 
-            FROM $projects_table p 
-            WHERE status = 'pending' AND task_id IS NULL AND created_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)
-        ");
+            WHERE retries < " . self::API_MAX_RETRIES
+        );
 
         foreach ($entries as $entry) {
-            // Check if the project already has a task ID
             $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d", $entry->project_id));
             
             if (!empty($project->task_id)) {
-                // Update project status to submitted if it has a task ID
-                $wpdb->update($projects_table, array('status' => 'submitted'), array('id' => $project->id));
-                self::log_action($project->id, 'Project Status Updated', 'Project has a task_id, status set to submitted');
+                // If the project has a task ID, update its status to 'submitted' if it's not already
+                if ($project->status !== 'submitted') {
+                    $wpdb->update($projects_table, array('status' => 'submitted'), array('id' => $project->id));
+                    self::log_action($project->id, 'Project Status Updated', 'Project has a task_id, status set to submitted');
+                }
+                
+                // Remove from backlog if it's there
+                if ($entry->type === 'backlog') {
+                    $wpdb->delete($backlog_table, array('id' => $entry->id));
+                    self::log_action($project->id, 'Removed from Backlog', 'Project has a task_id, removed from backlog');
+                }
+                
                 continue; // Skip to the next entry
             }
-            // Check if the project already has a task ID
-            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d", $entry->project_id));
-            
-            if ($project->status === 'submitted' || !empty($project->task_id)) {
-                // Skip this project as it has already been submitted
-                self::log_action($entry->project_id, 'Skipped Processing', 'Project already submitted or has a task ID');
-                continue;
-            }
 
-            $urls = json_decode($entry->urls, true);
-            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d", $entry->project_id));
-            $response = self::process_api_request($entry->project_id, $urls, $entry->notify, $project->user_id);
+            // If the project doesn't have a task ID, process it
+            $urls = json_decode($project->urls, true);
+            $response = self::process_api_request($project->id, $urls, $project->notify, $project->user_id);
 
             if ($response['success']) {
                 if ($entry->type === 'backlog') {
                     $wpdb->delete($backlog_table, array('id' => $entry->id));
-                    self::log_action($entry->project_id, 'Backlog Entry Processed', json_encode($response));
+                    self::log_action($project->id, 'Backlog Entry Processed', json_encode($response));
                 }
-                $wpdb->update($projects_table, array('status' => 'submitted', 'updated_at' => current_time('mysql')), array('id' => $entry->project_id));
-                self::log_action($entry->project_id, 'Project Processed', json_encode($response));
+                $wpdb->update($projects_table, array('status' => 'submitted', 'updated_at' => current_time('mysql')), array('id' => $project->id));
+                self::log_action($project->id, 'Project Processed', json_encode($response));
             } else {
                 if ($entry->type === 'backlog') {
                     $wpdb->update($backlog_table, array('retries' => $entry->retries + 1), array('id' => $entry->id));
-                    self::log_action($entry->project_id, 'Backlog Entry Retry', json_encode($response));
+                    self::log_action($project->id, 'Backlog Entry Retry', json_encode($response));
                 } else {
-                    // If processing fails for pending project, add to backlog if not already there
-                    $existing_backlog = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $backlog_table WHERE project_id = %d", $entry->project_id));
+                    // If processing fails for project, add to backlog if not already there
+                    $existing_backlog = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $backlog_table WHERE project_id = %d", $project->id));
                     if (!$existing_backlog) {
                         $wpdb->insert($backlog_table, array(
-                            'project_id' => $entry->project_id,
-                            'urls' => $entry->urls,
-                            'notify' => $entry->notify,
+                            'project_id' => $project->id,
+                            'urls' => $project->urls,
+                            'notify' => $project->notify,
                             'retries' => 0,
                             'created_at' => current_time('mysql')
                         ));
-                        self::log_action($entry->project_id, 'Project Added to Backlog', json_encode($response));
+                        self::log_action($project->id, 'Project Added to Backlog', json_encode($response));
                     }
                 }
-            }
 
-            // Check if the project has a task_id
-            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d", $entry->project_id));
-            if (!empty($project->task_id)) {
-                $wpdb->update($projects_table, array(
-                    'status' => 'submitted',
-                    'updated_at' => current_time('mysql')
-                ), array('id' => $entry->project_id));
-                self::log_action($entry->project_id, 'Project Status Updated', 'Project has a task_id, status set to submitted');
-            } elseif ($entry->type === 'pending' && strtotime($entry->created_at) <= strtotime('-12 hours') && $response['success'] === false) {
-                $wpdb->update($projects_table, array(
-                    'status' => 'failed',
-                    'updated_at' => current_time('mysql')
-                ), array('id' => $entry->project_id));
+                // If the project is older than 12 hours and still failing, mark it as failed
+                if (strtotime($project->created_at) <= strtotime('-12 hours')) {
+                    $wpdb->update($projects_table, array(
+                        'status' => 'failed',
+                        'updated_at' => current_time('mysql')
+                    ), array('id' => $project->id));
 
-                // Fetch user_id from projects table
-                $user_id = $wpdb->get_var($wpdb->prepare("SELECT user_id FROM $projects_table WHERE id = %d", $entry->project_id));
+                    // Unreserve credits
+                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
 
-                // Unreserve credits
-                if ($user_id) {
-                    Rapid_URL_Indexer_Customer::update_user_credits($user_id, count($urls), 'system', $entry->project_id);
+                    self::log_action($project->id, 'Submission Failed', 'Failed after 12 hours of retries');
                 }
-
-                self::log_action($entry->project_id, 'Submission Failed', 'Failed after 12 hours of retries');
             }
         }
 
