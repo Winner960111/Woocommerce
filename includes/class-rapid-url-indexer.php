@@ -148,6 +148,10 @@ class Rapid_URL_Indexer {
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
 
         self::log_cron_execution('Process Backlog Started');
+        
+        // Log the number of pending projects
+        $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM $projects_table WHERE status = 'pending' AND (task_id IS NULL OR task_id = '')");
+        self::log_action(0, 'Pending Projects Count', "Number of pending projects: $pending_count");
 
         // Process backlog entries and pending projects
         $entries = $wpdb->get_results("
@@ -157,7 +161,7 @@ class Rapid_URL_Indexer {
             UNION ALL
             SELECT 'pending' as type, p.id, p.id as project_id, p.urls, p.notify, 0 as retries, p.created_at 
             FROM $projects_table p 
-            WHERE status = 'pending' AND task_id IS NULL AND created_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            WHERE status = 'pending' AND (task_id IS NULL OR task_id = '') AND created_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)
         ");
 
         foreach ($entries as $entry) {
