@@ -220,20 +220,23 @@ class Rapid_URL_Indexer_Customer {
                 throw new Exception(__('Insufficient credits', 'rapid-url-indexer'));
             }
 
-            // Reserve credits
-            self::update_user_credits($user_id, -$credits_needed, 'system', 0, true);
-
             $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-            $wpdb->insert($table_name, array(
+            $result = $wpdb->insert($table_name, array(
                 'user_id' => $user_id,
                 'project_name' => $project_name,
                 'urls' => json_encode($urls),
                 'status' => 'pending',
-                'created_at' => current_time('mysql'),
-                'reserved_credits' => $credits_needed
+                'created_at' => current_time('mysql')
             ));
 
+            if ($result === false) {
+                throw new Exception(__('Failed to create project', 'rapid-url-indexer'));
+            }
+
             $project_id = $wpdb->insert_id;
+
+            // Reserve credits only if project was successfully created
+            self::update_user_credits($user_id, -$credits_needed, 'system', $project_id, true);
 
             // Schedule API request
             self::schedule_api_request($project_id, $urls, $notify);
