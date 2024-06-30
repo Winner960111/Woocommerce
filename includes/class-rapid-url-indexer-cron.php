@@ -10,6 +10,8 @@ class Rapid_URL_Indexer_Cron {
     }
 
     public static function update_daily_stats() {
+        self::log_cron_execution('Update Daily Stats Started');
+
         global $wpdb;
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
         $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
@@ -32,5 +34,19 @@ class Rapid_URL_Indexer_Cron {
                 array('%d', '%s', '%d', '%d')
             );
         }
+
+        self::log_cron_execution('Update Daily Stats Completed');
+    }
+
+    private static function log_cron_execution($action) {
+        global $wpdb;
+        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+            'user_id' => 0,
+            'project_id' => 0,
+            'triggered_by' => 'Cron',
+            'action' => $action,
+            'details' => '',
+            'created_at' => current_time('mysql')
+        ));
     }
 }
