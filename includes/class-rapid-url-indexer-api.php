@@ -4,7 +4,6 @@ class Rapid_URL_Indexer_API {
     const API_RATE_LIMIT = 100; // Maximum number of API requests per minute
     const API_RETRY_DELAY = 60; // Delay in seconds before retrying a failed API request 
     const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
-    const LOW_BALANCE_THRESHOLD = 100000; // Threshold for low balance notification
 
     public static function get_account_balance($api_key) {
         $response = self::make_api_request('GET', '/v2/account', $api_key);
@@ -51,9 +50,10 @@ class Rapid_URL_Indexer_API {
     }
 
     private static function check_low_balance($balance) {
-        if ($balance < self::LOW_BALANCE_THRESHOLD) {
+        $low_balance_threshold = get_option('rui_low_balance_threshold', 100000);
+        if ($balance < $low_balance_threshold) {
             self::notify_admin(__('Low URL Indexing Balance', 'rapid-url-indexer'), 
-                               __('The balance for URL indexing is below the threshold.', 'rapid-url-indexer'));
+                               sprintf(__('The balance for URL indexing is below the threshold of %d.', 'rapid-url-indexer'), $low_balance_threshold));
         }
     }
 

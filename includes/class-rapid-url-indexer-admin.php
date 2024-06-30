@@ -242,17 +242,22 @@ class Rapid_URL_Indexer_Admin {
             'type' => 'integer',
             'default' => 1000,
             'sanitize_callback' => 'intval'
-            ));
-            register_setting('rui_settings', 'rui_min_projects_for_abuse', array(
-                'type' => 'integer',
-                'default' => 10,
-                'sanitize_callback' => 'intval'
-            ));
-            register_setting('rui_settings', 'rui_avg_refund_rate_for_abuse', array(
-                'type' => 'float',
-                'default' => 0.7,
-                'sanitize_callback' => 'floatval'
-            ));
+        ));
+        register_setting('rui_settings', 'rui_min_projects_for_abuse', array(
+            'type' => 'integer',
+            'default' => 10,
+            'sanitize_callback' => 'intval'
+        ));
+        register_setting('rui_settings', 'rui_avg_refund_rate_for_abuse', array(
+            'type' => 'float',
+            'default' => 0.7,
+            'sanitize_callback' => 'floatval'
+        ));
+        register_setting('rui_settings', 'rui_low_balance_threshold', array(
+            'type' => 'integer',
+            'default' => 100000,
+            'sanitize_callback' => 'intval'
+        ));
     }
 
     public static function logs_page() {
