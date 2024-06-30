@@ -65,12 +65,6 @@ class Rapid_URL_Indexer_API {
         wp_mail(get_option('admin_email'), $subject, $message);
     }
 
-    private static function add_admin_notice($message, $type = 'error') {
-        add_action('admin_notices', function() use ($message, $type) {
-            printf('<div class="notice notice-%s is-dismissible"><p>%s</p></div>', esc_attr($type), esc_html($message));
-        });
-    }
-
     private static function is_api_response_success($response) {
         return wp_remote_retrieve_response_code($response) === 200;
     }
