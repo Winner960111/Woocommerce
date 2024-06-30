@@ -52,8 +52,9 @@ class Rapid_URL_Indexer_API {
     private static function check_low_balance($balance) {
         $low_balance_threshold = get_option('rui_low_balance_threshold', 100000);
         if ($balance < $low_balance_threshold) {
-            self::notify_admin(__('Low URL Indexing Balance', 'rapid-url-indexer'), 
-                               sprintf(__('The balance for URL indexing is below the threshold of %d.', 'rapid-url-indexer'), $low_balance_threshold));
+            $message = sprintf(__('The balance for URL indexing is below the threshold of %d.', 'rapid-url-indexer'), $low_balance_threshold);
+            self::notify_admin(__('Low URL Indexing Balance', 'rapid-url-indexer'), $message);
+            self::add_admin_notice($message, 'warning');
         }
     }
 
@@ -62,6 +63,12 @@ class Rapid_URL_Indexer_API {
             $message = $subject; // Use the subject as the message if no message is provided
         }
         wp_mail(get_option('admin_email'), $subject, $message);
+    }
+
+    private static function add_admin_notice($message, $type = 'error') {
+        add_action('admin_notices', function() use ($message, $type) {
+            printf('<div class="notice notice-%s is-dismissible"><p>%s</p></div>', esc_attr($type), esc_html($message));
+        });
     }
 
     private static function is_api_response_success($response) {
