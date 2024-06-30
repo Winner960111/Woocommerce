@@ -454,6 +454,9 @@ class Rapid_URL_Indexer {
         add_action('woocommerce_product_options_general_product_data', array('Rapid_URL_Indexer', 'add_credits_field'));
         add_action('woocommerce_process_product_meta', array('Rapid_URL_Indexer', 'save_credits_field'));
 
+        // Hook for processing backlog
+        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+
         // Admin notice for SpeedyIndex API issues
     }
     

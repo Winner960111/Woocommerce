@@ -41,3 +41,11 @@ function rui_flush_rewrite_rules() {
 Rapid_URL_Indexer_Admin::init();
 add_action('admin_init', array('Rapid_URL_Indexer_Admin', 'register_settings'));
 
+// Ensure cron jobs are scheduled on plugin activation
+register_activation_hook(__FILE__, 'rui_schedule_cron_jobs');
+function rui_schedule_cron_jobs() {
+    if (!wp_next_scheduled('rui_process_backlog')) {
+        wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
+    }
+}
+
