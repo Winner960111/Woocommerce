@@ -68,10 +68,6 @@ class Rapid_URL_Indexer_Customer {
         return $title;
     }
 
-    public static function flush_rewrite_rules() {
-        self::add_my_account_endpoints();
-        flush_rewrite_rules();
-    }
 
     public static function add_my_account_endpoints() {
         add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);

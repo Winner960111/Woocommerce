@@ -48,14 +48,6 @@ class Rapid_URL_Indexer_API {
             self::log_api_error($response);
             return false;
         }
-        
-        if (self::is_api_response_success($response)) {
-            $data = json_decode(wp_remote_retrieve_body($response), true);
-            return $data['result'];
-        } else {
-            self::log_api_error($response);
-            return false;
-        }
     }
 
     private static function check_low_balance($balance) {

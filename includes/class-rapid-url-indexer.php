@@ -655,17 +655,6 @@ class Rapid_URL_Indexer {
         ));
     }
 
-    private static function log_action($project_id, $action, $details = '') {
-        global $wpdb;
-        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-            'user_id' => 0,
-            'project_id' => $project_id,
-            'triggered_by' => 'System',
-            'action' => $action,
-            'details' => $details,
-            'created_at' => current_time('mysql')
-        ));
-    }
 
     private static function retry_failed_submissions() {
         global $wpdb;
