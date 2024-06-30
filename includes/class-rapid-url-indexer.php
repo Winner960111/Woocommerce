@@ -171,7 +171,7 @@ class Rapid_URL_Indexer {
             $response = self::process_api_request($project->id, $urls, $project->notify);
 
             if ($response['success']) {
-                $wpdb->update($projects_table, array('status' => 'submitted'), array('id' => $project->id));
+                $wpdb->update($projects_table, array('status' => 'submitted', 'updated_at' => current_time('mysql')), array('id' => $project->id));
                 self::log_action($project->id, 'Pending Project Processed', json_encode($response));
             } else {
                 // If processing fails, add to backlog if not already there
@@ -194,6 +194,36 @@ class Rapid_URL_Indexer {
         foreach ($failed_projects as $project) {
             $api_key = get_option('rui_speedyindex_api_key');
             $urls = json_decode($project->urls, true);
+            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name, $project->user_id);
+
+            if ($response && isset($response['task_id'])) {
+                $wpdb->update($projects_table, array(
+                    'task_id' => $response['task_id'],
+                    'status' => 'submitted',
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $project->id));
+
+                // Deduct reserved credits
+                Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, -count($urls), 'system', $project->id);
+
+                self::log_action($project->id, 'Retry Submission Successful', json_encode($response));
+            } else {
+                // If still failing after 12 hours, mark as failed and unreserve credits
+                if (strtotime($project->created_at) <= strtotime('-12 hours')) {
+                    $wpdb->update($projects_table, array(
+                        'status' => 'failed',
+                        'updated_at' => current_time('mysql')
+                    ), array('id' => $project->id));
+
+                    // Unreserve credits
+                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
+
+                    self::log_action($project->id, 'Submission Failed', 'Failed after 12 hours of retries');
+                }
+            }
+        }
+
+        self::log_cron_execution('Process Backlog Completed');
             $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name, $project->user_id);
 
             if ($response && isset($response['task_id'])) {
