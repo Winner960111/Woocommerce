@@ -175,7 +175,8 @@ class Rapid_URL_Indexer {
             }
 
             $urls = json_decode($entry->urls, true);
-            $response = self::process_api_request($entry->project_id, $urls, $entry->notify);
+            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d", $entry->project_id));
+            $response = self::process_api_request($entry->project_id, $urls, $entry->notify, $project->user_id);
 
             if ($response['success']) {
                 if ($entry->type === 'backlog') {
@@ -734,7 +735,7 @@ class Rapid_URL_Indexer {
     }
 
 
-    public static function process_api_request($project_id, $urls, $notify) {
+    public static function process_api_request($project_id, $urls, $notify, $user_id) {
         global $wpdb;
 
         // Get project details
@@ -747,8 +748,6 @@ class Rapid_URL_Indexer {
                 'error' => __('Invalid project ID.', 'rapid-url-indexer')
             );
         }
-        
-        $user_id = $project->user_id;
 
         // Get API key
         $api_key = get_option('rui_speedyindex_api_key');
@@ -764,7 +763,7 @@ class Rapid_URL_Indexer {
         // Check if the project already has a task ID to prevent double submission
         if (empty($project->task_id)) {
             // Call API to create task
-            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $user_id . ')');
+            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $user_id . ')', $user_id);
         
             // Handle response and update project status
             if ($response && isset($response['task_id'])) {
