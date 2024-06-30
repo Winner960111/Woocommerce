@@ -187,17 +187,11 @@ class Rapid_URL_Indexer {
             $urls = json_decode($project->urls, true);
             $user_credits = Rapid_URL_Indexer_Customer::get_user_credits($entry->user_id);
             if ($user_credits < count($urls)) {
-                // Mark project as failed and refund any reserved credits
+                // Mark project as failed
                 $wpdb->update($projects_table, array(
                     'status' => 'failed',
                     'updated_at' => current_time('mysql')
                 ), array('id' => $project->id));
-
-                // Refund reserved credits if any
-                $reserved_credits = $wpdb->get_var($wpdb->prepare("SELECT SUM(amount) FROM {$wpdb->prefix}rapid_url_indexer_logs WHERE project_id = %d AND action = 'Credit Reservation'", $project->id));
-                if ($reserved_credits > 0) {
-                    Rapid_URL_Indexer_Customer::update_user_credits($entry->user_id, $reserved_credits, 'system', $project->id);
-                }
 
                 self::log_action($project->id, 'Project Failed', 'Insufficient credits');
                 continue;
