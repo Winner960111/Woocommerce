@@ -4,7 +4,8 @@ class Rapid_URL_Indexer_Cron {
         add_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
         
         if (!wp_next_scheduled('rui_daily_stats_update')) {
-            wp_schedule_event(time(), 'daily', 'rui_daily_stats_update');
+            $timestamp = strtotime('tomorrow 00:05:00 UTC');
+            wp_schedule_event($timestamp, 'daily', 'rui_daily_stats_update');
         }
     }
 
