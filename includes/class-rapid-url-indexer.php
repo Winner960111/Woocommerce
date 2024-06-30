@@ -204,7 +204,6 @@ class Rapid_URL_Indexer {
 
         self::log_cron_execution('Process Backlog Completed');
         return true; // Return true to indicate successful completion
-        return true; // Return true to indicate successful completion
     }
     private static function add_to_backlog($project_id, $urls, $notify) {
         global $wpdb;
@@ -641,7 +640,7 @@ class Rapid_URL_Indexer {
 
     private static function log_cron_execution($action) {
         global $wpdb;
-        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+        $result = $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
             'user_id' => 0,
             'project_id' => 0,
             'triggered_by' => 'Cron',
@@ -650,8 +649,24 @@ class Rapid_URL_Indexer {
             'created_at' => current_time('mysql')
         ));
 
-        if ($wpdb->last_error) {
+        if ($result === false) {
             error_log('Error logging cron execution: ' . $wpdb->last_error);
+        }
+    }
+
+    private static function log_action($project_id, $action, $details) {
+        global $wpdb;
+        $result = $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+            'user_id' => 0,
+            'project_id' => $project_id,
+            'triggered_by' => 'Cron',
+            'action' => $action,
+            'details' => $details,
+            'created_at' => current_time('mysql')
+        ));
+
+        if ($result === false) {
+            error_log('Error logging action: ' . $wpdb->last_error);
         }
     }
 

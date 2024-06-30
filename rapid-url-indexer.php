@@ -49,3 +49,6 @@ function rui_schedule_cron_jobs() {
     }
 }
 
+// Hook the process_backlog method to the rui_process_backlog action
+add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+
