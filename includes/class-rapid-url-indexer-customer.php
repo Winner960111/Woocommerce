@@ -257,10 +257,6 @@ class Rapid_URL_Indexer_Customer {
         // Update project status
         $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
 
-        // Credits have already been reserved, so we don't need to subtract them again
-        // Instead, we'll update the project to show that the reserved credits have been used
-        $wpdb->update($table_name, array('reserved_credits' => 0), array('id' => $project_id));
-
         // Log the credit usage
         self::log_credit_change($user_id, -count($urls), 'system', $project_id, false);
     }
