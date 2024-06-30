@@ -889,7 +889,8 @@ class Rapid_URL_Indexer {
         if ($project->notify) {
             $user_info = get_userdata($project->user_id);
             $subject = sprintf(__('Rapid URL Indexer: Project "%s" Status Update', 'rapid-url-indexer'), $project->project_name);
-            $message = sprintf(__('Dear %s,', 'rapid-url-indexer'), $user_info->display_name) . "\n\n";
+            $first_name = trim(explode(' ', $user_info->display_name)[0]);
+            $message = sprintf(__('Hey %s,', 'rapid-url-indexer'), $first_name) . "\n\n";
             $message .= sprintf(__('Your Rapid URL Indexer project "%s" has been updated:', 'rapid-url-indexer'), $project->project_name) . "\n\n";
             $message .= sprintf(__('New Status: %s', 'rapid-url-indexer'), ucfirst($status)) . "\n";
             $message .= sprintf(__('Total Submitted URLs: %d', 'rapid-url-indexer'), count(json_decode($project->urls, true))) . "\n";
