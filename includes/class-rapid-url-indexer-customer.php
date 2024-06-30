@@ -133,7 +133,7 @@ class Rapid_URL_Indexer_Customer {
                 $api_key = get_option('rui_speedyindex_api_key');
                 $project_id = self::submit_project($project_name, $urls, $notify, $user_id);
                 if ($project_id) {
-                    $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify);
+                    $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify, $user_id);
                     if ($api_response['success']) {
                         wp_send_json_success(array(
                             'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
