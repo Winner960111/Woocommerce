@@ -604,7 +604,7 @@ class Rapid_URL_Indexer {
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
 
                     // Log the failure
-                    self::log_action($project->user_id, $project->id, 'Submission Failed', 'Failed after 48 hours of retries');
+                    self::log_action($project->user_id, $project->id, 'Submission Failed', 'Failed after 12 hours of retries');
                 }
             }
         }
