@@ -225,37 +225,6 @@ class Rapid_URL_Indexer {
 
         self::log_cron_execution('Process Backlog Completed');
         return true; // Return true to indicate successful completion
-        return true; // Return true to indicate successful completion
-            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name, $project->user_id);
-
-            if ($response && isset($response['task_id'])) {
-                $wpdb->update($projects_table, array(
-                    'task_id' => $response['task_id'],
-                    'status' => 'submitted',
-                    'updated_at' => current_time('mysql')
-                ), array('id' => $project->id));
-
-                // Deduct reserved credits
-                Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, -count($urls), 'system', $project->id);
-
-                self::log_action($project->id, 'Retry Submission Successful', json_encode($response));
-            } else {
-                // If still failing after 12 hours, mark as failed and unreserve credits
-                if (strtotime($project->created_at) <= strtotime('-12 hours')) {
-                    $wpdb->update($projects_table, array(
-                        'status' => 'failed',
-                        'updated_at' => current_time('mysql')
-                    ), array('id' => $project->id));
-
-                    // Unreserve credits
-                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
-
-                    self::log_action($project->id, 'Submission Failed', 'Failed after 12 hours of retries');
-                }
-            }
-        }
-
-        self::log_cron_execution('Process Backlog Completed');
     }
     private static function add_to_backlog($project_id, $urls, $notify) {
         global $wpdb;
