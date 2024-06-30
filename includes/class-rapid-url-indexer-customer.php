@@ -104,7 +104,18 @@ class Rapid_URL_Indexer_Customer {
             if ($credits) {
                 $user_id = $order->get_user_id();
                 $quantity = $item->get_quantity();
-                self::update_user_credits($user_id, $credits * $quantity);
+                $total_credits = $credits * $quantity;
+                try {
+                    self::update_user_credits($user_id, $total_credits);
+                    self::log_credit_change($user_id, $total_credits, 'purchase', $order_id);
+                } catch (Exception $e) {
+                    error_log('Failed to add credits for order ' . $order_id . ': ' . $e->getMessage());
+                    wp_mail(
+                        get_option('admin_email'),
+                        'Credit Addition Failed',
+                        'Failed to add ' . $total_credits . ' credits for user ' . $user_id . ' on order ' . $order_id . '. Error: ' . $e->getMessage()
+                    );
+                }
             }
         }
     }
