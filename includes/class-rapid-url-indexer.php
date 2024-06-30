@@ -225,6 +225,7 @@ class Rapid_URL_Indexer {
 
         self::log_cron_execution('Process Backlog Completed');
         return true; // Return true to indicate successful completion
+        return true; // Return true to indicate successful completion
             $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name, $project->user_id);
 
             if ($response && isset($response['task_id'])) {
