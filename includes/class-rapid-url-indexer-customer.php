@@ -257,8 +257,8 @@ class Rapid_URL_Indexer_Customer {
         // Update project status
         $wpdb->update($table_name, array('status' => 'submitted'), array('id' => $project_id));
 
-        // Log the credit usage
-        self::log_credit_change($user_id, -count($urls), 'system', $project_id, false);
+        // Credits have already been reserved, so we don't need to log credit usage here
+        // The credit change was already logged when the project was created
     }
 
     public static function update_user_credits($user_id, $amount, $triggered_by = 'system', $project_id = 0, $is_reservation = false) {
