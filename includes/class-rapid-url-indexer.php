@@ -424,25 +424,29 @@ class Rapid_URL_Indexer {
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE (status = 'submitted' OR status = 'completed') AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
 
         foreach ($projects as $project) {
-            if (!$project->auto_refund_processed) {
-                $api_key = get_option('speedyindex_api_key');
-                $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->id);
+            $api_key = get_option('speedyindex_api_key');
+            $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
 
-                if ($response && isset($response['result']['indexed_count'])) {
-                    $indexed_count = $response['result']['indexed_count'];
-                    $processed_count = isset($response['result']['processed_count']) ? $response['result']['processed_count'] : 0;
-                    $refund_credits = $processed_count - $indexed_count;
+            if ($response && isset($response['processed_count']) && isset($response['indexed_count'])) {
+                $processed_count = $response['processed_count'];
+                $indexed_count = $response['indexed_count'];
+                $refund_credits = $processed_count - $indexed_count;
 
+                if ($refund_credits > 0) {
                     // Refund credits
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refund_credits);
 
-                    // Mark auto refund as processed and store refunded credits
+                    // Update project status and details
                     $wpdb->update($table_name, array(
-                        'auto_refund_processed' => 1, 
-                        'refunded_credits' => $refund_credits
+                        'status' => 'refunded',
+                        'auto_refund_processed' => 1,
+                        'refunded_credits' => $refund_credits,
+                        'processed_links' => $processed_count,
+                        'indexed_links' => $indexed_count,
+                        'updated_at' => current_time('mysql')
                     ), array('id' => $project->id));
 
                     // Log the action
@@ -450,9 +454,22 @@ class Rapid_URL_Indexer {
                         'user_id' => $project->user_id,
                         'project_id' => $project->id,
                         'action' => 'Auto Refund',
-                        'details' => json_encode($response),
+                        'details' => json_encode(array(
+                            'processed_count' => $processed_count,
+                            'indexed_count' => $indexed_count,
+                            'refunded_credits' => $refund_credits
+                        )),
                         'created_at' => current_time('mysql')
                     ));
+                } else {
+                    // If all processed URLs were indexed, just mark as completed
+                    $wpdb->update($table_name, array(
+                        'status' => 'completed',
+                        'auto_refund_processed' => 1,
+                        'processed_links' => $processed_count,
+                        'indexed_links' => $indexed_count,
+                        'updated_at' => current_time('mysql')
+                    ), array('id' => $project->id));
                 }
             }
         }
