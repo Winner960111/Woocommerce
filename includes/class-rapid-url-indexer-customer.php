@@ -258,13 +258,13 @@ class Rapid_URL_Indexer_Customer {
         // The credit change was already logged when the project was created
     }
 
-    public static function update_user_credits($user_id, $amount, $triggered_by = 'system', $project_id = 0, $is_reservation = false) {
+    public static function update_user_credits($user_id, $amount, $triggered_by = 'system', $project_id = 0) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = self::get_user_credits($user_id);
         $new_credits = $credits + $amount;
 
-        if ($new_credits < 0 && !$is_reservation) {
+        if ($new_credits < 0) {
             throw new Exception(__('Insufficient credits', 'rapid-url-indexer'));
         }
 
@@ -274,10 +274,10 @@ class Rapid_URL_Indexer_Customer {
             $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
         }
         
-        self::log_credit_change($user_id, $amount, $triggered_by, $project_id, $is_reservation);
+        self::log_credit_change($user_id, $amount, $triggered_by, $project_id);
     }
 
-    private static function log_credit_change($user_id, $amount, $triggered_by, $project_id, $is_reservation) {
+    private static function log_credit_change($user_id, $amount, $triggered_by, $project_id) {
         global $wpdb;
         $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
         
@@ -293,7 +293,7 @@ class Rapid_URL_Indexer_Customer {
             'user_id' => $user_id,
             'project_id' => $project_id,
             'action' => 'Credit Change',
-            'details' => json_encode(array('amount' => $amount, 'is_reservation' => $is_reservation)),
+            'details' => json_encode(array('amount' => $amount)),
             'created_at' => current_time('mysql')
         ));
     }
