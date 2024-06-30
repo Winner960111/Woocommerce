@@ -140,7 +140,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         <?php echo do_shortcode('[rui_api_key_display]'); ?>
     </div>
     <details>
-        <summary>API Documentation</summary>
+        <summary>RESTful API Documentation</summary>
         <table>
             <thead>
                 <tr>
@@ -190,9 +190,9 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             <li><strong>500 Internal Server Error</strong> - An unexpected error occurred on the server.</li>
         </ul>
 
-        <h3>Endpoints</h3>
+        <h3>RESTful API Endpoints</h3>
 
-        <h4>1. Submit a New Project</h4>
+        <h4>Submit a New Project</h4>
         <p><strong>Endpoint:</strong> <code>POST /api/v1/projects</code></p>
         <p><strong>Request Body:</strong></p>
         <pre><code>{
@@ -221,7 +221,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     "message": "Insufficient credits"
 }</code></pre>
 
-        <h4>2. Get Project Status</h4>
+        <h4>Get Project Status</h4>
         <p><strong>Endpoint:</strong> <code>GET /api/v1/projects/{project_id}</code></p>
         <p><strong>Successful Response (200 OK):</strong></p>
         <pre><code>{
@@ -247,7 +247,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     "message": "Project not found"
 }</code></pre>
 
-        <h4>3. Download Project Report</h4>
+        <h4>Download Project Report</h4>
         <p><strong>Endpoint:</strong> <code>GET /api/v1/projects/{project_id}/report</code></p>
         <p><strong>Successful Response (200 OK):</strong></p>
         <p>Returns a CSV file with the following format:</p>
@@ -259,7 +259,7 @@ http://example.org,Not Indexed,</code></pre>
     "message": "Project report not available"
 }</code></pre>
 
-        <h4>4. Get Credit Balance</h4>
+        <h4>Get Credit Balance</h4>
         <p><strong>Endpoint:</strong> <code>GET /api/v1/credits/balance</code></p>
         <p><strong>Successful Response (200 OK):</strong></p>
         <pre><code>{
