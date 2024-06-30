@@ -145,7 +145,9 @@ class Rapid_URL_Indexer_API {
                 }
                 if (!empty($message)) {
                     self::notify_admin(__('SpeedyIndex API Issue', 'rapid-url-indexer'), $message);
-                    self::add_admin_notice($message);
+                    add_action('admin_notices', function() use ($message) {
+                        echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html($message) . '</p></div>';
+                    });
                 }
             }
             // Log the API response
