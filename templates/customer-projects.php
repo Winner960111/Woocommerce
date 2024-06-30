@@ -265,9 +265,9 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         </ul>
         <p><strong>Successful Response (200 OK):</strong></p>
         <p>Returns a CSV file with the following format:</p>
-        <pre><code>URL,Status,Indexed At
-http://example.com,Indexed,2023-06-01T12:05:00Z
-http://example.org,Not Indexed,</code></pre>
+        <pre><code>URL,Status
+http://example.com,Indexed
+http://example.org,Not Indexed</code></pre>
         <p><strong>Error Response (404 Not Found):</strong></p>
         <pre><code>{
     "message": "Project report not available"
