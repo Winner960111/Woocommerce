@@ -22,6 +22,10 @@
                 <th scope="row"><?php _e('Project Age Limit (days)', 'rapid-url-indexer'); ?></th>
                 <td><input type="number" name="rui_project_age_limit" value="<?php echo esc_attr(get_option('rui_project_age_limit', 90)); ?>" /></td>
             </tr>
+            <tr>
+                <th scope="row"><?php _e('Low Balance Threshold', 'rapid-url-indexer'); ?></th>
+                <td><input type="number" name="rui_low_balance_threshold" value="<?php echo esc_attr(get_option('rui_low_balance_threshold', 100000)); ?>" /></td>
+            </tr>
         </table>
             <h2><?php _e('Abuse Detection Settings', 'rapid-url-indexer'); ?></h2>
             <table class="form-table">
