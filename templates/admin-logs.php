@@ -44,7 +44,7 @@
                     <td><?php echo esc_html($log->project_id); ?></td>
                     <td><?php echo esc_html($log->action); ?></td>
                     <td><?php echo esc_html($log->details); ?></td>
-                    <td><?php echo esc_html(isset($log->triggered_by) ? $log->triggered_by : 'N/A'); ?></td>
+                    <td><?php echo esc_html($log->triggered_by); ?></td>
                     <td><?php echo esc_html($log->created_at); ?></td>
                 </tr>
             <?php endforeach; ?>

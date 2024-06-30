@@ -147,6 +147,8 @@ class Rapid_URL_Indexer {
         $backlog_table = $wpdb->prefix . 'rapid_url_indexer_backlog';
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
 
+        self::log_cron_execution('Process Backlog Started');
+
         // Process backlog entries
         $backlog = $wpdb->get_results("SELECT * FROM $backlog_table WHERE retries < " . self::API_MAX_RETRIES);
         foreach ($backlog as $entry) {
@@ -155,8 +157,10 @@ class Rapid_URL_Indexer {
 
             if ($response['success']) {
                 $wpdb->delete($backlog_table, array('id' => $entry->id));
+                self::log_action($entry->project_id, 'Backlog Entry Processed', json_encode($response));
             } else {
                 $wpdb->update($backlog_table, array('retries' => $entry->retries + 1), array('id' => $entry->id));
+                self::log_action($entry->project_id, 'Backlog Entry Retry', json_encode($response));
             }
         }
 
@@ -168,6 +172,7 @@ class Rapid_URL_Indexer {
 
             if ($response['success']) {
                 $wpdb->update($projects_table, array('status' => 'submitted'), array('id' => $project->id));
+                self::log_action($project->id, 'Pending Project Processed', json_encode($response));
             } else {
                 // If processing fails, add to backlog if not already there
                 $existing_backlog = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $backlog_table WHERE project_id = %d", $project->id));
@@ -179,6 +184,7 @@ class Rapid_URL_Indexer {
                         'retries' => 0,
                         'created_at' => current_time('mysql')
                     ));
+                    self::log_action($project->id, 'Project Added to Backlog', json_encode($response));
                 }
             }
         }
@@ -597,6 +603,9 @@ class Rapid_URL_Indexer {
         // Retry failed submissions
         self::retry_failed_submissions();
 
+        // Process backlog
+        self::process_backlog();
+
         self::log_cron_execution('Cron Job Completed');
     }
 
@@ -608,6 +617,18 @@ class Rapid_URL_Indexer {
             'triggered_by' => 'Cron',
             'action' => $action,
             'details' => '',
+            'created_at' => current_time('mysql')
+        ));
+    }
+
+    private static function log_action($project_id, $action, $details = '') {
+        global $wpdb;
+        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+            'user_id' => 0,
+            'project_id' => $project_id,
+            'triggered_by' => 'System',
+            'action' => $action,
+            'details' => $details,
             'created_at' => current_time('mysql')
         ));
     }
