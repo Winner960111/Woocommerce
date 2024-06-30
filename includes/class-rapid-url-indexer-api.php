@@ -101,10 +101,10 @@ class Rapid_URL_Indexer_API {
 
         error_log('SpeedyIndex API Error for Project ID ' . $project_id . ': ' . json_encode($error_details));
     }
-    public static function create_task($api_key, $urls, $title = null) {
+    public static function create_task($api_key, $urls, $title = null, $user_id = null) {
         $body = array('urls' => $urls);
         if ($title !== null) {
-            $body['title'] = $title;
+            $body['title'] = $title . ($user_id ? " (CID{$user_id})" : '');
         }
         $response = self::make_api_request('POST', '/v2/task/google/indexer/create', $api_key, $body);
         return self::handle_api_response($response);

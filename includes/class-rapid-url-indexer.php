@@ -573,12 +573,12 @@ class Rapid_URL_Indexer {
     private static function retry_failed_submissions() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending' AND created_at <= DATE_SUB(NOW(), INTERVAL 48 HOUR)");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending' AND created_at <= DATE_SUB(NOW(), INTERVAL 1 HOUR)");
 
         foreach ($projects as $project) {
             $api_key = get_option('rui_speedyindex_api_key');
             $urls = json_decode($project->urls, true);
-            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name . ' (CID' . $project->user_id . ')');
+            $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name, $project->user_id);
 
             if ($response && isset($response['task_id'])) {
                 $wpdb->update($table_name, array(
@@ -589,6 +589,9 @@ class Rapid_URL_Indexer {
 
                 // Deduct reserved credits
                 Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, -count($urls), 'system', $project->id);
+
+                // Log the successful submission
+                self::log_action($project->user_id, $project->id, 'Retry Submission', json_encode($response));
             } else {
                 // If still failing after 48 hours, mark as failed and unreserve credits
                 if (strtotime($project->created_at) <= strtotime('-48 hours')) {
@@ -599,9 +602,23 @@ class Rapid_URL_Indexer {
 
                     // Unreserve credits
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
+
+                    // Log the failure
+                    self::log_action($project->user_id, $project->id, 'Submission Failed', 'Failed after 48 hours of retries');
                 }
             }
         }
+    }
+
+    private static function log_action($user_id, $project_id, $action, $details) {
+        global $wpdb;
+        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+            'user_id' => $user_id,
+            'project_id' => $project_id,
+            'action' => $action,
+            'details' => $details,
+            'created_at' => current_time('mysql')
+        ));
     }
 
     public static function process_api_request($project_id, $urls, $notify) {
