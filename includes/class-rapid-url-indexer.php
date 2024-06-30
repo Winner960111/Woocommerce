@@ -707,16 +707,6 @@ class Rapid_URL_Indexer {
         }
     }
 
-    private static function log_action($user_id, $project_id, $action, $details) {
-        global $wpdb;
-        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-            'user_id' => $user_id,
-            'project_id' => $project_id,
-            'action' => $action,
-            'details' => $details,
-            'created_at' => current_time('mysql')
-        ));
-    }
 
     public static function process_api_request($project_id, $urls, $notify) {
         global $wpdb;
