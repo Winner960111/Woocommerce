@@ -161,6 +161,15 @@ class Rapid_URL_Indexer {
         ");
 
         foreach ($entries as $entry) {
+            // Check if the project already has a task ID
+            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d", $entry->project_id));
+            
+            if ($project->status === 'submitted' || !empty($project->task_id)) {
+                // Skip this project as it has already been submitted
+                self::log_action($entry->project_id, 'Skipped Processing', 'Project already submitted or has a task ID');
+                continue;
+            }
+
             $urls = json_decode($entry->urls, true);
             $response = self::process_api_request($entry->project_id, $urls, $entry->notify);
 
