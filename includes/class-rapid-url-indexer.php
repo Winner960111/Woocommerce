@@ -795,7 +795,7 @@ class Rapid_URL_Indexer {
                     'updated_at' => current_time('mysql')
                 ), array('id' => $project_id));
 
-                // Deduct credits
+                // Deduct credits only when the project is successfully submitted
                 Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'system', $project_id);
                 
                 // Log the action

@@ -235,9 +235,6 @@ class Rapid_URL_Indexer_Customer {
 
             $project_id = $wpdb->insert_id;
 
-            // Reserve credits only if project was successfully created
-            self::update_user_credits($user_id, -$credits_needed, 'system', $project_id, true);
-
             // Schedule API request
             self::schedule_api_request($project_id, $urls, $notify);
 
