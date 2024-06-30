@@ -76,29 +76,20 @@ class Rapid_URL_Indexer_Activator {
         // Check and add missing columns
         self::check_and_add_missing_columns();
 
-        // Schedule hourly cron job to process cron jobs
-        if (!wp_next_scheduled('rui_cron_job')) {
-            wp_schedule_event(time(), 'hourly', 'rui_cron_job');
-        }
-        // Schedule abuse check
-        if (!wp_next_scheduled('rui_check_abuse')) {
-            wp_schedule_event(time(), 'daily', 'rui_check_abuse');
-        }
+        // Schedule cron jobs
+        $cron_jobs = array(
+            'rui_cron_job' => 'hourly',
+            'rui_check_abuse' => 'daily',
+            'rui_process_backlog' => 'hourly',
+            'rui_purge_logs' => 'daily',
+            'rui_purge_projects' => 'daily',
+            'rui_daily_stats_update' => 'daily'
+        );
 
-
-        // Schedule backlog processing
-        if (!wp_next_scheduled('rui_process_backlog')) {
-            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
-        }
-
-        // Schedule log purging
-        if (!wp_next_scheduled('rui_purge_logs')) {
-            wp_schedule_event(time(), 'daily', 'rui_purge_logs');
-        }
-
-        // Schedule project purging based on age limit 
-        if (!wp_next_scheduled('rui_purge_projects')) {
-            wp_schedule_event(time(), 'daily', 'rui_purge_projects');
+        foreach ($cron_jobs as $job => $recurrence) {
+            if (!wp_next_scheduled($job)) {
+                wp_schedule_event(time(), $recurrence, $job);
+            }
         }
     }
     private static function check_and_add_missing_columns() {
