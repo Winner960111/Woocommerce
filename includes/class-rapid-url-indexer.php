@@ -105,6 +105,8 @@ class Rapid_URL_Indexer {
     }
 
     public static function get_project_stats($project_id) {
+        self::log_cron_execution('Get Project Stats Started');
+
         global $wpdb;
         $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
@@ -136,6 +138,7 @@ class Rapid_URL_Indexer {
             }
         }
 
+        self::log_cron_execution('Get Project Stats Completed');
         return $stats;
     }
 
