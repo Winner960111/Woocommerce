@@ -157,7 +157,7 @@ class Rapid_URL_Indexer {
             UNION ALL
             SELECT 'pending' as type, p.id, p.id as project_id, p.urls, p.notify, 0 as retries, p.created_at 
             FROM $projects_table p 
-            WHERE status = 'pending' AND created_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            WHERE status = 'pending' AND task_id IS NULL AND created_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)
         ");
 
         foreach ($entries as $entry) {
