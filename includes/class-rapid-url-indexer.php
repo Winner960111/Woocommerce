@@ -39,6 +39,8 @@ class Rapid_URL_Indexer {
     }
 
     public static function purge_logs() {
+        self::log_cron_execution('Purge Logs Started');
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
         $log_age_limit = get_option('rui_log_age_limit', 90); // Default to 90 days
@@ -47,9 +49,13 @@ class Rapid_URL_Indexer {
             "DELETE FROM $table_name WHERE created_at < NOW() - INTERVAL %d DAY",
             $log_age_limit
         ));
+
+        self::log_cron_execution('Purge Logs Completed');
     }
 
     public static function purge_projects() {
+        self::log_cron_execution('Purge Projects Started');
+
         global $wpdb;
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
         $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
@@ -64,9 +70,12 @@ class Rapid_URL_Indexer {
             $wpdb->query("DELETE FROM $stats_table WHERE project_id IN (" . implode(',', $old_projects) . ")");
             $wpdb->query("DELETE FROM $projects_table WHERE id IN (" . implode(',', $old_projects) . ")");
         }
+
+        self::log_cron_execution('Purge Projects Completed');
     }
 
     public static function update_daily_stats($project_id) {
+        self::log_cron_execution('Update Daily Stats Started');
         global $wpdb;
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
         $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
@@ -170,6 +179,8 @@ class Rapid_URL_Indexer {
                 }
             }
         }
+
+        self::log_cron_execution('Process Backlog Completed');
     }
     private static function add_to_backlog($project_id, $urls, $notify) {
         global $wpdb;
@@ -190,6 +201,8 @@ class Rapid_URL_Indexer {
     }
 
     public static function check_abuse() {
+        self::log_cron_execution('Check Abuse Started');
+        
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 
@@ -247,9 +260,13 @@ class Rapid_URL_Indexer {
                 'created_at' => current_time('mysql')
             ));
         }
+
+        self::log_cron_execution('Check Abuse Completed');
     }
 
     public static function update_project_status() {
+        self::log_cron_execution('Update Project Status Started');
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
         $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status IN ('submitted', 'pending', 'completed') AND task_id IS NOT NULL");
@@ -349,10 +366,14 @@ class Rapid_URL_Indexer {
                 $wpdb->update($table_name, array('status' => 'failed'), array('id' => $project->id));
             }
         }
+
+        self::log_cron_execution('Update Project Status Completed');
     }
 
 
     public static function auto_refund() {
+        self::log_cron_execution('Auto Refund Started');
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
         $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'submitted' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
@@ -387,6 +408,8 @@ class Rapid_URL_Indexer {
                 }
             }
         }
+
+        self::log_cron_execution('Auto Refund Completed');
     }
 
 
