@@ -57,7 +57,10 @@ class Rapid_URL_Indexer_API {
         }
     }
 
-    private static function notify_admin($subject, $message) {
+    private static function notify_admin($subject, $message = '') {
+        if (empty($message)) {
+            $message = $subject; // Use the subject as the message if no message is provided
+        }
         wp_mail(get_option('admin_email'), $subject, $message);
     }
 
@@ -117,7 +120,9 @@ class Rapid_URL_Indexer_API {
 
     private static function handle_api_response($response) {
         if (is_wp_error($response)) {
-            self::log_api_error($response->get_error_message());
+            $error_message = $response->get_error_message();
+            self::log_api_error($error_message);
+            self::notify_admin(__('SpeedyIndex API Error', 'rapid-url-indexer'), $error_message);
             return false;
         }
 
@@ -126,6 +131,7 @@ class Rapid_URL_Indexer_API {
 
         if ($response_code >= 200 && $response_code < 300) {
             if (isset($response_body['code'])) {
+                $message = '';
                 switch ($response_body['code']) {
                     case 1:
                         $message = __('The SpeedyIndex API responded with code 1: Top up balance.', 'rapid-url-indexer');
@@ -134,8 +140,10 @@ class Rapid_URL_Indexer_API {
                         $message = __('The SpeedyIndex API responded with code 2: The server is overloaded. Please retry later.', 'rapid-url-indexer');
                         break;
                 }
-                self::notify_admin(__('SpeedyIndex API Issue', 'rapid-url-indexer'), $message);
-                self::add_admin_notice($message);
+                if (!empty($message)) {
+                    self::notify_admin(__('SpeedyIndex API Issue', 'rapid-url-indexer'), $message);
+                    self::add_admin_notice($message);
+                }
             }
             // Log the API response
             global $wpdb;
@@ -151,6 +159,7 @@ class Rapid_URL_Indexer_API {
         } else {
             $error_message = isset($response_body['message']) ? $response_body['message'] : 'Unknown error';
             self::log_api_error($error_message);
+            self::notify_admin(__('SpeedyIndex API Error', 'rapid-url-indexer'), $error_message);
             return false;
         }
     }
