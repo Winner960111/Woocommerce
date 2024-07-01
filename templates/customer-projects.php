@@ -135,6 +135,13 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         <li><strong>Refunded:</strong> Some URLs were not indexed within 14 days, and credits have been automatically refunded.</li>
     </ul>
     <br>
+    <h2>How it Works</h2>
+    <ul>
+        <li><strong>1. Submit your project:</strong> First, submit your project.</li>
+        <li><strong>2. Wait for 3 days:</strong> After 3 days, the initial indexing report and charts will be available..</li>
+        <li><strong>3. Wait for another 11 days:</strong> 14 days after project submission, the final indexing report will be available and you will automatically receive a credit refund for unindexed URLs.</li>
+    </ul>
+    <br>
     <br>
     <div class="rui-api-key-display">
         <?php echo do_shortcode('[rui_api_key_display]'); ?>
