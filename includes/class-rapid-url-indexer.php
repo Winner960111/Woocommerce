@@ -269,25 +269,36 @@ class Rapid_URL_Indexer {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 
-        $min_projects = get_option('rui_min_projects_for_abuse', 10);
+        $min_urls = get_option('rui_min_urls_for_abuse', 1000);
         $avg_refund_rate = get_option('rui_avg_refund_rate_for_abuse', 0.7);
 
-        // Get users with more than the minimum number of projects where the average refund rate is above the threshold
+        // Get users with more than the minimum number of URLs where the average refund rate is above the threshold
         $results = $wpdb->get_results($wpdb->prepare("
-            SELECT user_id, COUNT(*) as project_count, AVG(refunded_credits / (indexed_links + refunded_credits)) as avg_refund_rate
+            SELECT 
+                user_id, 
+                SUM(submitted_links) as total_urls,
+                SUM(indexed_links) as total_indexed,
+                SUM(submitted_links - indexed_links) as total_unindexed,
+                SUM(submitted_links - indexed_links) / SUM(submitted_links) as refund_rate
             FROM $table_name
-            WHERE status = 'refunded'
+            WHERE status IN ('completed', 'refunded')
             GROUP BY user_id
-            HAVING project_count > %d AND avg_refund_rate >= %f
-        ", $min_projects, $avg_refund_rate));
+            HAVING total_urls >= %d AND refund_rate >= %f
+        ", $min_urls, $avg_refund_rate));
 
         if ($results) {
             $admin_email = get_option('admin_email');
             $subject = __('Potential Abuse Detected', 'rapid-url-indexer');
-            $message = __('The following users have created more than 10 projects with an average of 70% or more URLs not indexed and refunded:', 'rapid-url-indexer') . "\n\n";
+            $message = __('The following users have submitted more than 1000 URLs with a high percentage of unindexed URLs:', 'rapid-url-indexer') . "\n\n";
 
             foreach ($results as $result) {
-                $message .= sprintf(__('User ID: %d, Project Count: %d, Average Refund Rate: %.2f%%', 'rapid-url-indexer'), $result->user_id, $result->project_count, $result->avg_refund_rate * 100) . "\n";
+                $message .= sprintf(__('User ID: %d, Total URLs: %d, Indexed: %d, Unindexed: %d, Refund Rate: %.2f%%', 'rapid-url-indexer'), 
+                    $result->user_id, 
+                    $result->total_urls, 
+                    $result->total_indexed, 
+                    $result->total_unindexed, 
+                    $result->refund_rate * 100
+                ) . "\n";
 
                 // Log the detected abuser
                 $triggered_by = 'system';
@@ -297,8 +308,10 @@ class Rapid_URL_Indexer {
                     'project_id' => 0,
                     'action' => 'Abuse Detected',
                     'details' => json_encode(array(
-                        'project_count' => $result->project_count,
-                        'avg_refund_rate' => $result->avg_refund_rate * 100
+                        'total_urls' => $result->total_urls,
+                        'total_indexed' => $result->total_indexed,
+                        'total_unindexed' => $result->total_unindexed,
+                        'refund_rate' => $result->refund_rate * 100
                     )),
                     'created_at' => current_time('mysql')
                 ));

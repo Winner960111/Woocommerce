@@ -30,8 +30,8 @@
             <h2><?php _e('Abuse Detection Settings', 'rapid-url-indexer'); ?></h2>
             <table class="form-table">
                 <tr>
-                    <th scope="row"><?php _e('Minimum Number of Projects for Abuse Detection', 'rapid-url-indexer'); ?></th>
-                    <td><input type="number" name="rui_min_projects_for_abuse" value="<?php echo esc_attr(get_option('rui_min_projects_for_abuse', 10)); ?>" /></td>
+                    <th scope="row"><?php _e('Minimum Number of URLs for Abuse Detection', 'rapid-url-indexer'); ?></th>
+                    <td><input type="number" name="rui_min_urls_for_abuse" value="<?php echo esc_attr(get_option('rui_min_urls_for_abuse', 1000)); ?>" /></td>
                 </tr>
                 <tr>
                     <th scope="row"><?php _e('Average Refund Rate for Abuse Detection', 'rapid-url-indexer'); ?></th>
