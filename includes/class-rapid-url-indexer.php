@@ -553,8 +553,18 @@ class Rapid_URL_Indexer {
     }
 
     public static function define_hooks() {
-        // ... existing hooks ...
+        add_action('rui_cron_job', array('Rapid_URL_Indexer', 'process_cron_jobs')); // Hourly cron job to update project status
+        add_action('rui_check_abuse', array('Rapid_URL_Indexer', 'check_abuse'));
+        add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+        add_action('rui_purge_logs', array('Rapid_URL_Indexer', 'purge_logs'));
+        add_action('rui_purge_projects', array('Rapid_URL_Indexer', 'purge_projects'));
+        add_action('rui_daily_stats_update', array('Rapid_URL_Indexer_Cron', 'update_daily_stats'));
 
+        add_action('rui_process_api_request', array('Rapid_URL_Indexer', 'process_api_request'), 10, 3);
+        add_action('rest_api_init', array('Rapid_URL_Indexer', 'register_rest_routes'));
+        add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
+        add_action('wp_ajax_nopriv_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
+        
         // Add credits amount field to simple product
         add_action('woocommerce_product_options_general_product_data', array(__CLASS__, 'add_credits_field'));
         add_action('woocommerce_process_product_meta', array(__CLASS__, 'save_credits_field'));
