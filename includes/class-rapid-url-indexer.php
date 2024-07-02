@@ -4,6 +4,10 @@ class Rapid_URL_Indexer {
 
     public static function init() {
         add_action('wp', array(__CLASS__, 'late_init'));
+        
+        // Add WooCommerce hooks for credits field
+        add_action('woocommerce_product_options_general_product_data', array(__CLASS__, 'add_credits_field'));
+        add_action('woocommerce_process_product_meta', array(__CLASS__, 'save_credits_field'));
     }
 
     public static function late_init() {
@@ -513,38 +517,33 @@ class Rapid_URL_Indexer {
     }
 
     private static function define_hooks() {
-        add_action('rui_cron_job', array(__CLASS__, 'process_cron_jobs')); // Hourly cron job to update project status
-        add_action('rui_check_abuse', array(__CLASS__, 'check_abuse'));
-        add_action('rui_process_backlog', array(__CLASS__, 'process_backlog'));
-        add_action('rui_purge_logs', array(__CLASS__, 'purge_logs'));
-        add_action('rui_purge_projects', array(__CLASS__, 'purge_projects'));
         add_action('rui_daily_stats_update', array('Rapid_URL_Indexer_Cron', 'update_daily_stats'));
 
         add_action('rui_process_api_request', array(__CLASS__, 'process_api_request'), 10, 3);
         add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
         add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
         add_action('wp_ajax_nopriv_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));
-        
-        // Add credits amount field to simple product
-        add_action('woocommerce_product_options_general_product_data', array(__CLASS__, 'add_credits_field'));
-        add_action('woocommerce_process_product_meta', array(__CLASS__, 'save_credits_field'));
 
         // Admin notice for SpeedyIndex API issues
     }
     
     public static function add_credits_field() {
-        woocommerce_wp_text_input(array(
-            'id' => '_credits_amount',
-            'label' => __('Credits Amount', 'rapid-url-indexer'),
-            'placeholder' => '',
-            'desc_tip' => 'true',
-            'description' => __('Enter the number of credits this product will add to the customer\'s account upon purchase.', 'rapid-url-indexer'),
-            'type' => 'number',
-            'custom_attributes' => array(
-                'step' => '1',
-                'min' => '0'
-            )
-        ));
+        global $product_object;
+
+        if ('simple' === $product_object->get_type()) {
+            woocommerce_wp_text_input(array(
+                'id' => '_credits_amount',
+                'label' => __('Credits Amount', 'rapid-url-indexer'),
+                'placeholder' => '',
+                'desc_tip' => 'true',
+                'description' => __('Enter the number of credits this product will add to the customer\'s account upon purchase.', 'rapid-url-indexer'),
+                'type' => 'number',
+                'custom_attributes' => array(
+                    'step' => '1',
+                    'min' => '0'
+                )
+            ));
+        }
     }
     
     public static function save_credits_field($post_id) {
