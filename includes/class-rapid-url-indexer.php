@@ -533,9 +533,6 @@ class Rapid_URL_Indexer {
     }
     
     public static function add_credits_field() {
-        global $post;
-        
-        echo '<div class="options_group">';
         woocommerce_wp_text_input(array(
             'id' => '_credits_amount',
             'label' => __('Credits Amount', 'rapid-url-indexer'),
@@ -548,12 +545,19 @@ class Rapid_URL_Indexer {
                 'min' => '0'
             )
         ));
-        echo '</div>';
     }
     
     public static function save_credits_field($post_id) {
         $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : 0;
         update_post_meta($post_id, '_credits_amount', $credits_amount);
+    }
+
+    public static function define_hooks() {
+        // ... existing hooks ...
+
+        // Add credits amount field to simple product
+        add_action('woocommerce_product_options_general_product_data', array(__CLASS__, 'add_credits_field'));
+        add_action('woocommerce_process_product_meta', array(__CLASS__, 'save_credits_field'));
     }
 
     public static function register_rest_routes() {
