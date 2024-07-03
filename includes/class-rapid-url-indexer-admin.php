@@ -217,7 +217,8 @@ class Rapid_URL_Indexer_Admin {
         
         if (strpos($hook, 'rapid-url-indexer') !== false || in_array($hook, $valid_pages)) {
             wp_enqueue_style('rui-admin-css', RUI_PLUGIN_URL . 'assets/css/admin.css', array(), '1.0.0', 'all');
-            wp_enqueue_script('rui-admin-js', RUI_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), '1.0.0', true);
+            $admin_js_version = filemtime(RUI_PLUGIN_DIR . 'assets/js/admin.js');
+            wp_enqueue_script('rui-admin-js', RUI_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), $admin_js_version, true);
             wp_localize_script('rui-admin-js', 'rui_ajax', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('rui_ajax_nonce')
