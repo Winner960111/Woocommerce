@@ -907,7 +907,7 @@ class Rapid_URL_Indexer {
             $current_time = time();
             $hours_since_submission = ($current_time - $submission_time) / 3600;
 
-            if ($hours_since_submission >= 50) {
+            if ($hours_since_submission >= 96) {
                 $message .= sprintf(__('Processed URLs: %d', 'rapid-url-indexer'), $processed_links) . "\n";
                 $message .= sprintf(__('Indexed URLs: %d', 'rapid-url-indexer'), $indexed_links) . "\n";
                 $message .= sprintf(__('Indexing Rate: %.2f%%', 'rapid-url-indexer'), ($indexed_links / $processed_links) * 100) . "\n";
