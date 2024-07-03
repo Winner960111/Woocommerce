@@ -67,7 +67,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                         if ($project->status == 'pending' || $project->status == 'failed') {
                             echo esc_html("N/A");
                         } else {
-                            if ($hours_since_submission >= 50) {
+                            if ($hours_since_submission >= 96) {
                                 $urls = json_decode($project->urls, true);
                                 $total_urls = count($urls);
                                 $processed_count = isset($project->processed_links) ? $project->processed_links : 0;
@@ -87,7 +87,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                         <?php if ($project->status == 'pending' || $project->status == 'failed'): ?>
                             <span>N/A</span>
                         <?php else: ?>
-                            <?php if ($hours_since_submission >= 50): ?>
+                            <?php if ($hours_since_submission >= 96): ?>
                                 <a href="<?php echo esc_url(add_query_arg(array('download_report' => $project->id))); ?>" class="button wp-element-button">Download Report</a>
                                 <br>
                                 <a href="#" class="show-chart" data-project-id="<?php echo esc_attr($project->id); ?>" style="margin-top: 5px; display: inline-block;">Show Chart</a>
