@@ -7,6 +7,7 @@
         <li>Projects Processing: <?php echo esc_html($processing_projects); ?></li>
         <li>Projects Completed: <?php echo esc_html($completed_projects); ?></li>
         <li>URL Indexing Service Credits: <?php echo esc_html($api_credits); ?></li>
+        <li>Total Assigned Customer Credits: <?php echo esc_html($total_assigned_credits); ?></li>
     </ul>
     <h2>Potential Abusers</h2>
     <form id="check-abuse-form" method="post" action="">

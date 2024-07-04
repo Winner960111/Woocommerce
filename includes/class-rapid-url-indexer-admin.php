@@ -199,6 +199,8 @@ class Rapid_URL_Indexer_Admin {
         $api_credits = Rapid_URL_Indexer_API::get_account_balance($api_key);
         $api_credits = $api_credits ? $api_credits['balance']['indexer'] : 'N/A';
         
+        $total_assigned_credits = $wpdb->get_var("SELECT SUM(credits) FROM $credits_table");
+        
         include RUI_PLUGIN_DIR . 'templates/admin-dashboard.php';
     }
 

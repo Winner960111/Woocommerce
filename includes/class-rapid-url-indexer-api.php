@@ -58,6 +58,19 @@ class Rapid_URL_Indexer_API {
                 echo '<div class="notice notice-warning is-dismissible"><p>' . esc_html($message) . '</p></div>';
             });
         }
+
+        // Check if total assigned credits exceed available balance
+        global $wpdb;
+        $credits_table = $wpdb->prefix . 'rapid_url_indexer_credits';
+        $total_assigned_credits = $wpdb->get_var("SELECT SUM(credits) FROM $credits_table");
+
+        if ($total_assigned_credits > $balance) {
+            $message = sprintf(__('Total assigned customer credits (%d) exceed available SpeedyIndex API credits (%d).', 'rapid-url-indexer'), $total_assigned_credits, $balance);
+            self::notify_admin(__('Credits Imbalance', 'rapid-url-indexer'), $message);
+            add_action('admin_notices', function() use ($message) {
+                echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($message) . '</p></div>';
+            });
+        }
     }
 
     private static function notify_admin($subject, $message = '') {
