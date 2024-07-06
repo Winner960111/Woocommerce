@@ -846,8 +846,8 @@ class Rapid_URL_Indexer {
                 // Notify user if required
                 if ($notify) {
                     $user_info = get_userdata($user_id);
-                    $subject = sprintf(__('Your URL Indexing Project "%s" Has Been Submitted', 'rapid-url-indexer'), $project->project_name);
-                    $message = sprintf(__('Your project "%s" has been submitted and is being processed.', 'rapid-url-indexer'), $project->project_name);
+                    $subject = sprintf(__('Rapid URL Indexer: Project "%s" Has Been Submitted', 'rapid-url-indexer'), $project->project_name);
+                    $message = sprintf(__('Your Rapid URL Indexer project "%s" has been submitted and is being processed.', 'rapid-url-indexer'), $project->project_name);
                     wp_mail($user_info->user_email, $subject, $message);
 
                     // Log the email notification
@@ -915,7 +915,7 @@ class Rapid_URL_Indexer {
 
             if ($status === 'completed') {
                 $report_link = add_query_arg(array('download_report' => $project->id), home_url());
-                $message .= "\n" . sprintf(__('Your project report is now available. Download it here: %s', 'rapid-url-indexer'), $report_link) . "\n";
+                $message .= "\n" . sprintf(__('Your final project report is now available. Download it here: %s', 'rapid-url-indexer'), $report_link) . "\n";
             } elseif ($status === 'failed') {
                 $message .= "\n" . __('Unfortunately, your project has failed. All credits used for this project have been refunded to your account.', 'rapid-url-indexer') . "\n";
             } elseif ($status === 'refunded') {
