@@ -846,8 +846,8 @@ class Rapid_URL_Indexer {
                 // Notify user if required
                 if ($notify) {
                     $user_info = get_userdata($user_id);
-                    $subject = __('Your URL Indexing Project Has Been Submitted', 'rapid-url-indexer');
-                    $message = __('Your project has been submitted and is being processed.', 'rapid-url-indexer');
+                    $subject = sprintf(__('Your URL Indexing Project "%s" Has Been Submitted', 'rapid-url-indexer'), $project->project_name);
+                    $message = sprintf(__('Your project "%s" has been submitted and is being processed.', 'rapid-url-indexer'), $project->project_name);
                     wp_mail($user_info->user_email, $subject, $message);
 
                     // Log the email notification
