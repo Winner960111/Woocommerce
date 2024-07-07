@@ -578,11 +578,6 @@ class Rapid_URL_Indexer {
         ));
     }
 
-    public static function init() {
-        add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
-        // ... (keep existing code)
-    }
-
     public static function authenticate_api_request($request) {
         $api_key = $request->get_header('X-API-Key');
         if (!$api_key) {
