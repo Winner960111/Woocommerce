@@ -553,7 +553,7 @@ class Rapid_URL_Indexer {
     }
 
     public static function register_rest_routes() {
-        register_rest_route('rui/v1', '/projects', array(
+        register_rest_route('api/v1', '/projects', array(
             'methods' => 'POST',
             'callback' => array('Rapid_URL_Indexer', 'handle_project_submission'),
             'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
