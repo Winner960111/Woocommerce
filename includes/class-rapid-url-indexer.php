@@ -642,30 +642,68 @@ class Rapid_URL_Indexer {
     }
     
     public static function get_project_status($request) {
-        $project_id = $request['id'];
+        $project_id = intval($request['id']);
+        $api_key = $request->get_header('X-API-Key');
+
+        if (!$api_key) {
+            return new WP_Error('rest_forbidden', 'API key is missing', array('status' => 403));
+        }
+
+        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
+        if (empty($user)) {
+            return new WP_Error('rest_forbidden', 'Invalid API key', array('status' => 403));
+        }
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $project_id));
+        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d AND user_id = %d", $project_id, $user[0]->ID));
 
         if ($project) {
             return new WP_REST_Response(array(
                 'project_id' => $project_id,
+                'project_name' => $project->project_name,
                 'status' => $project->status,
                 'submitted_links' => count(json_decode($project->urls)),
-                'indexed_links' => $project->indexed_links
+                'processed_links' => $project->processed_links,
+                'indexed_links' => $project->indexed_links,
+                'created_at' => $project->created_at,
+                'updated_at' => $project->updated_at
             ), 200);
         } else {
-            return new WP_Error('no_project', 'Project not found', array('status' => 404));
+            return new WP_Error('no_project', 'Project not found or access denied', array('status' => 404));
         }
     }
 
     public static function download_project_report($request) {
-        $project_id = $request['id'];
+        $project_id = intval($request['id']);
+        $api_key = $request->get_header('X-API-Key');
 
-        // Generate and return the project report CSV
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
-        $report_csv = Rapid_URL_Indexer_API::download_task_report($user_id, $project_id);
+        if (!$api_key) {
+            return new WP_Error('rest_forbidden', 'API key is missing', array('status' => 403));
+        }
+
+        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
+        if (empty($user)) {
+            return new WP_Error('rest_forbidden', 'Invalid API key', array('status' => 403));
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d AND user_id = %d", $project_id, $user[0]->ID));
+
+        if (!$project) {
+            return new WP_Error('no_project', 'Project not found or access denied', array('status' => 404));
+        }
+
+        if ($project->status !== 'completed' && $project->status !== 'refunded') {
+            return new WP_Error('report_not_available', 'Project report is not available yet', array('status' => 400));
+        }
+
+        $report_csv = Rapid_URL_Indexer_API::download_task_report(get_option('rui_speedyindex_api_key'), $project->task_id);
+
+        if (!$report_csv) {
+            return new WP_Error('report_generation_failed', 'Failed to generate report', array('status' => 500));
+        }
 
         return new WP_REST_Response($report_csv, 200, array('Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="project-report.csv"'));
     }
