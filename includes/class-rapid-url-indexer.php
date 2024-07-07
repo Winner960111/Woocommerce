@@ -671,7 +671,17 @@ class Rapid_URL_Indexer {
     }
 
     public static function get_credits_balance($request) {
-        $user_id = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $request->get_header('X-API-Key'), 'number' => 1, 'fields' => 'ID'))[0];
+        $api_key = $request->get_header('X-API-Key');
+        if (!$api_key) {
+            return new WP_Error('rest_forbidden', 'API key is missing', array('status' => 403));
+        }
+
+        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
+        if (empty($user)) {
+            return new WP_Error('rest_forbidden', 'Invalid API key', array('status' => 403));
+        }
+
+        $user_id = $user[0]->ID;
         $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
 
         return new WP_REST_Response(array('credits' => $credits), 200);
