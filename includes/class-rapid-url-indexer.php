@@ -4,6 +4,7 @@ class Rapid_URL_Indexer {
 
     public static function init() {
         add_action('wp', array(__CLASS__, 'late_init'));
+        add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
         
         // Add WooCommerce hooks for credits field
         add_action('woocommerce_product_options_general_product_data', array(__CLASS__, 'add_credits_field'));
