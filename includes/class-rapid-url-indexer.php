@@ -570,7 +570,7 @@ class Rapid_URL_Indexer {
             'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
         ));
 
-        register_rest_route('rui/v1', '/credits', array(
+        register_rest_route('rui/v1', '/credits/balance', array(
             'methods' => 'GET',
             'callback' => array('Rapid_URL_Indexer', 'get_credits_balance'),
             'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
