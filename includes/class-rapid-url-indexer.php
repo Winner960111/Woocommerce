@@ -552,29 +552,34 @@ class Rapid_URL_Indexer {
     }
 
     public static function register_rest_routes() {
-        register_rest_route('rui/v1', '/projects', array(
+        register_rest_route('api/v1', '/projects', array(
             'methods' => 'POST',
             'callback' => array('Rapid_URL_Indexer', 'handle_project_submission'),
             'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
         ));
 
-        register_rest_route('rui/v1', '/projects/(?P<id>\d+)', array(
+        register_rest_route('api/v1', '/projects/(?P<id>\d+)', array(
             'methods' => 'GET',
             'callback' => array('Rapid_URL_Indexer', 'get_project_status'),
             'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
         ));
 
-        register_rest_route('rui/v1', '/projects/(?P<id>\d+)/report', array(
+        register_rest_route('api/v1', '/projects/(?P<id>\d+)/report', array(
             'methods' => 'GET',
             'callback' => array('Rapid_URL_Indexer', 'download_project_report'),
             'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
         ));
 
-        register_rest_route('rui/v1', '/credits/balance', array(
+        register_rest_route('api/v1', '/credits/balance', array(
             'methods' => 'GET',
             'callback' => array('Rapid_URL_Indexer', 'get_credits_balance'),
             'permission_callback' => array('Rapid_URL_Indexer', 'authenticate_api_request')
         ));
+    }
+
+    public static function init() {
+        add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
+        // ... (keep existing code)
     }
 
     public static function authenticate_api_request($request) {

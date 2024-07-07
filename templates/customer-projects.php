@@ -199,7 +199,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         <h3>RESTful API Endpoints</h3>
 
         <h4>Submit a New Project</h4>
-        <p><strong>Endpoint:</strong> <code>POST /api/v1/projects</code></p>
+        <p><strong>Endpoint:</strong> <code>POST https://rapidurlindexer.com/wp-json/api/v1/projects</code></p>
         <p><strong>Request Body:</strong></p>
         <pre><code>{
     "project_name": "My Project",
@@ -234,7 +234,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 }</code></pre>
 
         <h4>Get Project Status</h4>
-        <p><strong>Endpoint:</strong> <code>GET /api/v1/projects/{project_id}</code></p>
+        <p><strong>Endpoint:</strong> <code>GET https://rapidurlindexer.com/wp-json/api/v1/projects/{project_id}</code></p>
         <p><strong>Arguments:</strong></p>
         <ul>
             <li><strong>project_id</strong> (integer, required): The ID of the project you want to check.</li>
@@ -264,7 +264,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
 }</code></pre>
 
         <h4>Download Project Report</h4>
-        <p><strong>Endpoint:</strong> <code>GET /api/v1/projects/{project_id}/report</code></p>
+        <p><strong>Endpoint:</strong> <code>GET https://rapidurlindexer.com/wp-json/api/v1/projects/{project_id}/report</code></p>
         <p><strong>Arguments:</strong></p>
         <ul>
             <li><strong>project_id</strong> (integer, required): The ID of the project for which you want to download the report.</li>
@@ -280,7 +280,7 @@ http://example.org,Not Indexed</code></pre>
 }</code></pre>
 
         <h4>Get Credit Balance</h4>
-        <p><strong>Endpoint:</strong> <code>GET /api/v1/credits/balance</code></p>
+        <p><strong>Endpoint:</strong> <code>GET https://rapidurlindexer.com/wp-json/api/v1/credits/balance</code></p>
         <p><strong>Successful Response (200 OK):</strong></p>
         <pre><code>{
     "credits": 100
