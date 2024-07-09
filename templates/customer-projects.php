@@ -78,7 +78,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                                 echo esc_html("$indexed_links/$total_urls ($percentage%)");
                             } else {
                                 $hours_remaining = ceil(96 - $hours_since_submission);
-                                echo esc_html("Available in {$hours_remaining} hours");
+                                echo esc_html("Available in " . $hours_remaining . " " . ($hours_remaining == 1 ? "hour" : "hours") . "...");
                             }
                         }
                         ?>
@@ -93,7 +93,10 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                                 <br>
                                 <a href="#" class="show-chart" data-project-id="<?php echo esc_attr($project->id); ?>" style="margin-top: 5px; display: inline-block;">Show Chart</a>
                             <?php else: ?>
-                                <span>Waiting...</span>
+                                <?php
+                                $hours_remaining = ceil(96 - $hours_since_submission);
+                                echo esc_html("Available in " . $hours_remaining . " " . ($hours_remaining == 1 ? "hour" : "hours") . "...");
+                                ?>
                             <?php endif; ?>
                         <?php endif; ?>
                     </td>
