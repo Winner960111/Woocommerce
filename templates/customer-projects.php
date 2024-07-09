@@ -77,7 +77,8 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                                 $percentage = $total_urls > 0 ? round(($indexed_links / $total_urls) * 100) : 0;
                                 echo esc_html("$indexed_links/$total_urls ($percentage%)");
                             } else {
-                                echo esc_html("Waiting...");
+                                $hours_remaining = ceil(96 - $hours_since_submission);
+                                echo esc_html("Available in {$hours_remaining} hours");
                             }
                         }
                         ?>
