@@ -392,7 +392,11 @@ class Rapid_URL_Indexer {
                 // Update daily stats
                 self::update_daily_stats($project->id);
 
-                if ($status !== $project->status) {
+                $created_at = strtotime($project->created_at);
+                $current_time = time();
+                $hours_since_creation = ($current_time - $created_at) / (60 * 60);
+
+                if ($status !== $project->status || ($hours_since_creation >= 96 && $hours_since_creation < 97)) {
                     // Log the project status change
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
@@ -430,7 +434,7 @@ class Rapid_URL_Indexer {
                         // Send email notification
                         self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
                     } else {
-                        // Send email notification for other status changes
+                        // Send email notification for other status changes or initial report
                         self::send_status_change_email($project, $status, $processed_links, $indexed_links);
                     }
                 }
@@ -949,12 +953,17 @@ class Rapid_URL_Indexer {
             $first_name = trim(explode(' ', $user_info->display_name)[0]);
             $message = sprintf(__('Hey %s,', 'rapid-url-indexer'), $first_name) . "\n\n";
             $message .= sprintf(__('Your Rapid URL Indexer project "%s" has been updated:', 'rapid-url-indexer'), $project->project_name) . "\n\n";
-            $message .= sprintf(__('New Status: %s', 'rapid-url-indexer'), ucfirst($status)) . "\n";
-            $message .= sprintf(__('Total Submitted URLs: %d', 'rapid-url-indexer'), count(json_decode($project->urls, true))) . "\n";
 
             $submission_time = strtotime($project->created_at);
             $current_time = time();
             $hours_since_submission = ($current_time - $submission_time) / 3600;
+
+            if ($hours_since_submission >= 96 && $status !== 'completed') {
+                $status = 'initial_report';
+            }
+
+            $message .= sprintf(__('Status: %s', 'rapid-url-indexer'), ucfirst($status)) . "\n";
+            $message .= sprintf(__('Total Submitted URLs: %d', 'rapid-url-indexer'), count(json_decode($project->urls, true))) . "\n";
 
             if ($hours_since_submission >= 96) {
                 $message .= sprintf(__('Processed URLs: %d', 'rapid-url-indexer'), $processed_links) . "\n";
@@ -962,9 +971,12 @@ class Rapid_URL_Indexer {
                 $message .= sprintf(__('Indexing Rate: %.2f%%', 'rapid-url-indexer'), ($indexed_links / $processed_links) * 100) . "\n";
             }
 
+            $report_link = add_query_arg(array('download_report' => $project->id), home_url());
+
             if ($status === 'completed') {
-                $report_link = add_query_arg(array('download_report' => $project->id), home_url());
                 $message .= "\n" . sprintf(__('Your final project report is now available. Download it here: %s', 'rapid-url-indexer'), $report_link) . "\n";
+            } elseif ($status === 'initial_report') {
+                $message .= "\n" . sprintf(__('Your initial project report is now available. Please note that this is not the final report and more URLs may be indexed in the coming days. Download the current report here: %s', 'rapid-url-indexer'), $report_link) . "\n";
             } elseif ($status === 'failed') {
                 $message .= "\n" . __('Unfortunately, your project has failed. All credits used for this project have been refunded to your account.', 'rapid-url-indexer') . "\n";
             } elseif ($status === 'refunded') {
