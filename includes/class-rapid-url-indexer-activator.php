@@ -31,6 +31,7 @@ class Rapid_URL_Indexer_Activator {
             updated_at datetime DEFAULT CURRENT_TIMESTAMP,
             notify tinyint(1) DEFAULT 0,
             refunded_credits int DEFAULT 0,
+            initial_report_sent tinyint(1) DEFAULT 0,
             PRIMARY KEY  (id)
         ) $charset_collate;";
 

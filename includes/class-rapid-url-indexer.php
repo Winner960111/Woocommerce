@@ -396,7 +396,7 @@ class Rapid_URL_Indexer {
                 $current_time = time();
                 $hours_since_creation = ($current_time - $created_at) / (60 * 60);
 
-                if ($status !== $project->status || ($hours_since_creation >= 96 && $hours_since_creation < 97)) {
+                if ($status !== $project->status || ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent)) {
                     // Log the project status change
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
@@ -433,9 +433,11 @@ class Rapid_URL_Indexer {
                         ));
                         // Send email notification
                         self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
-                    } else {
-                        // Send email notification for other status changes or initial report
-                        self::send_status_change_email($project, $status, $processed_links, $indexed_links);
+                    } elseif ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent) {
+                        // Send email notification for initial report
+                        self::send_status_change_email($project, 'initial_report', $processed_links, $indexed_links);
+                        // Mark initial report as sent
+                        $wpdb->update($table_name, array('initial_report_sent' => 1), array('id' => $project->id));
                     }
                 }
             } else {
