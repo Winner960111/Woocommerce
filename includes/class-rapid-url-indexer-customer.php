@@ -106,8 +106,7 @@ class Rapid_URL_Indexer_Customer {
                 $quantity = $item->get_quantity();
                 $total_credits = $credits * $quantity;
                 try {
-                    self::update_user_credits($user_id, $total_credits);
-                    self::log_credit_change($user_id, $total_credits, 'purchase', $order_id);
+                    self::update_user_credits($user_id, $total_credits, 'purchase', $order_id);
                 } catch (Exception $e) {
                     error_log('Failed to add credits for order ' . $order_id . ': ' . $e->getMessage());
                     wp_mail(
@@ -269,7 +268,7 @@ class Rapid_URL_Indexer_Customer {
         // The credit change was already logged when the project was created
     }
 
-    public static function update_user_credits($user_id, $amount, $triggered_by = 'system', $project_id = 0) {
+    public static function update_user_credits($user_id, $amount, $triggered_by = 'system', $order_id = 0, $project_id = 0) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
         $credits = self::get_user_credits($user_id);
@@ -285,17 +284,17 @@ class Rapid_URL_Indexer_Customer {
             $wpdb->insert($table_name, array('user_id' => $user_id, 'credits' => $new_credits));
         }
         
-        self::log_credit_change($user_id, $amount, $triggered_by, $project_id);
+        self::log_credit_change($user_id, $amount, $triggered_by, $order_id, $project_id);
     }
 
-    private static function log_credit_change($user_id, $amount, $triggered_by, $project_id = 0, $order_id = 0) {
+    private static function log_credit_change($user_id, $amount, $triggered_by, $order_id = 0, $project_id = 0) {
         global $wpdb;
         $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
         
-        if ($triggered_by === 'system') {
-            $triggered_by = 'System';
-        } elseif ($triggered_by === 'purchase') {
+        if ($triggered_by === 'purchase') {
             $triggered_by = 'Purchase (Order ID: ' . $order_id . ')';
+        } elseif ($triggered_by === 'system') {
+            $triggered_by = 'System';
         } elseif (is_user_logged_in()) {
             $current_user = wp_get_current_user();
             $triggered_by = $current_user->roles[0] === 'administrator' ? 'Admin' : 'User ID: ' . get_current_user_id();
