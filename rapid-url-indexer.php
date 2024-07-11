@@ -50,8 +50,17 @@ add_action('admin_init', array('Rapid_URL_Indexer_Admin', 'register_settings'));
 register_activation_hook(__FILE__, 'rui_schedule_cron_jobs');
 function rui_schedule_cron_jobs() {
     if (!wp_next_scheduled('rui_process_backlog')) {
-        wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
+        wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
     }
+
+    // Add custom cron schedule
+    add_filter('cron_schedules', function($schedules) {
+        $schedules['six_hourly'] = array(
+            'interval' => 6 * HOUR_IN_SECONDS,
+            'display' => __('Every 6 hours')
+        );
+        return $schedules;
+    });
 }
 
 // Hook the process_backlog method to the rui_process_backlog action
