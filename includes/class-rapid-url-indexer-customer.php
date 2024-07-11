@@ -10,6 +10,7 @@ class Rapid_URL_Indexer_Customer {
         add_filter('the_title', array(__CLASS__, 'replace_my_account_title'), 10, 2);
         add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
         add_action('wp_ajax_rui_get_project_stats', array(__CLASS__, 'handle_ajax_get_project_stats'));
+        add_action('woocommerce_payment_complete', array(__CLASS__, 'handle_order_completed'));
         add_action('woocommerce_order_status_completed', array(__CLASS__, 'handle_order_completed'));
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
 
@@ -98,6 +99,12 @@ class Rapid_URL_Indexer_Customer {
 
     public static function handle_order_completed($order_id) {
         $order = wc_get_order($order_id);
+        
+        // Check if the order has already been processed
+        if ($order->get_meta('_rui_credits_processed')) {
+            return;
+        }
+
         foreach ($order->get_items() as $item) {
             $product_id = $item->get_product_id();
             $credits = get_post_meta($product_id, '_credits_amount', true);
@@ -107,6 +114,15 @@ class Rapid_URL_Indexer_Customer {
                 $total_credits = $credits * $quantity;
                 try {
                     self::update_user_credits($user_id, $total_credits, 'purchase', $order_id);
+                    
+                    // Mark the order as processed
+                    $order->update_meta_data('_rui_credits_processed', true);
+                    $order->save();
+
+                    // If the order contains only virtual products, mark it as completed
+                    if (self::order_contains_only_virtual_products($order)) {
+                        $order->update_status('completed');
+                    }
                 } catch (Exception $e) {
                     error_log('Failed to add credits for order ' . $order_id . ': ' . $e->getMessage());
                     wp_mail(
@@ -117,6 +133,16 @@ class Rapid_URL_Indexer_Customer {
                 }
             }
         }
+    }
+
+    private static function order_contains_only_virtual_products($order) {
+        foreach ($order->get_items() as $item) {
+            $product = $item->get_product();
+            if (!$product || !$product->is_virtual()) {
+                return false;
+            }
+        }
+        return true;
     }
     
     public static function handle_ajax_project_submission() {
