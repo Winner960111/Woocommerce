@@ -105,32 +105,36 @@ class Rapid_URL_Indexer_Customer {
             return;
         }
 
+        $credits_to_add = 0;
         foreach ($order->get_items() as $item) {
             $product_id = $item->get_product_id();
             $credits = get_post_meta($product_id, '_credits_amount', true);
             if ($credits) {
-                $user_id = $order->get_user_id();
                 $quantity = $item->get_quantity();
-                $total_credits = $credits * $quantity;
-                try {
-                    self::update_user_credits($user_id, $total_credits, 'purchase', $order_id);
-                    
-                    // Mark the order as processed
-                    $order->update_meta_data('_rui_credits_processed', true);
-                    $order->save();
+                $credits_to_add += $credits * $quantity;
+            }
+        }
 
-                    // If the order contains only virtual products, mark it as completed
-                    if (self::order_contains_only_virtual_products($order)) {
-                        $order->update_status('completed');
-                    }
-                } catch (Exception $e) {
-                    error_log('Failed to add credits for order ' . $order_id . ': ' . $e->getMessage());
-                    wp_mail(
-                        get_option('admin_email'),
-                        'Credit Addition Failed',
-                        'Failed to add ' . $total_credits . ' credits for user ' . $user_id . ' on order ' . $order_id . '. Error: ' . $e->getMessage()
-                    );
+        if ($credits_to_add > 0) {
+            $user_id = $order->get_user_id();
+            try {
+                self::update_user_credits($user_id, $credits_to_add, 'purchase', $order_id);
+                
+                // Mark the order as processed
+                $order->update_meta_data('_rui_credits_processed', true);
+                $order->save();
+
+                // If the order contains only virtual products, mark it as completed
+                if (self::order_contains_only_virtual_products($order)) {
+                    $order->update_status('completed');
                 }
+            } catch (Exception $e) {
+                error_log('Failed to add credits for order ' . $order_id . ': ' . $e->getMessage());
+                wp_mail(
+                    get_option('admin_email'),
+                    'Credit Addition Failed',
+                    'Failed to add ' . $credits_to_add . ' credits for user ' . $user_id . ' on order ' . $order_id . '. Error: ' . $e->getMessage()
+                );
             }
         }
     }
