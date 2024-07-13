@@ -175,9 +175,11 @@ class Rapid_URL_Indexer_Customer {
                 if ($project_id) {
                     $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify, $user_id);
                     if ($api_response['success']) {
+                        $user_email = wp_get_current_user()->user_email;
                         wp_send_json_success(array(
                             'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
-                            'project_id' => $project_id
+                            'project_id' => $project_id,
+                            'user_email' => $user_email
                         ));
                     } else {
                         wp_send_json_error(array('message' => $api_response['error']));
