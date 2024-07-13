@@ -17,6 +17,15 @@ jQuery(function($) {
         $.post(ajax_object.ajaxurl, data, function(response) {
             if (response.success) {
                 $('#rui-submission-response').html('<div class="notice notice-success"><p>' + response.data.message + '</p></div>');
+                
+                // Fire Sendinblue custom event
+                if (typeof sendinblue !== 'undefined' && typeof sendinblue.track === 'function') {
+                    sendinblue.track(
+                        'project_submitted',
+                        { email: response.data.user_email },
+                        { id: 'project:' + response.data.project_id }
+                    );
+                }
             } else {
                 $('#rui-submission-response').html('<div class="notice notice-error"><p>' + response.data.message + '</p></div>');
             }
