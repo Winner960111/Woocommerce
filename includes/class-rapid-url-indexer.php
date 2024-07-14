@@ -633,7 +633,7 @@ class Rapid_URL_Indexer {
 
     public static function handle_project_submission($request) {
         $params = $request->get_params();
-        $project_name = sanitize_text_field($params['project_name']);
+        $project_name = isset($params['project_name']) ? sanitize_text_field($params['project_name']) : '';
         $urls = array_map('esc_url_raw', $params['urls']);
         $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
 
@@ -652,6 +652,11 @@ class Rapid_URL_Indexer {
         }
 
         if (count($urls) > 0 && count($urls) <= 9999) {
+            // Use fallback project name if not provided
+            if (empty($project_name)) {
+                $project_name = self::generate_fallback_project_name($urls);
+            }
+
             // Create project
             $project_id = Rapid_URL_Indexer_Customer::submit_project($project_name, $urls, $notify, $user_id);
 
