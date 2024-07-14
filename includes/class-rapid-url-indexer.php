@@ -370,18 +370,21 @@ class Rapid_URL_Indexer {
         foreach ($projects as $project) {
             $api_key = get_option('rui_speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
+            
             if (!$response) {
-                continue; // Skip if no response from API
+                self::log_cron_execution("Failed to get API response for project {$project->id}");
+                continue;
             }
 
+            self::log_cron_execution("API response for project {$project->id}: " . json_encode($response));
+
             if (isset($response['id'])) {
-                $status = 'submitted'; // Assuming the status is 'submitted' if the task is found
+                $status = 'submitted';
                 $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
                 $processed_links = isset($response['processed_count']) ? $response['processed_count'] : 0;
                 $total_urls = isset($response['size']) ? $response['size'] : 0;
                 $last_updated = current_time('mysql');
 
-                // Check if 13 days have passed since project creation
                 $created_at = strtotime($project->created_at);
                 $current_time = time();
                 $days_since_creation = ($current_time - $created_at) / (60 * 60 * 24);
@@ -390,7 +393,6 @@ class Rapid_URL_Indexer {
                     $status = 'completed';
                 }
 
-                // Update project with latest data from API
                 $notify = isset($project->notify) ? intval($project->notify) : 0;
                 $update_data = array(
                     'status' => $status,
@@ -409,13 +411,11 @@ class Rapid_URL_Indexer {
                     self::log_cron_execution("Updated project {$project->id}. Processed: $processed_links, Indexed: $indexed_links");
                 }
 
-                // Update daily stats
                 self::update_daily_stats($project->id);
 
                 $hours_since_creation = ($current_time - $created_at) / (60 * 60);
 
                 if ($status !== $project->status || $processed_links != $project->processed_links || $indexed_links != $project->indexed_links || ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent)) {
-                    // Log the project status change
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
                         'project_id' => $project->id,
@@ -432,20 +432,16 @@ class Rapid_URL_Indexer {
                     ));
 
                     if ($status === 'completed') {
-                        // Send email notification
                         self::send_status_change_email($project, 'completed', $processed_links, $indexed_links);
                     } elseif ($status === 'failed' && !$project->auto_refund_processed) {
-                        // Refund credits
                         $total_urls = count(json_decode($project->urls, true));
                         Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
 
-                        // Mark auto refund as processed and store refunded credits
                         $wpdb->update($table_name, array(
                             'auto_refund_processed' => 1,
                             'refunded_credits' => $total_urls
                         ), array('id' => $project->id));
 
-                        // Log the action
                         $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                             'user_id' => $project->user_id,
                             'project_id' => $project->id,
@@ -453,26 +449,24 @@ class Rapid_URL_Indexer {
                             'details' => json_encode(array('refunded_credits' => $total_urls)),
                             'created_at' => current_time('mysql')
                         ));
-                        // Send email notification
                         self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
                     } elseif ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent) {
-                        // Send email notification for initial report
                         self::send_status_change_email($project, 'initial_report', $processed_links, $indexed_links);
-                        // Mark initial report as sent
                         $wpdb->update($table_name, array('initial_report_sent' => 1), array('id' => $project->id));
                     }
                 }
+            } else {
+                self::log_cron_execution("Invalid API response for project {$project->id}: " . json_encode($response));
             }
+        }
 
-            // Check for pending projects older than 24 hours
-            if ($project->status === 'pending' && strtotime($project->created_at) < strtotime('-24 hours')) {
-                // Refund credits
-                $total_urls = count(json_decode($project->urls, true));
-                Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
-
-                // Update project status to failed
-                $wpdb->update($table_name, array('status' => 'failed'), array('id' => $project->id));
-            }
+        // Check for pending projects older than 24 hours
+        $old_pending_projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending' AND created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)");
+        foreach ($old_pending_projects as $project) {
+            $total_urls = count(json_decode($project->urls, true));
+            Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
+            $wpdb->update($table_name, array('status' => 'failed'), array('id' => $project->id));
+            self::log_cron_execution("Marked project {$project->id} as failed due to being pending for over 24 hours");
         }
 
         self::log_cron_execution('Update Project Status Completed');
