@@ -80,7 +80,7 @@ class Rapid_URL_Indexer {
     }
 
     public static function update_daily_stats($project_id) {
-        self::log_cron_execution('Update Daily Stats Started');
+        self::log_cron_execution('Update Daily Stats Started for Project ID: ' . $project_id);
         global $wpdb;
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
         $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
@@ -88,15 +88,15 @@ class Rapid_URL_Indexer {
 
         // Get the latest project data
         $project = $wpdb->get_row($wpdb->prepare(
-            "SELECT indexed_links, submitted_links FROM $projects_table WHERE id = %d",
+            "SELECT indexed_links, submitted_links, processed_links FROM $projects_table WHERE id = %d",
             $project_id
         ));
 
         if ($project) {
             $indexed_count = $project->indexed_links;
-            $unindexed_count = $project->submitted_links - $project->indexed_links;
+            $unindexed_count = $project->processed_links - $project->indexed_links;
 
-            $wpdb->replace(
+            $result = $wpdb->replace(
                 $stats_table,
                 array(
                     'project_id' => $project_id,
@@ -106,6 +106,14 @@ class Rapid_URL_Indexer {
                 ),
                 array('%d', '%s', '%d', '%d')
             );
+
+            if ($result === false) {
+                self::log_cron_execution('Error updating daily stats for Project ID: ' . $project_id . '. MySQL Error: ' . $wpdb->last_error);
+            } else {
+                self::log_cron_execution('Daily stats updated successfully for Project ID: ' . $project_id);
+            }
+        } else {
+            self::log_cron_execution('Project not found for ID: ' . $project_id);
         }
     }
 
@@ -353,18 +361,17 @@ class Rapid_URL_Indexer {
         $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status IN ('submitted', 'pending', 'completed') AND task_id IS NOT NULL");
 
         foreach ($projects as $project) {
-            $api_key = get_option('speedyindex_api_key');
+            $api_key = get_option('rui_speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
             if (!$response) {
                 continue; // Skip if no response from API
             }
 
-
             if (isset($response['id'])) {
                 $status = 'submitted'; // Assuming the status is 'submitted' if the task is found
                 $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
-                $processed_links = $response['processed_count'];
-                $total_urls = $response['size'];
+                $processed_links = isset($response['processed_count']) ? $response['processed_count'] : 0;
+                $total_urls = isset($response['size']) ? $response['size'] : 0;
                 $last_updated = current_time('mysql');
 
                 // Check if 13 days have passed since project creation
@@ -387,13 +394,11 @@ class Rapid_URL_Indexer {
                     'notify' => $notify
                 );
 
-                $wpdb->update($table_name, $update_data, array('task_id' => $project->task_id));
+                $wpdb->update($table_name, $update_data, array('id' => $project->id));
 
                 // Update daily stats
                 self::update_daily_stats($project->id);
 
-                $created_at = strtotime($project->created_at);
-                $current_time = time();
                 $hours_since_creation = ($current_time - $created_at) / (60 * 60);
 
                 if ($status !== $project->status || ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent)) {
@@ -404,7 +409,9 @@ class Rapid_URL_Indexer {
                         'action' => 'Project Status Change',
                         'details' => json_encode(array(
                             'old_status' => $project->status,
-                            'new_status' => $status
+                            'new_status' => $status,
+                            'processed_links' => $processed_links,
+                            'indexed_links' => $indexed_links
                         )),
                         'created_at' => current_time('mysql')
                     ));
@@ -421,7 +428,7 @@ class Rapid_URL_Indexer {
                         $wpdb->update($table_name, array(
                             'auto_refund_processed' => 1,
                             'refunded_credits' => $total_urls
-                        ), array('task_id' => $project->task_id));
+                        ), array('id' => $project->id));
 
                         // Log the action
                         $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
@@ -440,7 +447,6 @@ class Rapid_URL_Indexer {
                         $wpdb->update($table_name, array('initial_report_sent' => 1), array('id' => $project->id));
                     }
                 }
-            } else {
             }
 
             // Check for pending projects older than 24 hours
