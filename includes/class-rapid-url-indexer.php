@@ -93,6 +93,8 @@ class Rapid_URL_Indexer {
         ));
 
         if ($project) {
+            self::log_cron_execution('Project data retrieved for ID: ' . $project_id . '. Indexed: ' . $project->indexed_links . ', Submitted: ' . $project->submitted_links . ', Processed: ' . $project->processed_links);
+            
             $indexed_count = $project->indexed_links;
             $unindexed_count = $project->processed_links - $project->indexed_links;
 
@@ -110,7 +112,7 @@ class Rapid_URL_Indexer {
             if ($result === false) {
                 self::log_cron_execution('Error updating daily stats for Project ID: ' . $project_id . '. MySQL Error: ' . $wpdb->last_error);
             } else {
-                self::log_cron_execution('Daily stats updated successfully for Project ID: ' . $project_id);
+                self::log_cron_execution('Daily stats updated successfully for Project ID: ' . $project_id . '. Indexed: ' . $indexed_count . ', Unindexed: ' . $unindexed_count);
             }
 
             // Update the project's updated_at timestamp

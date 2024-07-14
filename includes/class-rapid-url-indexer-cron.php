@@ -14,25 +14,11 @@ class Rapid_URL_Indexer_Cron {
 
         global $wpdb;
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
-        $date = current_time('Y-m-d');
 
-        $projects = $wpdb->get_results("SELECT id, indexed_links, submitted_links FROM $projects_table");
+        $projects = $wpdb->get_results("SELECT id FROM $projects_table");
 
         foreach ($projects as $project) {
-            $indexed_count = $project->indexed_links;
-            $unindexed_count = $project->submitted_links - $project->indexed_links;
-
-            $wpdb->replace(
-                $stats_table,
-                array(
-                    'project_id' => $project->id,
-                    'date' => $date,
-                    'indexed_count' => $indexed_count,
-                    'unindexed_count' => $unindexed_count
-                ),
-                array('%d', '%s', '%d', '%d')
-            );
+            Rapid_URL_Indexer::update_daily_stats($project->id);
         }
 
         self::log_cron_execution('Update Daily Stats Completed');
