@@ -549,6 +549,11 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Auto Refund Completed');
     }
 
+    public static function generate_fallback_project_name($urls) {
+        $urls_string = implode('', $urls);
+        $hash = md5($urls_string);
+        return "noname_" . $hash;
+    }
 
     private static function load_dependencies() {
         require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-admin.php';
