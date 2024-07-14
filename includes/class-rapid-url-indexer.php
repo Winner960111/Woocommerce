@@ -414,7 +414,7 @@ class Rapid_URL_Indexer {
 
                 $hours_since_creation = ($current_time - $created_at) / (60 * 60);
 
-                if ($status !== $project->status || ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent)) {
+                if ($status !== $project->status || $processed_links !== $project->processed_links || $indexed_links !== $project->indexed_links || ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent)) {
                     // Log the project status change
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
