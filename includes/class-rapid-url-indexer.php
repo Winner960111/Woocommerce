@@ -86,43 +86,57 @@ class Rapid_URL_Indexer {
         $stats_table = $wpdb->prefix . 'rapid_url_indexer_daily_stats';
         $date = current_time('Y-m-d');
 
-        // Get the latest project data
+        // Get the project data
         $project = $wpdb->get_row($wpdb->prepare(
-            "SELECT indexed_links, submitted_links, processed_links FROM $projects_table WHERE id = %d",
+            "SELECT task_id, submitted_links FROM $projects_table WHERE id = %d",
             $project_id
         ));
 
-        if ($project) {
-            self::log_cron_execution('Project data retrieved for ID: ' . $project_id . '. Indexed: ' . $project->indexed_links . ', Submitted: ' . $project->submitted_links . ', Processed: ' . $project->processed_links);
-            
-            $indexed_count = $project->indexed_links;
-            $unindexed_count = $project->processed_links - $project->indexed_links;
+        if ($project && $project->task_id) {
+            // Fetch the latest data from SpeedyIndex API
+            $api_key = get_option('rui_speedyindex_api_key');
+            $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
 
-            $result = $wpdb->replace(
-                $stats_table,
-                array(
-                    'project_id' => $project_id,
-                    'date' => $date,
-                    'indexed_count' => $indexed_count,
-                    'unindexed_count' => $unindexed_count
-                ),
-                array('%d', '%s', '%d', '%d')
-            );
+            if ($response && isset($response['processed_count']) && isset($response['indexed_count'])) {
+                $processed_count = $response['processed_count'];
+                $indexed_count = $response['indexed_count'];
+                $unindexed_count = $processed_count - $indexed_count;
 
-            if ($result === false) {
-                self::log_cron_execution('Error updating daily stats for Project ID: ' . $project_id . '. MySQL Error: ' . $wpdb->last_error);
+                self::log_cron_execution('API data retrieved for Project ID: ' . $project_id . '. Processed: ' . $processed_count . ', Indexed: ' . $indexed_count);
+
+                // Update the project table
+                $wpdb->update(
+                    $projects_table,
+                    array(
+                        'processed_links' => $processed_count,
+                        'indexed_links' => $indexed_count,
+                        'updated_at' => current_time('mysql')
+                    ),
+                    array('id' => $project_id)
+                );
+
+                // Update the daily stats table
+                $result = $wpdb->replace(
+                    $stats_table,
+                    array(
+                        'project_id' => $project_id,
+                        'date' => $date,
+                        'indexed_count' => $indexed_count,
+                        'unindexed_count' => $unindexed_count
+                    ),
+                    array('%d', '%s', '%d', '%d')
+                );
+
+                if ($result === false) {
+                    self::log_cron_execution('Error updating daily stats for Project ID: ' . $project_id . '. MySQL Error: ' . $wpdb->last_error);
+                } else {
+                    self::log_cron_execution('Daily stats updated successfully for Project ID: ' . $project_id . '. Indexed: ' . $indexed_count . ', Unindexed: ' . $unindexed_count);
+                }
             } else {
-                self::log_cron_execution('Daily stats updated successfully for Project ID: ' . $project_id . '. Indexed: ' . $indexed_count . ', Unindexed: ' . $unindexed_count);
+                self::log_cron_execution('Failed to retrieve API data for Project ID: ' . $project_id);
             }
-
-            // Update the project's updated_at timestamp
-            $wpdb->update(
-                $projects_table,
-                array('updated_at' => current_time('mysql')),
-                array('id' => $project_id)
-            );
         } else {
-            self::log_cron_execution('Project not found for ID: ' . $project_id);
+            self::log_cron_execution('Project not found or no task ID for Project ID: ' . $project_id);
         }
     }
 

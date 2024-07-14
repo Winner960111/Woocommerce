@@ -126,11 +126,15 @@ class Rapid_URL_Indexer_API {
         
         if (self::is_api_response_success($response)) {
             $data = json_decode(wp_remote_retrieve_body($response), true);
-            return $data['result'];
-        } else {
-            self::log_api_error($response);
-            return false;
+            if (isset($data['result'])) {
+                return array(
+                    'processed_count' => isset($data['result']['processed_count']) ? $data['result']['processed_count'] : 0,
+                    'indexed_count' => isset($data['result']['indexed_count']) ? $data['result']['indexed_count'] : 0
+                );
+            }
         }
+        self::log_api_error($response);
+        return false;
     }
 
 
