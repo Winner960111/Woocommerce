@@ -129,7 +129,8 @@ class Rapid_URL_Indexer_API {
             if (isset($data['result'])) {
                 return array(
                     'processed_count' => isset($data['result']['processed_count']) ? $data['result']['processed_count'] : 0,
-                    'indexed_count' => isset($data['result']['indexed_count']) ? $data['result']['indexed_count'] : 0
+                    'indexed_count' => isset($data['result']['indexed_count']) ? $data['result']['indexed_count'] : 0,
+                    'submitted_count' => isset($data['result']['size']) ? $data['result']['size'] : 0
                 );
             }
         }

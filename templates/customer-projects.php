@@ -67,8 +67,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                         if ($project->status == 'pending' || $project->status == 'failed') {
                             echo esc_html("N/A");
                         } else {
-                            $total_urls = $project->submitted_links;
-                            $processed_count = $project->processed_links;
+                            $total_urls = $project->processed_links;
                             $indexed_links = $project->indexed_links;
                             
                             if ($hours_since_submission >= 96) {

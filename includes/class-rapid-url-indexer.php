@@ -398,7 +398,7 @@ class Rapid_URL_Indexer {
                 $status = 'submitted';
                 $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
                 $processed_links = isset($response['processed_count']) ? $response['processed_count'] : 0;
-                $total_urls = isset($response['size']) ? $response['size'] : 0;
+                $submitted_links = isset($response['submitted_count']) ? $response['submitted_count'] : 0;
                 $last_updated = current_time('mysql');
 
                 $created_at = strtotime($project->created_at);
@@ -412,7 +412,7 @@ class Rapid_URL_Indexer {
                 $notify = isset($project->notify) ? intval($project->notify) : 0;
                 $update_data = array(
                     'status' => $status,
-                    'submitted_links' => $total_urls,
+                    'submitted_links' => $submitted_links,
                     'processed_links' => $processed_links,
                     'indexed_links' => $indexed_links,
                     'updated_at' => $last_updated,
@@ -500,10 +500,11 @@ class Rapid_URL_Indexer {
             $api_key = get_option('speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
 
-            if ($response && isset($response['processed_count']) && isset($response['indexed_count'])) {
+            if ($response && isset($response['processed_count']) && isset($response['indexed_count']) && isset($response['submitted_count'])) {
                 $processed_count = $response['processed_count'];
                 $indexed_count = $response['indexed_count'];
-                $refund_credits = $processed_count - $indexed_count;
+                $submitted_count = $response['submitted_count'];
+                $refund_credits = $submitted_count - $indexed_count;
 
                 if ($refund_credits > 0) {
                     // Refund credits
@@ -514,6 +515,7 @@ class Rapid_URL_Indexer {
                         'status' => 'refunded',
                         'auto_refund_processed' => 1,
                         'refunded_credits' => $refund_credits,
+                        'submitted_links' => $submitted_count,
                         'processed_links' => $processed_count,
                         'indexed_links' => $indexed_count,
                         'updated_at' => current_time('mysql')
