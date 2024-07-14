@@ -504,7 +504,7 @@ class Rapid_URL_Indexer {
                 $processed_count = $response['processed_count'];
                 $indexed_count = $response['indexed_count'];
                 $submitted_count = $response['submitted_count'];
-                $refund_credits = $submitted_count - $indexed_count;
+                $refund_credits = $processed_count - $indexed_count;
 
                 if ($refund_credits > 0) {
                     // Refund credits
