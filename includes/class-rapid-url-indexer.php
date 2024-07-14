@@ -112,6 +112,13 @@ class Rapid_URL_Indexer {
             } else {
                 self::log_cron_execution('Daily stats updated successfully for Project ID: ' . $project_id);
             }
+
+            // Update the project's updated_at timestamp
+            $wpdb->update(
+                $projects_table,
+                array('updated_at' => current_time('mysql')),
+                array('id' => $project_id)
+            );
         } else {
             self::log_cron_execution('Project not found for ID: ' . $project_id);
         }
@@ -394,7 +401,13 @@ class Rapid_URL_Indexer {
                     'notify' => $notify
                 );
 
-                $wpdb->update($table_name, $update_data, array('id' => $project->id));
+                $update_result = $wpdb->update($table_name, $update_data, array('id' => $project->id));
+
+                if ($update_result === false) {
+                    self::log_cron_execution("Failed to update project {$project->id}. MySQL Error: " . $wpdb->last_error);
+                } else {
+                    self::log_cron_execution("Updated project {$project->id}. Processed: $processed_links, Indexed: $indexed_links");
+                }
 
                 // Update daily stats
                 self::update_daily_stats($project->id);
