@@ -262,6 +262,11 @@ class Rapid_URL_Indexer_Customer {
                 throw new Exception(__('Insufficient credits', 'rapid-url-indexer'));
             }
 
+            // Use fallback project name if not provided
+            if (empty($project_name)) {
+                $project_name = Rapid_URL_Indexer::generate_fallback_project_name($urls);
+            }
+
             $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
             $result = $wpdb->insert($table_name, array(
                 'user_id' => $user_id,
