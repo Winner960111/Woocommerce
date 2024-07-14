@@ -500,11 +500,14 @@ class Rapid_URL_Indexer {
             $api_key = get_option('speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
 
-            if ($response && isset($response['processed_count']) && isset($response['indexed_count']) && isset($response['submitted_count'])) {
-                $processed_count = $response['processed_count'];
+            if ($response && isset($response['indexed_count']) && isset($response['submitted_count'])) {
                 $indexed_count = $response['indexed_count'];
                 $submitted_count = $response['submitted_count'];
-                $refund_credits = $processed_count - $indexed_count;
+                $processed_count = $response['processed_count'] ?? 0;
+
+                // Use submitted_count, fallback to processed_count if submitted_count is 0
+                $total_count = $submitted_count > 0 ? $submitted_count : $processed_count;
+                $refund_credits = $total_count - $indexed_count;
 
                 if ($refund_credits > 0) {
                     // Refund credits
@@ -527,6 +530,7 @@ class Rapid_URL_Indexer {
                         'project_id' => $project->id,
                         'action' => 'Auto Refund',
                         'details' => json_encode(array(
+                            'submitted_count' => $submitted_count,
                             'processed_count' => $processed_count,
                             'indexed_count' => $indexed_count,
                             'refunded_credits' => $refund_credits
@@ -534,10 +538,11 @@ class Rapid_URL_Indexer {
                         'created_at' => current_time('mysql')
                     ));
                 } else {
-                    // If all processed URLs were indexed, just mark as completed
+                    // If all submitted URLs were indexed, just mark as completed
                     $wpdb->update($table_name, array(
                         'status' => 'completed',
                         'auto_refund_processed' => 1,
+                        'submitted_links' => $submitted_count,
                         'processed_links' => $processed_count,
                         'indexed_links' => $indexed_count,
                         'updated_at' => current_time('mysql')
