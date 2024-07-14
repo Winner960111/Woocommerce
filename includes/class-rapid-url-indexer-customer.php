@@ -268,6 +268,7 @@ class Rapid_URL_Indexer_Customer {
                 'project_name' => $project_name,
                 'urls' => json_encode($urls),
                 'status' => 'pending',
+                'submitted_links' => count($urls),
                 'created_at' => current_time('mysql')
             ));
 

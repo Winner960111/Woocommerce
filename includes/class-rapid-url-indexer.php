@@ -663,7 +663,11 @@ class Rapid_URL_Indexer {
                 if ($response && isset($response['task_id'])) {
                     global $wpdb;
                     $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-                    $wpdb->update($table_name, array('task_id' => $response['task_id'], 'status' => 'submitted'), array('id' => $project_id));
+                    $wpdb->update($table_name, array(
+                        'task_id' => $response['task_id'],
+                        'status' => 'submitted',
+                        'submitted_links' => count($urls)
+                    ), array('id' => $project_id));
 
                     // Deduct credits
                     Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'system', $project_id);
