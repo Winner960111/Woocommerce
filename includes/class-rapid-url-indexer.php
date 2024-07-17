@@ -1052,7 +1052,7 @@ class Rapid_URL_Indexer {
             wp_mail($user_info->user_email, $subject, $message);
         }
     }
-}
+
     private static function handle_error($error, $user_id) {
         error_log('Rapid URL Indexer Error: ' . $error->getMessage());
         
