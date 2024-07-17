@@ -1056,7 +1056,8 @@ class Rapid_URL_Indexer {
     private static function handle_error($error, $user_id) {
         error_log('Rapid URL Indexer Error: ' . $error->getMessage());
         
-        if (current_user_can('manage_options')) {
+        $user = get_user_by('id', $user_id);
+        if ($user && user_can($user, 'manage_options')) {
             return new WP_REST_Response(array(
                 'message' => 'An error occurred. Please check the error logs.',
                 'error' => $error->getMessage(),
