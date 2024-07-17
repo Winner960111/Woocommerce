@@ -642,31 +642,32 @@ class Rapid_URL_Indexer {
     }
 
     public static function handle_project_submission($request) {
-        $params = $request->get_params();
-        $project_name = isset($params['project_name']) ? sanitize_text_field($params['project_name']) : '';
-        $urls = isset($params['urls']) ? (array) $params['urls'] : array();
-        $urls = array_map('esc_url_raw', $urls);
-        $notify = isset($params['notify_on_status_change']) ? filter_var($params['notify_on_status_change'], FILTER_VALIDATE_BOOLEAN) : false;
+        try {
+            $params = $request->get_params();
+            $project_name = isset($params['project_name']) ? sanitize_text_field($params['project_name']) : '';
+            $urls = isset($params['urls']) ? (array) $params['urls'] : array();
+            $urls = array_map('esc_url_raw', $urls);
+            $notify = isset($params['notify_on_status_change']) ? filter_var($params['notify_on_status_change'], FILTER_VALIDATE_BOOLEAN) : false;
 
-        // Validate and process the project submission
-        $api_key = $request->get_header('X-API-Key');
-        $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
-        if (empty($user)) {
-            return new WP_REST_Response(array('message' => 'Invalid API key'), 403);
-        }
-        $user_id = $user[0]->ID;
+            // Validate and process the project submission
+            $api_key = $request->get_header('X-API-Key');
+            $user = get_users(array('meta_key' => 'rui_api_key', 'meta_value' => $api_key, 'number' => 1));
+            if (empty($user)) {
+                return new WP_REST_Response(array('message' => 'Invalid API key'), 403);
+            }
+            $user_id = $user[0]->ID;
 
-        // Check if user has enough credits
-        $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
-        if ($credits < count($urls)) {
-            return new WP_REST_Response(array('message' => 'Insufficient credits'), 400);
-        }
+            // Check if user has enough credits
+            $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
+            if ($credits < count($urls)) {
+                return new WP_REST_Response(array('message' => 'Insufficient credits'), 400);
+            }
 
-        if (empty($urls)) {
-            return new WP_REST_Response(array('message' => 'No valid URLs provided'), 400);
-        }
+            if (empty($urls)) {
+                return new WP_REST_Response(array('message' => 'No valid URLs provided'), 400);
+            }
 
-        if (count($urls) <= 9999) {
+            if (count($urls) <= 9999) {
             // Use fallback project name if not provided
             if (empty($project_name)) {
                 $project_name = self::generate_fallback_project_name($urls);
@@ -699,8 +700,11 @@ class Rapid_URL_Indexer {
             } else {
                 return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
             }
-        } else {
-            return new WP_REST_Response(array('message' => 'Invalid number of URLs. Must be between 1 and 9999.'), 400);
+            } else {
+                return new WP_REST_Response(array('message' => 'Invalid number of URLs. Must be between 1 and 9999.'), 400);
+            }
+        } catch (Exception $e) {
+            return self::handle_error($e, $user_id);
         }
     }
     
@@ -1049,3 +1053,18 @@ class Rapid_URL_Indexer {
         }
     }
 }
+    private static function handle_error($error, $user_id) {
+        error_log('Rapid URL Indexer Error: ' . $error->getMessage());
+        
+        if (current_user_can('manage_options')) {
+            return new WP_REST_Response(array(
+                'message' => 'An error occurred. Please check the error logs.',
+                'error' => $error->getMessage(),
+                'trace' => $error->getTraceAsString()
+            ), 500);
+        } else {
+            return new WP_REST_Response(array(
+                'message' => 'An error occurred. Please contact the administrator.'
+            ), 500);
+        }
+    }
