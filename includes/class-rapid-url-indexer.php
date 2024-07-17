@@ -644,8 +644,9 @@ class Rapid_URL_Indexer {
     public static function handle_project_submission($request) {
         $params = $request->get_params();
         $project_name = isset($params['project_name']) ? sanitize_text_field($params['project_name']) : '';
-        $urls = array_map('esc_url_raw', $params['urls']);
-        $notify = isset($params['notify_on_status_change']) ? boolval($params['notify_on_status_change']) : false;
+        $urls = isset($params['urls']) ? (array) $params['urls'] : array();
+        $urls = array_map('esc_url_raw', $urls);
+        $notify = isset($params['notify_on_status_change']) ? filter_var($params['notify_on_status_change'], FILTER_VALIDATE_BOOLEAN) : false;
 
         // Validate and process the project submission
         $api_key = $request->get_header('X-API-Key');
@@ -661,7 +662,11 @@ class Rapid_URL_Indexer {
             return new WP_REST_Response(array('message' => 'Insufficient credits'), 400);
         }
 
-        if (count($urls) > 0 && count($urls) <= 9999) {
+        if (empty($urls)) {
+            return new WP_REST_Response(array('message' => 'No valid URLs provided'), 400);
+        }
+
+        if (count($urls) <= 9999) {
             // Use fallback project name if not provided
             if (empty($project_name)) {
                 $project_name = self::generate_fallback_project_name($urls);
