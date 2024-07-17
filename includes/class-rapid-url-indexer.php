@@ -1054,18 +1054,22 @@ class Rapid_URL_Indexer {
     }
 
     private static function handle_error($error, $user_id) {
-        error_log('Rapid URL Indexer Error: ' . $error->getMessage());
+        $error_message = 'Rapid URL Indexer Error: ' . $error->getMessage();
+        error_log($error_message);
         
         $user = get_user_by('id', $user_id);
         if ($user && user_can($user, 'manage_options')) {
+            error_log('Error details for admin (User ID: ' . $user_id . '): ' . $error->getTraceAsString());
             return new WP_REST_Response(array(
-                'message' => 'An error occurred. Please check the error logs.',
+                'message' => 'An error occurred. Please check the error logs for more details.',
                 'error' => $error->getMessage(),
                 'trace' => $error->getTraceAsString()
             ), 500);
         } else {
+            error_log('Error occurred for non-admin user (User ID: ' . $user_id . ')');
             return new WP_REST_Response(array(
-                'message' => 'An error occurred. Please contact the administrator.'
+                'message' => 'An error occurred. Our team has been notified and will investigate the issue.'
             ), 500);
         }
     }
+}
