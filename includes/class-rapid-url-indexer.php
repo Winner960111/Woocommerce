@@ -1037,7 +1037,7 @@ class Rapid_URL_Indexer {
             if ($status === 'completed') {
                 $message .= "\n" . sprintf(__('Your final project report is now available. Download it here: %s', 'rapid-url-indexer'), $report_link) . "\n";
             } elseif ($status === 'initial_report') {
-                $message .= "\n" . sprintf(__('Your initial project report is now available. Please note that this is not the final report and more URLs may be indexed in the coming days. Download the current report here: %s', 'rapid-url-indexer'), $report_link) . "\n";
+                $message .= "\n" . sprintf(__('Your initial project report is now available. Please note that this is not the final report and more URLs will be indexed in the coming days. Download the current report here: %s', 'rapid-url-indexer'), $report_link) . "\n";
             } elseif ($status === 'failed') {
                 $message .= "\n" . __('Unfortunately, your project has failed. All credits used for this project have been refunded to your account.', 'rapid-url-indexer') . "\n";
             } elseif ($status === 'refunded') {
