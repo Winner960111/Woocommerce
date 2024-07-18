@@ -75,11 +75,3 @@ function rui_reschedule_cron_jobs() {
     }
 }
 add_action('init', 'rui_reschedule_cron_jobs');
-// Temporary function to reschedule cron jobs
-function rui_reschedule_cron_jobs() {
-    wp_clear_scheduled_hook('rui_process_backlog');
-    if (!wp_next_scheduled('rui_process_backlog')) {
-        wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
-    }
-}
-add_action('init', 'rui_reschedule_cron_jobs');
