@@ -47,13 +47,6 @@ function rui_flush_rewrite_rules() {
 add_action('admin_init', array('Rapid_URL_Indexer_Admin', 'register_settings'));
 
 // Ensure cron jobs are scheduled on plugin activation
-register_activation_hook(__FILE__, 'rui_schedule_cron_jobs');
-function rui_schedule_cron_jobs() {
-    if (!wp_next_scheduled('rui_process_backlog')) {
-        wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
-    }
-}
-
 // Add custom cron schedule
 add_filter('cron_schedules', 'rui_add_cron_interval');
 function rui_add_cron_interval($schedules) {
@@ -62,6 +55,13 @@ function rui_add_cron_interval($schedules) {
         'display'  => esc_html__('Every 6 hours'),
     );
     return $schedules;
+}
+
+register_activation_hook(__FILE__, 'rui_schedule_cron_jobs');
+function rui_schedule_cron_jobs() {
+    if (!wp_next_scheduled('rui_process_backlog')) {
+        wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
+    }
 }
 
 // Hook the process_backlog method to the rui_process_backlog action
