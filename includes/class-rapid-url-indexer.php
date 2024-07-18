@@ -431,45 +431,47 @@ class Rapid_URL_Indexer {
 
                 $hours_since_creation = ($current_time - $created_at) / (60 * 60);
 
-                if ($status !== $project->status || $processed_links != $project->processed_links || $indexed_links != $project->indexed_links || ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent)) {
+                // Always log status changes
+                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                    'user_id' => $project->user_id,
+                    'project_id' => $project->id,
+                    'action' => 'Project Status Update',
+                    'details' => json_encode(array(
+                        'old_status' => $project->status,
+                        'new_status' => $status,
+                        'old_processed_links' => $project->processed_links,
+                        'new_processed_links' => $processed_links,
+                        'old_indexed_links' => $project->indexed_links,
+                        'new_indexed_links' => $indexed_links
+                    )),
+                    'created_at' => current_time('mysql')
+                ));
+
+                if ($status === 'completed') {
+                    self::send_status_change_email($project, 'completed', $processed_links, $indexed_links);
+                } elseif ($status === 'failed' && !$project->auto_refund_processed) {
+                    $total_urls = count(json_decode($project->urls, true));
+                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
+
+                    $wpdb->update($table_name, array(
+                        'auto_refund_processed' => 1,
+                        'refunded_credits' => $total_urls
+                    ), array('id' => $project->id));
+
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
                         'project_id' => $project->id,
-                        'action' => 'Project Status Change',
-                        'details' => json_encode(array(
-                            'old_status' => $project->status,
-                            'new_status' => $status,
-                            'old_processed_links' => $project->processed_links,
-                            'new_processed_links' => $processed_links,
-                            'old_indexed_links' => $project->indexed_links,
-                            'new_indexed_links' => $indexed_links
-                        )),
+                        'action' => 'Auto Refund',
+                        'details' => json_encode(array('refunded_credits' => $total_urls)),
                         'created_at' => current_time('mysql')
                     ));
+                    self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
+                }
 
-                    if ($status === 'completed') {
-                        self::send_status_change_email($project, 'completed', $processed_links, $indexed_links);
-                    } elseif ($status === 'failed' && !$project->auto_refund_processed) {
-                        $total_urls = count(json_decode($project->urls, true));
-                        Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
-
-                        $wpdb->update($table_name, array(
-                            'auto_refund_processed' => 1,
-                            'refunded_credits' => $total_urls
-                        ), array('id' => $project->id));
-
-                        $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                            'user_id' => $project->user_id,
-                            'project_id' => $project->id,
-                            'action' => 'Auto Refund',
-                            'details' => json_encode(array('refunded_credits' => $total_urls)),
-                            'created_at' => current_time('mysql')
-                        ));
-                        self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
-                    } elseif ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent) {
-                        self::send_status_change_email($project, 'initial_report', $processed_links, $indexed_links);
-                        $wpdb->update($table_name, array('initial_report_sent' => 1), array('id' => $project->id));
-                    }
+                // Send initial report email after 96 hours, regardless of status changes
+                if ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent) {
+                    self::send_status_change_email($project, 'initial_report', $processed_links, $indexed_links);
+                    $wpdb->update($table_name, array('initial_report_sent' => 1), array('id' => $project->id));
                 }
             } else {
                 self::log_cron_execution("Invalid API response for project {$project->id}: " . json_encode($response));
@@ -1021,17 +1023,13 @@ class Rapid_URL_Indexer {
             $current_time = time();
             $hours_since_submission = ($current_time - $submission_time) / 3600;
 
-            if ($hours_since_submission >= 96 && $status !== 'completed') {
-                $status = 'initial_report';
-            }
-
             $message .= sprintf(__('Status: %s', 'rapid-url-indexer'), ucfirst($status)) . "\n";
             $message .= sprintf(__('Total Submitted URLs: %d', 'rapid-url-indexer'), count(json_decode($project->urls, true))) . "\n";
 
-            if ($hours_since_submission >= 96) {
+            if ($hours_since_submission >= 96 || $status === 'completed' || $status === 'initial_report') {
                 $message .= sprintf(__('Processed URLs: %d', 'rapid-url-indexer'), $processed_links) . "\n";
                 $message .= sprintf(__('Indexed URLs: %d', 'rapid-url-indexer'), $indexed_links) . "\n";
-                $message .= sprintf(__('Indexing Rate: %.2f%%', 'rapid-url-indexer'), ($indexed_links / $processed_links) * 100) . "\n";
+                $message .= sprintf(__('Indexing Rate: %.2f%%', 'rapid-url-indexer'), ($processed_links > 0 ? ($indexed_links / $processed_links) * 100 : 0)) . "\n";
             }
 
             $report_link = add_query_arg(array('download_report' => $project->id), home_url());
