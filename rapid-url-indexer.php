@@ -67,3 +67,11 @@ function rui_schedule_cron_jobs() {
 // Hook the process_backlog method to the rui_process_backlog action
 add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
 
+// Temporary function to reschedule cron jobs
+function rui_reschedule_cron_jobs() {
+    wp_clear_scheduled_hook('rui_process_backlog');
+    if (!wp_next_scheduled('rui_process_backlog')) {
+        wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
+    }
+}
+add_action('init', 'rui_reschedule_cron_jobs');
