@@ -1005,8 +1005,8 @@ class Rapid_URL_Indexer {
             }
         } else {
             return array(
-                'success' => false,
-                'error' => __('This project has already been submitted.', 'rapid-url-indexer')
+                'success' => true,
+                'error' => null
             );
         }
     }

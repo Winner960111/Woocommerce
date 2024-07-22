@@ -283,8 +283,12 @@ class Rapid_URL_Indexer_Customer {
 
             $project_id = $wpdb->insert_id;
 
-            // Schedule API request
-            self::schedule_api_request($project_id, $urls, $notify);
+            // Process API request immediately instead of scheduling
+            $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify, $user_id);
+            
+            if (!$api_response['success']) {
+                throw new Exception($api_response['error']);
+            }
 
             $wpdb->query('COMMIT');
             return $project_id;
