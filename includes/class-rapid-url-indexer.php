@@ -394,29 +394,41 @@ class Rapid_URL_Indexer {
 
             self::log_cron_execution("API response for project {$project->id}: " . json_encode($response));
 
-            if (isset($response['id'])) {
-                $status = 'submitted';
+            if (isset($response['processed_count'])) {
                 $indexed_links = isset($response['indexed_count']) ? $response['indexed_count'] : 0;
-                $processed_links = isset($response['processed_count']) ? $response['processed_count'] : 0;
-                $submitted_links = isset($response['submitted_count']) ? $response['submitted_count'] : 0;
+                $processed_links = $response['processed_count'];
+                $submitted_links = isset($response['submitted_count']) ? $response['submitted_count'] : $project->submitted_links;
                 $last_updated = current_time('mysql');
 
                 $created_at = strtotime($project->created_at);
                 $current_time = time();
                 $days_since_creation = ($current_time - $created_at) / (60 * 60 * 24);
 
-                if ($days_since_creation >= 13) {
+                $status = $project->status;
+                if ($days_since_creation >= 14) {
+                    if ($indexed_links < $submitted_links) {
+                        $status = 'refunded';
+                        $refunded_credits = $submitted_links - $indexed_links;
+                        if (!$project->auto_refund_processed) {
+                            Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refunded_credits);
+                            $wpdb->update($table_name, array(
+                                'auto_refund_processed' => 1,
+                                'refunded_credits' => $refunded_credits
+                            ), array('id' => $project->id));
+                        }
+                    } else {
+                        $status = 'completed';
+                    }
+                } elseif ($days_since_creation >= 13 && $indexed_links == $submitted_links) {
                     $status = 'completed';
                 }
 
-                $notify = isset($project->notify) ? intval($project->notify) : 0;
                 $update_data = array(
                     'status' => $status,
                     'submitted_links' => $submitted_links,
                     'processed_links' => $processed_links,
                     'indexed_links' => $indexed_links,
-                    'updated_at' => $last_updated,
-                    'notify' => $notify
+                    'updated_at' => $last_updated
                 );
 
                 $update_result = $wpdb->update($table_name, $update_data, array('id' => $project->id));
@@ -424,51 +436,33 @@ class Rapid_URL_Indexer {
                 if ($update_result === false) {
                     self::log_cron_execution("Failed to update project {$project->id}. MySQL Error: " . $wpdb->last_error);
                 } else {
-                    self::log_cron_execution("Updated project {$project->id}. Processed: $processed_links, Indexed: $indexed_links");
+                    self::log_cron_execution("Updated project {$project->id}. Status: $status, Processed: $processed_links, Indexed: $indexed_links");
                 }
 
                 self::update_daily_stats($project->id);
 
-                $hours_since_creation = ($current_time - $created_at) / (60 * 60);
-
-                // Always log status changes
-                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                    'user_id' => $project->user_id,
-                    'project_id' => $project->id,
-                    'action' => 'Project Status Update',
-                    'details' => json_encode(array(
-                        'old_status' => $project->status,
-                        'new_status' => $status,
-                        'old_processed_links' => $project->processed_links,
-                        'new_processed_links' => $processed_links,
-                        'old_indexed_links' => $project->indexed_links,
-                        'new_indexed_links' => $indexed_links
-                    )),
-                    'created_at' => current_time('mysql')
-                ));
-
-                if ($status === 'completed') {
-                    self::send_status_change_email($project, 'completed', $processed_links, $indexed_links);
-                } elseif ($status === 'failed' && !$project->auto_refund_processed) {
-                    $total_urls = count(json_decode($project->urls, true));
-                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
-
-                    $wpdb->update($table_name, array(
-                        'auto_refund_processed' => 1,
-                        'refunded_credits' => $total_urls
-                    ), array('id' => $project->id));
-
+                // Log status changes
+                if ($status !== $project->status) {
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
                         'project_id' => $project->id,
-                        'action' => 'Auto Refund',
-                        'details' => json_encode(array('refunded_credits' => $total_urls)),
+                        'action' => 'Project Status Update',
+                        'details' => json_encode(array(
+                            'old_status' => $project->status,
+                            'new_status' => $status,
+                            'processed_links' => $processed_links,
+                            'indexed_links' => $indexed_links
+                        )),
                         'created_at' => current_time('mysql')
                     ));
-                    self::send_status_change_email($project, 'failed', $processed_links, $indexed_links);
+
+                    if ($project->notify) {
+                        self::send_status_change_email($project, $status, $processed_links, $indexed_links);
+                    }
                 }
 
                 // Send initial report email after 96 hours, regardless of status changes
+                $hours_since_creation = ($current_time - $created_at) / (60 * 60);
                 if ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent) {
                     self::send_status_change_email($project, 'initial_report', $processed_links, $indexed_links);
                     $wpdb->update($table_name, array('initial_report_sent' => 1), array('id' => $project->id));
