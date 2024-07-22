@@ -487,7 +487,7 @@ class Rapid_URL_Indexer {
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE (status = 'submitted' OR status = 'completed') AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'completed' AND DATE_ADD(created_at, INTERVAL 14 DAY) <= NOW() AND auto_refund_processed = 0");
 
         foreach ($projects as $project) {
             $api_key = get_option('speedyindex_api_key');
@@ -531,9 +531,8 @@ class Rapid_URL_Indexer {
                         'created_at' => current_time('mysql')
                     ));
                 } else {
-                    // If all submitted URLs were indexed, just mark as completed
+                    // If all submitted URLs were indexed, just mark as processed
                     $wpdb->update($table_name, array(
-                        'status' => 'completed',
                         'auto_refund_processed' => 1,
                         'submitted_links' => $submitted_count,
                         'processed_links' => $processed_count,
