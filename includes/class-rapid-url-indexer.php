@@ -405,22 +405,19 @@ class Rapid_URL_Indexer {
                 $days_since_creation = ($current_time - $created_at) / (60 * 60 * 24);
 
                 $status = $project->status;
-                if ($days_since_creation >= 14) {
-                    if ($indexed_links < $submitted_links) {
-                        $status = 'refunded';
-                        $refunded_credits = $submitted_links - $indexed_links;
-                        if (!$project->auto_refund_processed) {
-                            Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refunded_credits);
-                            $wpdb->update($table_name, array(
-                                'auto_refund_processed' => 1,
-                                'refunded_credits' => $refunded_credits
-                            ), array('id' => $project->id));
-                        }
-                    } else {
-                        $status = 'completed';
-                    }
-                } elseif ($days_since_creation >= 13 && $indexed_links == $submitted_links) {
+                if ($days_since_creation >= 13) {
                     $status = 'completed';
+                }
+                if ($days_since_creation >= 14 && !$project->auto_refund_processed) {
+                    $refunded_credits = $submitted_links - $indexed_links;
+                    if ($refunded_credits > 0) {
+                        $status = 'refunded';
+                        Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refunded_credits);
+                        $wpdb->update($table_name, array(
+                            'auto_refund_processed' => 1,
+                            'refunded_credits' => $refunded_credits
+                        ), array('id' => $project->id));
+                    }
                 }
 
                 $update_data = array(
