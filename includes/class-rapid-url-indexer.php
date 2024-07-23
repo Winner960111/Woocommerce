@@ -812,11 +812,6 @@ class Rapid_URL_Indexer {
         self::retry_failed_submissions();
         self::log_cron_execution('Finished retry_failed_submissions');
 
-        // Process backlog
-        self::log_cron_execution('Starting process_backlog');
-        self::process_backlog();
-        self::log_cron_execution('Finished process_backlog');
-
         // Check for abuse
         self::log_cron_execution('Starting check_abuse');
         self::check_abuse();
