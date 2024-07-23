@@ -24,6 +24,30 @@ class Rapid_URL_Indexer_Customer {
         add_action('template_redirect', array(__CLASS__, 'handle_download_report'));
     }
 
+    private static function send_out_of_credits_email($user_id) {
+        $user = get_user_by('id', $user_id);
+        if (!$user) {
+            return;
+        }
+
+        $to = $user->user_email;
+        $subject = __('Out of Credits - Rapid URL Indexer', 'rapid-url-indexer');
+        $message = sprintf(
+            __('Hello %s,
+
+You are out of credits for URL indexing. To continue submitting URLs, please purchase more credits.
+
+Click here to buy credits: %s
+
+Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
+            $user->display_name,
+            wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))
+        );
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        
+        wp_mail($to, $subject, $message, $headers);
+    }
+
     public static function handle_download_report() {
         if (isset($_GET['download_report'])) {
             $project_id = intval($_GET['download_report']);
@@ -164,10 +188,13 @@ class Rapid_URL_Indexer_Customer {
         });
         $notify = isset($_POST['notify']) ? intval($_POST['notify']) : 0;
 
-        if ($credits <= 0) {
-            wp_send_json_error(array('message' => sprintf(__('You have no credits. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
-        } elseif ($credits < count($urls)) {
-            wp_send_json_error(array('message' => sprintf(__('You do not have enough credits to submit %d URLs. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), count($urls), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
+        if ($credits <= 0 || $credits < count($urls)) {
+            self::send_out_of_credits_email($user_id);
+            if ($credits <= 0) {
+                wp_send_json_error(array('message' => sprintf(__('You have no credits. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
+            } else {
+                wp_send_json_error(array('message' => sprintf(__('You do not have enough credits to submit %d URLs. <a href="%s">Buy more credits</a> to continue.', 'rapid-url-indexer'), count($urls), esc_url(wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))))));
+            }
         } else {
             if (count($urls) > 0 && count($urls) <= 9999) {
                 $api_key = get_option('rui_speedyindex_api_key');
