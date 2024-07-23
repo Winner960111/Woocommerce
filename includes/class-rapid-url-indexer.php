@@ -408,6 +408,7 @@ class Rapid_URL_Indexer {
                 $status = $project->status;
                 if ($status === 'submitted' && $days_since_creation >= 13) {
                     $status = 'completed';
+                    self::log_cron_execution("Project {$project->id} marked as completed after 13 days");
                 }
                 if ($status === 'completed' && $days_since_creation >= 14 && !$project->auto_refund_processed) {
                     $refunded_credits = $submitted_links - $indexed_links;
@@ -418,6 +419,7 @@ class Rapid_URL_Indexer {
                             'auto_refund_processed' => 1,
                             'refunded_credits' => $refunded_credits
                         ), array('id' => $project->id));
+                        self::log_cron_execution("Project {$project->id} marked as refunded after 14 days");
                     }
                 }
 
@@ -518,6 +520,8 @@ class Rapid_URL_Indexer {
                         'updated_at' => current_time('mysql')
                     ), array('id' => $project->id));
 
+                    self::log_cron_execution("Project {$project->id} auto-refunded. Refunded credits: $refund_credits");
+
                     // Log the action
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
@@ -540,7 +544,11 @@ class Rapid_URL_Indexer {
                         'indexed_links' => $indexed_count,
                         'updated_at' => current_time('mysql')
                     ), array('id' => $project->id));
+
+                    self::log_cron_execution("Project {$project->id} processed without refund. All URLs indexed.");
                 }
+            } else {
+                self::log_cron_execution("Failed to get API response for project {$project->id} during auto-refund process");
             }
         }
 
