@@ -26,13 +26,16 @@ class Rapid_URL_Indexer {
             wp_schedule_event(time(), 'daily', 'rui_check_abuse');
         }
         if (!wp_next_scheduled('rui_process_backlog')) {
-            wp_schedule_event(time(), 'hourly', 'rui_process_backlog');
+            wp_schedule_event(time(), 'every_six_hours', 'rui_process_backlog');
         }
         if (!wp_next_scheduled('rui_purge_logs')) {
             wp_schedule_event(time(), 'daily', 'rui_purge_logs');
         }
         if (!wp_next_scheduled('rui_purge_projects')) {
             wp_schedule_event(time(), 'daily', 'rui_purge_projects');
+        }
+        if (!wp_next_scheduled('rui_daily_stats_update')) {
+            wp_schedule_event(time(), 'daily', 'rui_daily_stats_update');
         }
 
         // Add actions for cron jobs
@@ -41,6 +44,7 @@ class Rapid_URL_Indexer {
         add_action('rui_process_backlog', array(__CLASS__, 'process_backlog'));
         add_action('rui_purge_logs', array(__CLASS__, 'purge_logs'));
         add_action('rui_purge_projects', array(__CLASS__, 'purge_projects'));
+        add_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
     }
 
     public static function purge_logs() {
@@ -794,7 +798,7 @@ class Rapid_URL_Indexer {
     }
 
     public static function process_cron_jobs() {
-        self::log_cron_execution('Cron Job Started');
+        self::log_cron_execution('Hourly Cron Job Started');
 
         try {
             // Update project status hourly
@@ -812,25 +816,10 @@ class Rapid_URL_Indexer {
             self::retry_failed_submissions();
             self::log_cron_execution('Finished retry_failed_submissions');
 
-            // Check for abuse
-            self::log_cron_execution('Starting check_abuse');
-            self::check_abuse();
-            self::log_cron_execution('Finished check_abuse');
-
-            // Purge old logs
-            self::log_cron_execution('Starting purge_logs');
-            self::purge_logs();
-            self::log_cron_execution('Finished purge_logs');
-
-            // Purge old projects
-            self::log_cron_execution('Starting purge_projects');
-            self::purge_projects();
-            self::log_cron_execution('Finished purge_projects');
-
-            self::log_cron_execution('Cron Job Completed Successfully');
+            self::log_cron_execution('Hourly Cron Job Completed Successfully');
         } catch (Exception $e) {
-            self::log_cron_execution('Cron Job Failed: ' . $e->getMessage());
-            error_log('Rapid URL Indexer Cron Job Failed: ' . $e->getMessage());
+            self::log_cron_execution('Hourly Cron Job Failed: ' . $e->getMessage());
+            error_log('Rapid URL Indexer Hourly Cron Job Failed: ' . $e->getMessage());
         }
     }
 
