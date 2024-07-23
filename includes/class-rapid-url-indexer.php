@@ -381,7 +381,7 @@ class Rapid_URL_Indexer {
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status IN ('submitted', 'pending', 'completed') AND task_id IS NOT NULL");
+        $projects = $wpdb->get_results("SELECT *, notify FROM $table_name WHERE status IN ('submitted', 'pending', 'completed') AND task_id IS NOT NULL");
 
         foreach ($projects as $project) {
             $api_key = get_option('rui_speedyindex_api_key');
