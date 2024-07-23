@@ -406,10 +406,14 @@ class Rapid_URL_Indexer {
                 $days_since_creation = ($current_time - $created_at) / (60 * 60 * 24);
 
                 $status = $project->status;
-                if ($status === 'submitted' && $days_since_creation >= 13) {
-                    $status = 'completed';
+                if ($status === 'submitted') {
+                    if ($days_since_creation >= 13) {
+                        $status = 'completed';
+                    } elseif ($processed_links == $submitted_links) {
+                        $status = 'completed';
+                    }
                 }
-                if ($status === 'submitted' && $days_since_creation >= 14 && !$project->auto_refund_processed) {
+                if ($status === 'completed' && $days_since_creation >= 14 && !$project->auto_refund_processed) {
                     $refunded_credits = $submitted_links - $indexed_links;
                     if ($refunded_credits > 0) {
                         $status = 'refunded';
@@ -790,25 +794,39 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Cron Job Started');
 
         // Update project status hourly
+        self::log_cron_execution('Starting update_project_status');
         self::update_project_status();
+        self::log_cron_execution('Finished update_project_status');
         
         // Process auto refunds
+        self::log_cron_execution('Starting auto_refund');
         self::auto_refund();
+        self::log_cron_execution('Finished auto_refund');
 
         // Retry failed submissions
+        self::log_cron_execution('Starting retry_failed_submissions');
         self::retry_failed_submissions();
+        self::log_cron_execution('Finished retry_failed_submissions');
 
         // Process backlog
+        self::log_cron_execution('Starting process_backlog');
         self::process_backlog();
+        self::log_cron_execution('Finished process_backlog');
 
         // Check for abuse
+        self::log_cron_execution('Starting check_abuse');
         self::check_abuse();
+        self::log_cron_execution('Finished check_abuse');
 
         // Purge old logs
+        self::log_cron_execution('Starting purge_logs');
         self::purge_logs();
+        self::log_cron_execution('Finished purge_logs');
 
         // Purge old projects
+        self::log_cron_execution('Starting purge_projects');
         self::purge_projects();
+        self::log_cron_execution('Finished purge_projects');
 
         self::log_cron_execution('Cron Job Completed');
     }
