@@ -31,9 +31,9 @@ class Rapid_URL_Indexer_Customer {
         }
 
         $to = $user->user_email;
-        $subject = __('Out of Credits - Rapid URL Indexer', 'rapid-url-indexer');
+        $subject = __('Warning: You Are Out of Credits', 'rapid-url-indexer');
         $message = sprintf(
-            __('Hello %s,
+            __('Hey %s,
 
 You are out of credits for URL indexing. To continue submitting URLs, please purchase more credits.
 
