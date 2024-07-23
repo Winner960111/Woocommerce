@@ -797,37 +797,42 @@ class Rapid_URL_Indexer {
     public static function process_cron_jobs() {
         self::log_cron_execution('Cron Job Started');
 
-        // Update project status hourly
-        self::log_cron_execution('Starting update_project_status');
-        self::update_project_status();
-        self::log_cron_execution('Finished update_project_status');
-        
-        // Process auto refunds
-        self::log_cron_execution('Starting auto_refund');
-        self::auto_refund();
-        self::log_cron_execution('Finished auto_refund');
+        try {
+            // Update project status hourly
+            self::log_cron_execution('Starting update_project_status');
+            self::update_project_status();
+            self::log_cron_execution('Finished update_project_status');
+            
+            // Process auto refunds
+            self::log_cron_execution('Starting auto_refund');
+            self::auto_refund();
+            self::log_cron_execution('Finished auto_refund');
 
-        // Retry failed submissions
-        self::log_cron_execution('Starting retry_failed_submissions');
-        self::retry_failed_submissions();
-        self::log_cron_execution('Finished retry_failed_submissions');
+            // Retry failed submissions
+            self::log_cron_execution('Starting retry_failed_submissions');
+            self::retry_failed_submissions();
+            self::log_cron_execution('Finished retry_failed_submissions');
 
-        // Check for abuse
-        self::log_cron_execution('Starting check_abuse');
-        self::check_abuse();
-        self::log_cron_execution('Finished check_abuse');
+            // Check for abuse
+            self::log_cron_execution('Starting check_abuse');
+            self::check_abuse();
+            self::log_cron_execution('Finished check_abuse');
 
-        // Purge old logs
-        self::log_cron_execution('Starting purge_logs');
-        self::purge_logs();
-        self::log_cron_execution('Finished purge_logs');
+            // Purge old logs
+            self::log_cron_execution('Starting purge_logs');
+            self::purge_logs();
+            self::log_cron_execution('Finished purge_logs');
 
-        // Purge old projects
-        self::log_cron_execution('Starting purge_projects');
-        self::purge_projects();
-        self::log_cron_execution('Finished purge_projects');
+            // Purge old projects
+            self::log_cron_execution('Starting purge_projects');
+            self::purge_projects();
+            self::log_cron_execution('Finished purge_projects');
 
-        self::log_cron_execution('Cron Job Completed');
+            self::log_cron_execution('Cron Job Completed Successfully');
+        } catch (Exception $e) {
+            self::log_cron_execution('Cron Job Failed: ' . $e->getMessage());
+            error_log('Rapid URL Indexer Cron Job Failed: ' . $e->getMessage());
+        }
     }
 
     private static function log_cron_execution($action) {
@@ -843,6 +848,8 @@ class Rapid_URL_Indexer {
 
         if ($result === false) {
             error_log('Error logging cron execution: ' . $wpdb->last_error);
+        } else {
+            error_log('Cron execution logged: ' . $action);
         }
     }
 
