@@ -20,6 +20,14 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <div class="rui-project-submission">
         <?php echo do_shortcode('[rui_project_submission]'); ?>
     </div>
+    <script>
+        // Clear form fields after page load (which happens after form submission)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('project_name').value = '';
+            document.getElementById('urls').value = '';
+            document.getElementById('notify').checked = false;
+        });
+    </script>
     <div class="rui-credits-display">
     <?php echo Rapid_URL_Indexer_Customer::credits_display(false); ?>
     </div>

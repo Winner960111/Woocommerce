@@ -16,7 +16,9 @@ jQuery(function($) {
 
         $.post(ajax_object.ajaxurl, data, function(response) {
             if (response.success) {
-                $('#rui-submission-response').html('<div class="notice notice-success"><p>' + response.data.message + '</p></div>');
+                // Store success message in sessionStorage
+                sessionStorage.setItem('rui_submission_message', response.data.message);
+                sessionStorage.setItem('rui_submission_status', 'success');
                 
                 // Fire Sendinblue custom event
                 if (typeof sendinblue !== 'undefined' && typeof sendinblue.track === 'function') {
@@ -26,12 +28,40 @@ jQuery(function($) {
                         { id: 'project:' + response.data.project_id }
                     );
                 }
+                
+                // Refresh the page
+                window.location.reload();
             } else {
-                $('#rui-submission-response').html('<div class="notice notice-error"><p>' + response.data.message + '</p></div>');
+                // Store error message in sessionStorage
+                sessionStorage.setItem('rui_submission_message', response.data.message);
+                sessionStorage.setItem('rui_submission_status', 'error');
+                
+                // Refresh the page
+                window.location.reload();
             }
         }).fail(function() {
-            $('#rui-submission-response').html('<div class="notice notice-error"><p>An error occurred. Please try again.</p></div>');
+            // Store error message in sessionStorage
+            sessionStorage.setItem('rui_submission_message', 'An error occurred. Please try again.');
+            sessionStorage.setItem('rui_submission_status', 'error');
+            
+            // Refresh the page
+            window.location.reload();
         });
+    });
+
+    // Check for stored messages on page load
+    $(document).ready(function() {
+        var message = sessionStorage.getItem('rui_submission_message');
+        var status = sessionStorage.getItem('rui_submission_status');
+        
+        if (message) {
+            var noticeClass = status === 'success' ? 'notice-success' : 'notice-error';
+            $('#rui-submission-response').html('<div class="notice ' + noticeClass + '"><p>' + message + '</p></div>');
+            
+            // Clear the stored message and status
+            sessionStorage.removeItem('rui_submission_message');
+            sessionStorage.removeItem('rui_submission_status');
+        }
     });
 
     // Chart functionality
