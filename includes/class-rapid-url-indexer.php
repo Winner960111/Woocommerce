@@ -26,7 +26,7 @@ class Rapid_URL_Indexer {
             wp_schedule_event(time(), 'daily', 'rui_check_abuse');
         }
         if (!wp_next_scheduled('rui_process_backlog')) {
-            wp_schedule_event(time(), 'every_six_hours', 'rui_process_backlog');
+            wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
         }
         if (!wp_next_scheduled('rui_purge_logs')) {
             wp_schedule_event(time(), 'daily', 'rui_purge_logs');
