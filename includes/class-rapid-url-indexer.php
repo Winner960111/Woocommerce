@@ -25,9 +25,6 @@ class Rapid_URL_Indexer {
         if (!wp_next_scheduled('rui_check_abuse')) {
             wp_schedule_event(time(), 'daily', 'rui_check_abuse');
         }
-        if (!wp_next_scheduled('rui_process_backlog')) {
-            wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
-        }
         if (!wp_next_scheduled('rui_purge_logs')) {
             wp_schedule_event(time(), 'daily', 'rui_purge_logs');
         }
@@ -41,7 +38,6 @@ class Rapid_URL_Indexer {
         // Add actions for cron jobs
         add_action('rui_cron_job', array(__CLASS__, 'process_cron_jobs'));
         add_action('rui_check_abuse', array(__CLASS__, 'check_abuse'));
-        add_action('rui_process_backlog', array(__CLASS__, 'process_backlog'));
         add_action('rui_purge_logs', array(__CLASS__, 'purge_logs'));
         add_action('rui_purge_projects', array(__CLASS__, 'purge_projects'));
         add_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
