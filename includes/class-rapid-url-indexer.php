@@ -406,12 +406,8 @@ class Rapid_URL_Indexer {
                 $days_since_creation = ($current_time - $created_at) / (60 * 60 * 24);
 
                 $status = $project->status;
-                if ($status === 'submitted') {
-                    if ($days_since_creation >= 13) {
-                        $status = 'completed';
-                    } elseif ($processed_links == $submitted_links) {
-                        $status = 'completed';
-                    }
+                if ($status === 'submitted' && $days_since_creation >= 13) {
+                    $status = 'completed';
                 }
                 if ($status === 'completed' && $days_since_creation >= 14 && !$project->auto_refund_processed) {
                     $refunded_credits = $submitted_links - $indexed_links;
