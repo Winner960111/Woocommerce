@@ -3,7 +3,7 @@ class Rapid_URL_Indexer {
     const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
 
     public static function init() {
-        add_action('wp', array(__CLASS__, 'late_init'));
+        add_action('init', array(__CLASS__, 'initialize_plugin'));
         add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
         
         // Add WooCommerce hooks for credits field
@@ -11,8 +11,7 @@ class Rapid_URL_Indexer {
         add_action('woocommerce_process_product_meta', array(__CLASS__, 'save_credits_field'));
     }
 
-
-    public static function late_init() {
+    public static function initialize_plugin() {
         self::load_dependencies();
         self::define_hooks();
         self::initialize_cron_jobs();
