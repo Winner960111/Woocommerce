@@ -408,15 +408,17 @@ class Rapid_URL_Indexer {
                 $current_time = time();
                 $days_since_creation = ($current_time - $created_at) / (60 * 60 * 24);
 
-                $status = $project->status;
-                if ($status === 'submitted' && $days_since_creation >= 13) {
-                    $status = 'completed';
+                $old_status = $project->status;
+                $new_status = $old_status;
+
+                if ($old_status === 'submitted' && $days_since_creation >= 13) {
+                    $new_status = 'completed';
                     self::log_cron_execution("Project {$project->id} marked as completed after 13 days");
                 }
-                if ($status === 'completed' && $days_since_creation >= 14 && !$project->auto_refund_processed) {
-                    $refunded_credits = $submitted_links - $indexed_links;
+                if ($old_status === 'completed' && $days_since_creation >= 14 && !$project->auto_refund_processed) {
+                    $refunded_credits =  $submitted_links - $indexed_links;
                     if ($refunded_credits > 0) {
-                        $status = 'refunded';
+                        $new_status = 'refunded';
                         Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refunded_credits);
                         $wpdb->update($table_name, array(
                             'auto_refund_processed' => 1,
@@ -427,7 +429,7 @@ class Rapid_URL_Indexer {
                 }
 
                 $update_data = array(
-                    'status' => $status,
+                    'status' => $new_status,
                     'submitted_links' => $submitted_links,
                     'processed_links' => $processed_links,
                     'indexed_links' => $indexed_links,
@@ -439,29 +441,27 @@ class Rapid_URL_Indexer {
                 if ($update_result === false) {
                     self::log_cron_execution("Failed to update project {$project->id}. MySQL Error: " . $wpdb->last_error);
                 } else {
-                    self::log_cron_execution("Updated project {$project->id}. Status: $status, Processed: $processed_links, Indexed: $indexed_links");
+                    self::log_cron_execution("Updated project {$project->id}. Status: $new_status, Processed: $processed_links, Indexed: $indexed_links");
                 }
 
                 self::update_daily_stats($project->id);
 
-                // Log status changes
-                if ($status !== $project->status) {
+                // Log status changes and send email
+                if ($new_status !== $old_status) {
                     $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                         'user_id' => $project->user_id,
                         'project_id' => $project->id,
                         'action' => 'Project Status Update',
                         'details' => json_encode(array(
-                            'old_status' => $project->status,
-                            'new_status' => $status,
+                            'old_status' => $old_status,
+                            'new_status' => $new_status,
                             'processed_links' => $processed_links,
                             'indexed_links' => $indexed_links
                         )),
                         'created_at' => current_time('mysql')
                     ));
 
-                    if ($project->notify) {
-                        self::send_status_change_email($project, $status, $processed_links, $indexed_links);
-                    }
+                    self::send_status_change_email($project, $new_status, $processed_links, $indexed_links);
                 }
 
                 // Send initial report email after 96 hours, regardless of status changes
@@ -482,6 +482,7 @@ class Rapid_URL_Indexer {
             Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $total_urls);
             $wpdb->update($table_name, array('status' => 'failed'), array('id' => $project->id));
             self::log_cron_execution("Marked project {$project->id} as failed due to being pending for over 24 hours");
+            self::send_status_change_email($project, 'failed', 0, 0);
         }
 
         self::log_cron_execution('Update Project Status Completed');
@@ -1051,7 +1052,17 @@ class Rapid_URL_Indexer {
 
             $message .= "\n" . __('Thank you for using Rapid URL Indexer!', 'rapid-url-indexer') . "\n";
 
-            wp_mail($user_info->user_email, $subject, $message);
+            $sent = wp_mail($user_info->user_email, $subject, $message);
+            if (!$sent) {
+                error_log('Failed to send email notification for project ' . $project->id . ' with status ' . $status);
+            }
+            
+            // Log the email sending attempt
+            self::log_action($project->id, 'Email Notification', json_encode(array(
+                'status' => $status,
+                'recipient' => $user_info->user_email,
+                'sent' => $sent
+            )));
         }
     }
 
