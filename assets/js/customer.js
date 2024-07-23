@@ -6,6 +6,9 @@ jQuery(function($) {
     $('#rui-project-submission-form').on('submit', function(e) {
         e.preventDefault();
 
+        var $submitButton = $(this).find('button[type="submit"]');
+        $submitButton.prop('disabled', true).text('Submitting...');
+
         var data = {
             action: 'rui_submit_project',
             security: $('input[name="security"]').val(),
