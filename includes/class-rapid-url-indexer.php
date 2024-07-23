@@ -1017,6 +1017,7 @@ class Rapid_URL_Indexer {
     }
 
     private static function send_status_change_email($project, $status, $processed_links, $indexed_links) {
+        // Only send email if notifications are enabled for this project
         if ($project->notify) {
             $user_info = get_userdata($project->user_id);
             $subject = sprintf(__('Rapid URL Indexer: Project "%s" Status Update', 'rapid-url-indexer'), $project->project_name);
@@ -1062,6 +1063,12 @@ class Rapid_URL_Indexer {
                 'status' => $status,
                 'recipient' => $user_info->user_email,
                 'sent' => $sent
+            )));
+        } else {
+            // Log that email was not sent due to notifications being disabled
+            self::log_action($project->id, 'Email Notification Skipped', json_encode(array(
+                'status' => $status,
+                'reason' => 'Notifications disabled for this project'
             )));
         }
     }
