@@ -11,24 +11,6 @@ class Rapid_URL_Indexer {
         add_action('woocommerce_process_product_meta', array(__CLASS__, 'save_credits_field'));
     }
 
-    private static function send_out_of_credits_email($user) {
-        $to = $user->user_email;
-        $subject = __('Out of Credits - Rapid URL Indexer', 'rapid-url-indexer');
-        $message = sprintf(
-            __('Hello %s,
-
-You are out of credits for URL indexing. To continue submitting URLs, please purchase more credits.
-
-Click here to buy credits: %s
-
-Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
-            $user->display_name,
-            wc_get_endpoint_url('rui-buy-credits', '', wc_get_page_permalink('myaccount'))
-        );
-        $headers = array('Content-Type: text/html; charset=UTF-8');
-        
-        wp_mail($to, $subject, $message, $headers);
-    }
 
     public static function late_init() {
         self::load_dependencies();
