@@ -465,6 +465,7 @@ class Rapid_URL_Indexer {
                 if ($hours_since_creation >= 96 && $hours_since_creation < 97 && !$project->initial_report_sent) {
                     self::send_status_change_email($project, 'initial_report', $processed_links, $indexed_links);
                     $wpdb->update($table_name, array('initial_report_sent' => 1), array('id' => $project->id));
+                    self::log_cron_execution("Sent initial report email for project {$project->id}");
                 }
             } else {
                 self::log_cron_execution("Invalid API response for project {$project->id}: " . json_encode($response));
