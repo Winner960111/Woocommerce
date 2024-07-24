@@ -2,22 +2,12 @@
     <h1>Rapid URL Indexer - Projects</h1>
     <div class="tablenav top">
         <div class="alignleft actions">
-            <label for="rui-project-search">Search:</label>
-            <input type="search" id="rui-project-search" name="s" value="<?php echo esc_attr($search); ?>">
-            <input type="button" id="rui-project-search-submit" class="button" value="Search">
-        </div>
-        <div class="tablenav-pages">
-            <span class="displaying-num"><?php echo $total_projects; ?> items</span>
-            <span class="pagination-links">
-                <?php echo paginate_links(array(
-                    'base' => add_query_arg('paged', '%#%'),
-                    'format' => '',
-                    'prev_text' => __('&laquo;'),
-                    'next_text' => __('&raquo;'),
-                    'total' => ceil($total_projects / $projects_per_page),
-                    'current' => $paged
-                )); ?>
-            </span>
+            <form method="get">
+                <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>">
+                <label for="rui-project-search" class="screen-reader-text">Search Projects:</label>
+                <input type="search" id="rui-project-search" name="s" value="<?php echo esc_attr($search); ?>">
+                <input type="submit" id="rui-project-search-submit" class="button" value="Search Projects">
+            </form>
         </div>
     </div>
     

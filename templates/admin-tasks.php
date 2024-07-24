@@ -2,9 +2,12 @@
     <h1>Rapid URL Indexer - Tasks</h1>
     <div class="tablenav top">
         <div class="alignleft actions">
-            <label for="rui-task-search">Search:</label>
-            <input type="search" id="rui-task-search" name="s" value="<?php echo esc_attr($search); ?>">
-            <input type="button" id="rui-task-search-submit" class="button" value="Search">
+            <form method="get">
+                <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>">
+                <label for="rui-task-search" class="screen-reader-text">Search Tasks:</label>
+                <input type="search" id="rui-task-search" name="s" value="<?php echo esc_attr($search); ?>">
+                <input type="submit" id="rui-task-search-submit" class="button" value="Search Tasks">
+            </form>
         </div>
     </div>
     

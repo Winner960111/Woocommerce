@@ -3,22 +3,12 @@
     
     <div class="tablenav top">
         <div class="alignleft actions">
-            <label for="rui-log-search">Search:</label>
-            <input type="search" id="rui-log-search" name="s" value="">
-            <input type="button" id="rui-log-search-submit" class="button" value="Search">
-        </div>
-        <div class="tablenav-pages">
-            <span class="displaying-num"><?php echo $total_logs; ?> items</span>
-            <span class="pagination-links">
-                <?php echo paginate_links(array(
-                    'base' => add_query_arg('paged', '%#%'),
-                    'format' => '',
-                    'prev_text' => __('&laquo;'),
-                    'next_text' => __('&raquo;'),
-                    'total' => ceil($total_logs / $logs_per_page),
-                    'current' => $paged
-                )); ?>
-            </span>
+            <form method="get">
+                <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page']); ?>">
+                <label for="rui-log-search" class="screen-reader-text">Search Logs:</label>
+                <input type="search" id="rui-log-search" name="s" value="<?php echo esc_attr($search); ?>">
+                <input type="submit" id="rui-log-search-submit" class="button" value="Search Logs">
+            </form>
         </div>
     </div>
 
