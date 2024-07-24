@@ -67,7 +67,7 @@ function rui_schedule_cron_jobs() {
     $cron_jobs = array(
         'rui_cron_job' => 'twicedaily',
         'rui_check_abuse' => 'daily',
-        'rui_process_backlog' => 'hourly',
+        'rui_process_backlog' => 'six_hourly',
         'rui_purge_logs' => 'daily',
         'rui_purge_projects' => 'daily',
         'rui_daily_stats_update' => 'daily'
