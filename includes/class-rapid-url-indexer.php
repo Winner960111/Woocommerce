@@ -175,23 +175,6 @@ class Rapid_URL_Indexer {
         return $stats;
     }
 
-    private static function add_to_backlog($project_id, $urls, $notify) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
-
-        // Check if the request is already in the backlog
-        $exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE project_id = %d", $project_id));
-
-        if (!$exists) {
-            $wpdb->insert($table_name, array(
-                'project_id' => $project_id,
-                'urls' => json_encode($urls),
-                'notify' => $notify,
-                'retries' => 0,
-                'created_at' => current_time('mysql')
-            ));
-        }
-    }
 
     public static function check_abuse() {
         self::log_cron_execution('Check Abuse Started');
