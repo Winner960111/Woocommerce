@@ -46,6 +46,18 @@ function rui_flush_rewrite_rules() {
 
 add_action('admin_init', array('Rapid_URL_Indexer_Admin', 'register_settings'));
 
+// Add a function to manually reschedule the rui_process_backlog job
+function rui_manually_reschedule_process_backlog() {
+    $next_scheduled = wp_next_scheduled('rui_process_backlog');
+    if ($next_scheduled) {
+        wp_unschedule_event($next_scheduled, 'rui_process_backlog');
+    }
+    wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
+}
+
+// You can call this function from an admin action or run it manually
+// add_action('admin_init', 'rui_manually_reschedule_process_backlog');
+
 // Ensure cron jobs are scheduled on plugin activation
 // Add custom cron schedule
 add_filter('cron_schedules', 'rui_add_cron_interval');
