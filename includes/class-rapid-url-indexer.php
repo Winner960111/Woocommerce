@@ -21,7 +21,6 @@ class Rapid_URL_Indexer {
         $cron_jobs = array(
             'rui_cron_job' => 'twicedaily',
             'rui_check_abuse' => 'daily',
-            'rui_process_backlog' => 'six_hourly',
             'rui_purge_logs' => 'daily',
             'rui_purge_projects' => 'daily',
             'rui_daily_stats_update' => 'daily'
@@ -39,7 +38,6 @@ class Rapid_URL_Indexer {
         add_action('rui_purge_logs', array(__CLASS__, 'purge_logs'));
         add_action('rui_purge_projects', array(__CLASS__, 'purge_projects'));
         add_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
-        add_action('rui_process_backlog', array(__CLASS__, 'process_backlog'));
     }
 
     public static function purge_logs() {
@@ -177,109 +175,6 @@ class Rapid_URL_Indexer {
         return $stats;
     }
 
-    public static function process_backlog() {
-        global $wpdb;
-        $backlog_table = $wpdb->prefix . 'rapid_url_indexer_backlog';
-        $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
-
-        self::log_cron_execution('Process Backlog Started');
-        
-        // Log the number of pending projects
-        $pending_count = $wpdb->get_var("SELECT COUNT(*) FROM $projects_table WHERE status = 'pending'");
-        self::log_action(0, 'Pending Projects Count', "Number of pending projects: $pending_count");
-
-        // Process all projects, regardless of status
-        $entries = $wpdb->get_results("
-            SELECT 'project' as type, id, id as project_id, urls, notify, 0 as retries, created_at, user_id
-            FROM $projects_table
-            UNION ALL
-            SELECT 'backlog' as type, b.id, b.project_id, b.urls, b.notify, b.retries, b.created_at, p.user_id
-            FROM $backlog_table b 
-            JOIN $projects_table p ON b.project_id = p.id
-            WHERE b.retries < " . self::API_MAX_RETRIES
-        );
-
-        foreach ($entries as $entry) {
-            $project = $wpdb->get_row($wpdb->prepare("SELECT * FROM $projects_table WHERE id = %d", $entry->project_id));
-            
-            if (!empty($project->task_id)) {
-                // If the project has a task ID, update its status to 'submitted' if it's not already
-                if ($project->status !== 'submitted') {
-                    $wpdb->update($projects_table, array('status' => 'submitted'), array('id' => $project->id));
-                    self::log_action($project->id, 'Project Status Updated', 'Project has a task_id, status set to submitted');
-                }
-                
-                // Remove from backlog if it's there
-                if ($entry->type === 'backlog') {
-                    $wpdb->delete($backlog_table, array('id' => $entry->id));
-                    self::log_action($project->id, 'Removed from Backlog', 'Project has a task_id, removed from backlog');
-                }
-                
-                continue; // Skip to the next entry
-            }
-
-            // Check if user has enough credits
-            $urls = json_decode($project->urls, true);
-            $user_credits = Rapid_URL_Indexer_Customer::get_user_credits($entry->user_id);
-            if ($user_credits < count($urls)) {
-                // Mark project as failed
-                $wpdb->update($projects_table, array(
-                    'status' => 'failed',
-                    'updated_at' => current_time('mysql')
-                ), array('id' => $project->id));
-
-                self::log_action($project->id, 'Project Failed', 'Insufficient credits');
-                continue;
-            }
-
-            // If the project doesn't have a task ID, process it
-            $response = self::process_api_request($project->id, $urls, $project->notify, $entry->user_id);
-
-            if ($response['success']) {
-                if ($entry->type === 'backlog') {
-                    $wpdb->delete($backlog_table, array('id' => $entry->id));
-                    self::log_action($project->id, 'Backlog Entry Processed', json_encode($response));
-                }
-                $wpdb->update($projects_table, array('status' => 'submitted', 'updated_at' => current_time('mysql')), array('id' => $project->id));
-                self::log_action($project->id, 'Project Processed', json_encode($response));
-            } else {
-                if ($entry->type === 'backlog') {
-                    $wpdb->update($backlog_table, array('retries' => $entry->retries + 1), array('id' => $entry->id));
-                    self::log_action($project->id, 'Backlog Entry Retry', json_encode($response));
-                } else {
-                    // If processing fails for project, add to backlog if not already there
-                    $existing_backlog = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $backlog_table WHERE project_id = %d", $project->id));
-                    if (!$existing_backlog) {
-                        $wpdb->insert($backlog_table, array(
-                            'project_id' => $project->id,
-                            'urls' => $project->urls,
-                            'notify' => $project->notify,
-                            'retries' => 0,
-                            'created_at' => current_time('mysql')
-                        ));
-                        self::log_action($project->id, 'Project Added to Backlog', json_encode($response));
-                    }
-                }
-
-                // If the project is older than 12 hours and still failing, mark it as failed
-                if (strtotime($project->created_at) <= strtotime('-12 hours')) {
-                    $wpdb->update($projects_table, array(
-                        'status' => 'failed',
-                        'updated_at' => current_time('mysql')
-                    ), array('id' => $project->id));
-
-                    // Refund credits
-                    $total_urls = count(json_decode($project->urls, true));
-                    Rapid_URL_Indexer_Customer::update_user_credits($entry->user_id, $total_urls, 'system', $project->id);
-
-                    self::log_action($project->id, 'Submission Failed', 'Failed after 12 hours of retries');
-                }
-            }
-        }
-
-        self::log_cron_execution('Process Backlog Completed');
-        return true; // Return true to indicate successful completion
-    }
     private static function add_to_backlog($project_id, $urls, $notify) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_backlog';
@@ -858,11 +753,23 @@ class Rapid_URL_Indexer {
     private static function retry_failed_submissions() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending' AND created_at <= DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending' AND task_id IS NULL AND created_at <= DATE_SUB(NOW(), INTERVAL 1 HOUR)");
 
         foreach ($projects as $project) {
             $api_key = get_option('rui_speedyindex_api_key');
             $urls = json_decode($project->urls, true);
+            
+            // Check if user has enough credits
+            $user_credits = Rapid_URL_Indexer_Customer::get_user_credits($project->user_id);
+            if ($user_credits < count($urls)) {
+                $wpdb->update($table_name, array(
+                    'status' => 'failed',
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $project->id));
+                self::log_action($project->user_id, $project->id, 'Submission Failed', 'Insufficient credits');
+                continue;
+            }
+
             $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name, $project->user_id);
 
             if ($response && isset($response['task_id'])) {
@@ -872,21 +779,18 @@ class Rapid_URL_Indexer {
                     'updated_at' => current_time('mysql')
                 ), array('id' => $project->id));
 
-                // Deduct reserved credits
+                // Deduct credits
                 Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, -count($urls), 'system', $project->id);
 
                 // Log the successful submission
                 self::log_action($project->user_id, $project->id, 'Retry Submission', json_encode($response));
             } else {
-                // If still failing after 12 hours, mark as failed and unreserve credits
+                // If still failing after 12 hours, mark as failed
                 if (strtotime($project->created_at) <= strtotime('-12 hours')) {
                     $wpdb->update($table_name, array(
                         'status' => 'failed',
                         'updated_at' => current_time('mysql')
                     ), array('id' => $project->id));
-
-                    // Unreserve credits
-                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
 
                     // Log the failure
                     self::log_action($project->user_id, $project->id, 'Submission Failed', 'Failed after 12 hours of retries');
