@@ -6,7 +6,6 @@ class Rapid_URL_Indexer_Deactivator {
         $cron_hooks = [
             'rui_check_abuse',
             'rui_update_project_status',
-            'rui_process_backlog',
             'rui_purge_logs',
             'rui_purge_projects'  
         ];
