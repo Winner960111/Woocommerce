@@ -795,10 +795,10 @@ class Rapid_URL_Indexer {
     }
 
     public static function process_cron_jobs() {
-        self::log_cron_execution('Hourly Cron Job Started');
+        self::log_cron_execution('Twice Daily Cron Job Started');
 
         try {
-            // Update project status hourly
+            // Update project status
             self::log_cron_execution('Starting update_project_status');
             self::update_project_status();
             self::log_cron_execution('Finished update_project_status');
@@ -813,10 +813,10 @@ class Rapid_URL_Indexer {
             self::retry_failed_submissions();
             self::log_cron_execution('Finished retry_failed_submissions');
 
-            self::log_cron_execution('Hourly Cron Job Completed Successfully');
+            self::log_cron_execution('Twice Daily Cron Job Completed Successfully');
         } catch (Exception $e) {
-            self::log_cron_execution('Hourly Cron Job Failed: ' . $e->getMessage());
-            error_log('Rapid URL Indexer Hourly Cron Job Failed: ' . $e->getMessage());
+            self::log_cron_execution('Twice Daily Cron Job Failed: ' . $e->getMessage());
+            error_log('Rapid URL Indexer Twice Daily Cron Job Failed: ' . $e->getMessage());
         }
     }
 
