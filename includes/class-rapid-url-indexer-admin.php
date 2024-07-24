@@ -91,13 +91,15 @@ class Rapid_URL_Indexer_Admin {
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 
         $projects_per_page = 50;
-        $paged = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+        $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
         $offset = ($paged - 1) * $projects_per_page;
 
         $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
         $where = $search ? $wpdb->prepare(" WHERE project_name LIKE %s OR task_id LIKE %s OR users.user_email LIKE %s", '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%') : '';
 
-        $total_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name $where");
+        $total_projects = $wpdb->get_var("SELECT COUNT(*) FROM $table_name projects LEFT JOIN {$wpdb->users} users ON projects.user_id = users.ID $where");
+        $total_pages = ceil($total_projects / $projects_per_page);
+
         $projects = $wpdb->get_results("
             SELECT projects.*, users.user_email 
             FROM $table_name projects 
@@ -107,13 +109,37 @@ class Rapid_URL_Indexer_Admin {
             LIMIT $offset, $projects_per_page
         ");
 
+        $pagination = paginate_links(array(
+            'base' => add_query_arg('paged', '%#%'),
+            'format' => '',
+            'prev_text' => __('&laquo;'),
+            'next_text' => __('&raquo;'),
+            'total' => $total_pages,
+            'current' => $paged
+        ));
+
         include RUI_PLUGIN_DIR . 'templates/admin-projects.php';
     }
 
     public static function view_tasks_page() {
         $api_key = get_option('rui_speedyindex_api_key');
         $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
-        $tasks = Rapid_URL_Indexer_API::get_tasks($api_key, 0, $search);
+        $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+        $tasks_per_page = 50;
+
+        $tasks = Rapid_URL_Indexer_API::get_tasks($api_key, ($paged - 1) * $tasks_per_page, $search, $tasks_per_page);
+
+        $total_tasks = Rapid_URL_Indexer_API::get_total_tasks($api_key, $search);
+        $total_pages = ceil($total_tasks / $tasks_per_page);
+
+        $pagination = paginate_links(array(
+            'base' => add_query_arg('paged', '%#%'),
+            'format' => '',
+            'prev_text' => __('&laquo;'),
+            'next_text' => __('&raquo;'),
+            'total' => $total_pages,
+            'current' => $paged
+        ));
 
         include RUI_PLUGIN_DIR . 'templates/admin-tasks.php';
     }
@@ -279,13 +305,15 @@ class Rapid_URL_Indexer_Admin {
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
 
         $logs_per_page = 50;
-        $paged = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+        $paged = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
         $offset = ($paged - 1) * $logs_per_page;
 
         $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
         $where = $search ? $wpdb->prepare(" WHERE action LIKE %s OR details LIKE %s OR users.user_email LIKE %s", '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%', '%' . $wpdb->esc_like($search) . '%') : '';
 
-        $total_logs = $wpdb->get_var("SELECT COUNT(*) FROM $table_name $where");
+        $total_logs = $wpdb->get_var("SELECT COUNT(*) FROM $table_name logs LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID $where");
+        $total_pages = ceil($total_logs / $logs_per_page);
+
         $logs = $wpdb->get_results("
             SELECT logs.*, users.user_email, projects.id as project_id, projects.user_id as project_user_id
             FROM $table_name logs 
@@ -307,6 +335,15 @@ class Rapid_URL_Indexer_Admin {
                 }
             }
         }
+
+        $pagination = paginate_links(array(
+            'base' => add_query_arg('paged', '%#%'),
+            'format' => '',
+            'prev_text' => __('&laquo;'),
+            'next_text' => __('&raquo;'),
+            'total' => $total_pages,
+            'current' => $paged
+        ));
 
         include RUI_PLUGIN_DIR . 'templates/admin-logs.php';
     }

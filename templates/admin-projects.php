@@ -51,4 +51,12 @@
     <?php else: ?>
         <p>No projects found.</p>
     <?php endif; ?>
+
+    <?php if ($pagination): ?>
+        <div class="tablenav bottom">
+            <div class="tablenav-pages">
+                <?php echo $pagination; ?>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
