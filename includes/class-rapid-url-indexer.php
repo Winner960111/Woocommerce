@@ -771,15 +771,15 @@ class Rapid_URL_Indexer {
                 // Log the retry attempt
                 self::log_action($project->id, 'Retry Submission Failed', json_encode($response));
 
-                // If still failing after 12 hours, mark as failed
-                if (strtotime($project->created_at) <= strtotime('-12 hours')) {
+                // If still failing after 24 hours, mark as failed
+                if (strtotime($project->created_at) <= strtotime('-24 hours')) {
                     $wpdb->update($table_name, array(
                         'status' => 'failed',
                         'updated_at' => current_time('mysql')
                     ), array('id' => $project->id));
 
                     // Log the final failure
-                    self::log_action($project->id, 'Submission Failed', 'Failed after 12 hours of retries');
+                    self::log_action($project->id, 'Submission Failed', 'Failed after 24 hours of retries');
 
                     // Refund credits to the user
                     Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
