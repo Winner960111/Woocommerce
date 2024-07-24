@@ -62,7 +62,7 @@ function rui_add_cron_interval($schedules) {
 }
 
 register_activation_hook(__FILE__, 'rui_schedule_cron_jobs');
-add_action('plugins_loaded', 'rui_schedule_cron_jobs');
+
 function rui_schedule_cron_jobs() {
     $cron_jobs = array(
         'rui_cron_job' => 'twicedaily',
@@ -74,11 +74,22 @@ function rui_schedule_cron_jobs() {
     );
 
     foreach ($cron_jobs as $job => $recurrence) {
-        $timestamp = wp_next_scheduled($job);
-        if ($timestamp) {
-            wp_unschedule_event($timestamp, $job);
+        if (!wp_next_scheduled($job)) {
+            wp_schedule_event(time(), $recurrence, $job);
         }
-        wp_schedule_event(time(), $recurrence, $job);
+    }
+}
+
+// Reschedule cron jobs after plugin update
+add_action('upgrader_process_complete', 'rui_reschedule_cron_jobs', 10, 2);
+
+function rui_reschedule_cron_jobs($upgrader_object, $options) {
+    if ($options['action'] == 'update' && $options['type'] == 'plugin' && isset($options['plugins'])) {
+        foreach($options['plugins'] as $plugin) {
+            if ($plugin == plugin_basename(__FILE__)) {
+                rui_schedule_cron_jobs();
+            }
+        }
     }
 }
 
