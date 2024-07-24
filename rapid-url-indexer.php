@@ -54,6 +54,10 @@ function rui_add_cron_interval($schedules) {
         'interval' => 6 * HOUR_IN_SECONDS,
         'display'  => esc_html__('Every 6 hours'),
     );
+    $schedules['twicedaily'] = array(
+        'interval' => 12 * HOUR_IN_SECONDS,
+        'display'  => esc_html__('Twice Daily'),
+    );
     return $schedules;
 }
 
