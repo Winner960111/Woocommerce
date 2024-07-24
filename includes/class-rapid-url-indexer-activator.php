@@ -77,23 +77,7 @@ class Rapid_URL_Indexer_Activator {
         // Check and add missing columns
         self::check_and_add_missing_columns();
 
-        // Schedule cron jobs
-        $cron_jobs = array(
-            'rui_cron_job' => 'twicedaily',
-            'rui_check_abuse' => 'daily',
-            'rui_process_backlog' => 'hourly',
-            'rui_purge_logs' => 'daily',
-            'rui_purge_projects' => 'daily',
-            'rui_daily_stats_update' => 'daily'
-        );
-
-        foreach ($cron_jobs as $job => $recurrence) {
-            $timestamp = wp_next_scheduled($job);
-            if ($timestamp) {
-                wp_unschedule_event($timestamp, $job);
-            }
-            wp_schedule_event(time(), $recurrence, $job);
-        }
+        // Cron jobs are now scheduled in the main plugin file
     }
     private static function check_and_add_missing_columns() {
         global $wpdb;
