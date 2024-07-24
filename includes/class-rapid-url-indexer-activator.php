@@ -88,9 +88,11 @@ class Rapid_URL_Indexer_Activator {
         );
 
         foreach ($cron_jobs as $job => $recurrence) {
-            if (!wp_next_scheduled($job)) {
-                wp_schedule_event(time(), $recurrence, $job);
+            $timestamp = wp_next_scheduled($job);
+            if ($timestamp) {
+                wp_unschedule_event($timestamp, $job);
             }
+            wp_schedule_event(time(), $recurrence, $job);
         }
     }
     private static function check_and_add_missing_columns() {

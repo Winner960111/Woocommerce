@@ -62,9 +62,23 @@ function rui_add_cron_interval($schedules) {
 }
 
 register_activation_hook(__FILE__, 'rui_schedule_cron_jobs');
+add_action('plugins_loaded', 'rui_schedule_cron_jobs');
 function rui_schedule_cron_jobs() {
-    if (!wp_next_scheduled('rui_process_backlog')) {
-        wp_schedule_event(time(), 'six_hourly', 'rui_process_backlog');
+    $cron_jobs = array(
+        'rui_cron_job' => 'twicedaily',
+        'rui_check_abuse' => 'daily',
+        'rui_process_backlog' => 'hourly',
+        'rui_purge_logs' => 'daily',
+        'rui_purge_projects' => 'daily',
+        'rui_daily_stats_update' => 'daily'
+    );
+
+    foreach ($cron_jobs as $job => $recurrence) {
+        $timestamp = wp_next_scheduled($job);
+        if ($timestamp) {
+            wp_unschedule_event($timestamp, $job);
+        }
+        wp_schedule_event(time(), $recurrence, $job);
     }
 }
 
