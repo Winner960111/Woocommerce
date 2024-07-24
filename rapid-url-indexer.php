@@ -93,8 +93,4 @@ function rui_reschedule_cron_jobs($upgrader_object, $options) {
     }
 }
 
-// Hook the process_backlog method to the rui_process_backlog action
-add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
-
-// Hook the process_backlog method to the rui_process_backlog action
-add_action('rui_process_backlog', array('Rapid_URL_Indexer', 'process_backlog'));
+// This section is no longer needed as it's handled in initialize_cron_jobs()

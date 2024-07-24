@@ -18,21 +18,19 @@ class Rapid_URL_Indexer {
     }
 
     private static function initialize_cron_jobs() {
-        // Schedule cron jobs if they're not already scheduled
-        if (!wp_next_scheduled('rui_cron_job')) {
-            wp_schedule_event(time(), 'hourly', 'rui_cron_job');
-        }
-        if (!wp_next_scheduled('rui_check_abuse')) {
-            wp_schedule_event(time(), 'daily', 'rui_check_abuse');
-        }
-        if (!wp_next_scheduled('rui_purge_logs')) {
-            wp_schedule_event(time(), 'daily', 'rui_purge_logs');
-        }
-        if (!wp_next_scheduled('rui_purge_projects')) {
-            wp_schedule_event(time(), 'daily', 'rui_purge_projects');
-        }
-        if (!wp_next_scheduled('rui_daily_stats_update')) {
-            wp_schedule_event(time(), 'daily', 'rui_daily_stats_update');
+        $cron_jobs = array(
+            'rui_cron_job' => 'twicedaily',
+            'rui_check_abuse' => 'daily',
+            'rui_process_backlog' => 'six_hourly',
+            'rui_purge_logs' => 'daily',
+            'rui_purge_projects' => 'daily',
+            'rui_daily_stats_update' => 'daily'
+        );
+
+        foreach ($cron_jobs as $job => $recurrence) {
+            if (!wp_next_scheduled($job)) {
+                wp_schedule_event(time(), $recurrence, $job);
+            }
         }
 
         // Add actions for cron jobs
@@ -41,6 +39,7 @@ class Rapid_URL_Indexer {
         add_action('rui_purge_logs', array(__CLASS__, 'purge_logs'));
         add_action('rui_purge_projects', array(__CLASS__, 'purge_projects'));
         add_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
+        add_action('rui_process_backlog', array(__CLASS__, 'process_backlog'));
     }
 
     public static function purge_logs() {
