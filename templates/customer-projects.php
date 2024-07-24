@@ -63,7 +63,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                     <td>
                         <?php echo esc_html($project->status); ?>
                         <?php if ($project->status == 'refunded'): ?>
-                            (<?php echo esc_html($project->refunded_credits); ?> credits refunded)
+                            (<?php echo esc_html($project->refunded_credits); ?> credits)
                         <?php endif; ?>
                     </td>
                     <td>
