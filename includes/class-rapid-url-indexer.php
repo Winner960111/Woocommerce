@@ -749,7 +749,7 @@ class Rapid_URL_Indexer {
                     'status' => 'failed',
                     'updated_at' => current_time('mysql')
                 ), array('id' => $project->id));
-                self::log_action($project->user_id, $project->id, 'Submission Failed', 'Insufficient credits');
+                self::log_action($project->id, 'Submission Failed', 'Insufficient credits');
                 continue;
             }
 
@@ -766,8 +766,11 @@ class Rapid_URL_Indexer {
                 Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, -count($urls), 'system', $project->id);
 
                 // Log the successful submission
-                self::log_action($project->user_id, $project->id, 'Retry Submission', json_encode($response));
+                self::log_action($project->id, 'Retry Submission Successful', json_encode($response));
             } else {
+                // Log the retry attempt
+                self::log_action($project->id, 'Retry Submission Failed', json_encode($response));
+
                 // If still failing after 12 hours, mark as failed
                 if (strtotime($project->created_at) <= strtotime('-12 hours')) {
                     $wpdb->update($table_name, array(
@@ -775,8 +778,12 @@ class Rapid_URL_Indexer {
                         'updated_at' => current_time('mysql')
                     ), array('id' => $project->id));
 
-                    // Log the failure
-                    self::log_action($project->user_id, $project->id, 'Submission Failed', 'Failed after 12 hours of retries');
+                    // Log the final failure
+                    self::log_action($project->id, 'Submission Failed', 'Failed after 12 hours of retries');
+
+                    // Refund credits to the user
+                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
+                    self::log_action($project->id, 'Credits Refunded', 'Refunded ' . count($urls) . ' credits due to submission failure');
                 }
             }
         }
