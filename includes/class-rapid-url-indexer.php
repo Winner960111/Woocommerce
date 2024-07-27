@@ -907,6 +907,12 @@ class Rapid_URL_Indexer {
     }
 
     private static function send_status_change_email($project, $status, $processed_links, $indexed_links) {
+        // Log the notification attempt
+        self::log_action($project->id, 'Email Notification Attempt', json_encode(array(
+            'status' => $status,
+            'notify_flag' => $project->notify
+        )));
+
         // Only send email if notifications are enabled for this project
         if ($project->notify) {
             $user_info = get_userdata($project->user_id);
