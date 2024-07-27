@@ -301,6 +301,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 'urls' => json_encode($urls),
                 'status' => 'pending',
                 'submitted_links' => count($urls),
+                'notify' => $notify ? 1 : 0,  // Ensure notify is stored as 1 or 0
                 'created_at' => current_time('mysql')
             ));
 
