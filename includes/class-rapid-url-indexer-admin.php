@@ -1,4 +1,6 @@
 <?php
+require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer.php';
+
 class Rapid_URL_Indexer_Admin {
     public static function init() {
         add_action('admin_menu', array(__CLASS__, 'admin_menu'));
@@ -269,7 +271,13 @@ class Rapid_URL_Indexer_Admin {
             update_option('rui_delete_data_on_uninstall', isset($_POST['rui_delete_data_on_uninstall']) ? 1 : 0);
             update_option('rui_log_age_limit', intval($_POST['rui_log_age_limit']));
             update_option('rui_project_age_limit', intval($_POST['rui_project_age_limit']));
-            echo '<div class="notice notice-success"><p>Settings saved.</p></div>';
+            update_option('rui_min_urls_for_abuse', intval($_POST['rui_min_urls_for_abuse']));
+            update_option('rui_avg_refund_rate_for_abuse', floatval($_POST['rui_avg_refund_rate_for_abuse']));
+            
+            // Trigger abuse check immediately after updating settings
+            Rapid_URL_Indexer::check_abuse();
+            
+            echo '<div class="notice notice-success"><p>Settings saved and abuse check triggered.</p></div>';
         }
 
         include RUI_PLUGIN_DIR . 'templates/admin-settings.php';
