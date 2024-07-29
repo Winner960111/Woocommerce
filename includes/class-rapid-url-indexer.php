@@ -182,8 +182,8 @@ class Rapid_URL_Indexer {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 
-        $min_urls = get_option('rui_min_urls_for_abuse', 1000);
-        $avg_refund_rate = get_option('rui_avg_refund_rate_for_abuse', 0.7);
+        $min_urls = intval(get_option('rui_min_urls_for_abuse', 1000));
+        $avg_refund_rate = floatval(get_option('rui_avg_refund_rate_for_abuse', 0.7));
 
         // Get users with more than the minimum number of URLs where the average refund rate is above the threshold
         $results = $wpdb->get_results($wpdb->prepare("
@@ -198,6 +198,9 @@ class Rapid_URL_Indexer {
             GROUP BY user_id
             HAVING total_urls >= %d AND refund_rate >= %f
         ", $min_urls, $avg_refund_rate));
+
+        // Log the values being used for debugging
+        error_log("Abuse check parameters - Min URLs: $min_urls, Avg Refund Rate: $avg_refund_rate");
 
         if ($results) {
             $admin_email = get_option('admin_email');
