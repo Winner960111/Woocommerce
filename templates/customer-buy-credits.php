@@ -24,18 +24,15 @@ $products = wc_get_products(array(
             }
         ?>
             <li>
-                <a href="<?php echo esc_url('?add-to-cart=' . $product->get_id()); ?>"><?php echo esc_html($product->get_name()); ?></a>
-                <span class="rui-credits-amount">
-                    <i>(<?php echo esc_html($credits_amount); ?> credits)</i>
-                </span>
+                <a href="<?php echo esc_url('?add-to-cart=' . $product->get_id()); ?>"><?php echo esc_html($product->get_name()); ?></a> - 
                 <?php if ($sale_price): ?>
                     <span class="rui-savings">
-                        <strong><?php echo sprintf('%.1f%% off', $savings_percentage); ?></strong>
-                        <span class="rui-savings-amount">(Save $<?php echo number_format($savings_amount, 2); ?>)</span>
-                    </span>
+                        <strong><?php echo sprintf('%d%% Off', round($savings_percentage)); ?></strong>
+                        (Save $<?php echo number_format($savings_amount, 2); ?>)
+                    </span> - 
                 <?php endif; ?>
                 <span class="rui-cost-per-credit">
-                    $<?php echo number_format($cost_per_credit, 3); ?> per credit
+                    $<?php echo number_format($cost_per_credit, 3); ?> per Credit
                 </span>
             </li>
         <?php endforeach; ?>
