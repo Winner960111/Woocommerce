@@ -34,10 +34,16 @@
     color: var(--wp--preset--color--inputtext);
 }
 
+.rui-table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+    margin-top: 20px;
+}
+
 .rui-projects table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    min-width: 600px; /* Ensure table doesn't shrink too much */
 }
 
 .rui-projects table th,
@@ -57,6 +63,19 @@
     border-radius: 4px;
     text-decoration: none;
     cursor: pointer;
+    white-space: nowrap;
+}
+
+@media screen and (max-width: 600px) {
+    .rui-projects table th,
+    .rui-projects table td {
+        padding: 8px 5px;
+    }
+    
+    .rui-projects table th:nth-child(4),
+    .rui-projects table td:nth-child(4) {
+        display: none; /* Hide 'Created at' column on very small screens */
+    }
 }
 
 .rui-api-key-display {

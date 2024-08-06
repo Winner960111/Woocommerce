@@ -56,17 +56,18 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             ?>
         </div>
     </div>
-    <table>
-        <thead>
-            <tr>
-                <th>Project</th>
-                <th>Status</th>
-                <th>Indexed</th>
-                <th>Created at</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="rui-table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Indexed</th>
+                    <th>Created at</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
             <?php foreach ($projects as $project): ?>
                 <tr>
                     <td><?php echo esc_html($project->project_name); ?></td>
@@ -117,8 +118,9 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
                     </td>
                 </tr>
             <?php endforeach; ?>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 
 </tbody>
     </table>
