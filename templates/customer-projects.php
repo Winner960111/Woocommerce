@@ -39,6 +39,7 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <div class="rui-credits-display">
     <?php echo Rapid_URL_Indexer_Customer::credits_display(false); ?>
     </div>
+    <h2>Project List</h2>
     <div class="tablenav">
         <div class="tablenav-pages">
             <?php
@@ -65,7 +66,6 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
             ?>
         </div>
     </div>
-    <h2>Project List</h2>
     <table>
         <thead>
             <tr>
