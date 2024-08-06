@@ -14,7 +14,7 @@ $offset = ($paged - 1) * $projects_per_page;
 
 // Fetch user projects with pagination
 $total_projects = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE user_id = %d", $user_id));
-$projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC LIMIT %d OFFSET %d", $user_id, $projects_per_page, $offset));
+$projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC LIMIT %d OFFSET %d", $user_id, $projects_per_page, ($paged - 1) * $projects_per_page));
 ?>
 <div class="rui-projects">
     <div class="rui-project-submission">
