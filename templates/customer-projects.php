@@ -40,32 +40,6 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <?php echo Rapid_URL_Indexer_Customer::credits_display(false); ?>
     </div>
     <h2>Project List</h2>
-    <div class="tablenav">
-        <div class="tablenav-pages">
-            <?php
-            $total_pages = ceil($total_projects / $projects_per_page);
-            $paginate_links = paginate_links(array(
-                'base' => home_url('/my-account/rui-projects/page/%#%/'),
-                'format' => '',
-                'current' => $paged,
-                'total' => $total_pages,
-                'prev_text' => __('&laquo;'),
-                'next_text' => __('&raquo;'),
-                'type' => 'array'
-            ));
-
-            if ($paginate_links) {
-                echo '<nav class="pagination">';
-                echo '<ul class="page-numbers">';
-                foreach ($paginate_links as $link) {
-                    echo '<li>' . $link . '</li>';
-                }
-                echo '</ul>';
-                echo '</nav>';
-            }
-            ?>
-        </div>
-    </div>
     <table>
         <thead>
             <tr>
