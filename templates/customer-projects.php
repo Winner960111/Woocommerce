@@ -24,7 +24,9 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         // Clear form fields after page load (which happens after form submission)
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('project_name').value = '';
+            document.getElementById('project_name').placeholder = 'My Project';
             document.getElementById('urls').value = '';
+            document.getElementById('urls').placeholder = 'https://example.com/some-page/\nhttps://example.org/another-page/\n...';
             document.getElementById('notify').checked = false;
         });
     </script>
