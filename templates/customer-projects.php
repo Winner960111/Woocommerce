@@ -9,12 +9,11 @@ $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
 
 // Pagination settings
 $projects_per_page = 50;
-$paged = isset($_GET['paged']) ? intval($_GET['paged']) : 1;
+$paged = get_query_var('paged') ? absint(get_query_var('paged')) : 1;
 $offset = ($paged - 1) * $projects_per_page;
 
 // Fetch user projects with pagination
 $total_projects = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE user_id = %d", $user_id));
-$offset = ($paged - 1) * $projects_per_page;
 $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d ORDER BY created_at DESC LIMIT %d OFFSET %d", $user_id, $projects_per_page, $offset));
 ?>
 <div class="rui-projects">
@@ -38,14 +37,25 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
         <div class="tablenav-pages">
             <?php
             $total_pages = ceil($total_projects / $projects_per_page);
-            echo paginate_links(array(
-                'base' => add_query_arg('paged', '%#%'),
-                'format' => '',
+            $paginate_links = paginate_links(array(
+                'base' => str_replace(999999999, '%#%', esc_url(get_pagenum_link(999999999))),
+                'format' => '?paged=%#%',
+                'current' => max(1, $paged),
+                'total' => $total_pages,
                 'prev_text' => __('&laquo;'),
                 'next_text' => __('&raquo;'),
-                'total' => $total_pages,
-                'current' => $paged
+                'type' => 'array'
             ));
+
+            if ($paginate_links) {
+                echo '<nav class="pagination">';
+                echo '<ul class="page-numbers">';
+                foreach ($paginate_links as $link) {
+                    echo '<li>' . $link . '</li>';
+                }
+                echo '</ul>';
+                echo '</nav>';
+            }
             ?>
         </div>
     </div>
