@@ -36,12 +36,13 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <div class="tablenav">
         <div class="tablenav-pages">
             <?php
+            $total_pages = ceil($total_projects / $projects_per_page);
             echo paginate_links(array(
                 'base' => add_query_arg('paged', '%#%'),
                 'format' => '',
                 'prev_text' => __('&laquo;'),
                 'next_text' => __('&raquo;'),
-                'total' => ceil($total_projects / $projects_per_page),
+                'total' => $total_pages,
                 'current' => $paged
             ));
             ?>
