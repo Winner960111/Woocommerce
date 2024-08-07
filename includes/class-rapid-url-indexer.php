@@ -290,9 +290,10 @@ class Rapid_URL_Indexer {
                 if ($old_status === 'submitted' && $days_since_creation >= 13) {
                     $new_status = 'completed';
                     self::log_cron_execution("Project {$project->id} marked as completed after 13 days");
+                    self::send_status_change_email($project, $new_status, $processed_links, $indexed_links);
                 }
                 if ($old_status === 'completed' && $days_since_creation >= 14 && !$project->auto_refund_processed) {
-                    $refunded_credits =  $submitted_links - $indexed_links;
+                    $refunded_credits = $submitted_links - $indexed_links;
                     if ($refunded_credits > 0) {
                         $new_status = 'refunded';
                         Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refunded_credits);
@@ -301,6 +302,7 @@ class Rapid_URL_Indexer {
                             'refunded_credits' => $refunded_credits
                         ), array('id' => $project->id));
                         self::log_cron_execution("Project {$project->id} marked as refunded after 14 days");
+                        self::send_status_change_email($project, $new_status, $processed_links, $indexed_links);
                     }
                 }
 
