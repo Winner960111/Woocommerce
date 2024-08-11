@@ -554,9 +554,10 @@ class Rapid_URL_Indexer {
                 $api_key = get_option('speedyindex_api_key');
                 $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project_name . ' (CID' . $user_id . ')');
 
+                global $wpdb;
+                $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+                
                 if ($response && isset($response['task_id'])) {
-                    global $wpdb;
-                    $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
                     $wpdb->update($table_name, array(
                         'task_id' => $response['task_id'],
                         'status' => 'submitted',
@@ -568,7 +569,20 @@ class Rapid_URL_Indexer {
 
                     return new WP_REST_Response(array('message' => 'Project created and submitted', 'project_id' => $project_id), 200);
                 } else {
-                    return new WP_REST_Response(array('message' => 'Project created but submission failed'), 500);
+                    // Log the API submission failure
+                    error_log("Failed to submit project $project_id to SpeedyIndex API");
+                    
+                    // Update project status to 'pending' instead of 'submitted'
+                    $wpdb->update($table_name, array(
+                        'status' => 'pending',
+                        'submitted_links' => count($urls)
+                    ), array('id' => $project_id));
+
+                    // Deduct credits (we still create the project, so we deduct credits)
+                    Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'system', $project_id);
+
+                    // Return a 200 status because the project was created in our database
+                    return new WP_REST_Response(array('message' => 'Project created but API submission pending. It will be retried automatically.', 'project_id' => $project_id), 200);
                 }
             } else {
                 return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
