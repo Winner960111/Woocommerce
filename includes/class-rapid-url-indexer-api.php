@@ -1,8 +1,7 @@
 <?php
 class Rapid_URL_Indexer_API {
     const API_BASE_URL = 'https://api.speedyindex.com';
-    const API_RATE_LIMIT = 100; // Maximum number of API requests per minute
-    const API_RETRY_DELAY = 60; // Delay in seconds before retrying a failed API request 
+    const API_RETRY_DELAY = 5; // Delay in seconds before retrying a failed API request 
     const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
 
     public static function get_account_balance($api_key) {
@@ -208,27 +207,6 @@ class Rapid_URL_Indexer_API {
         $retries = 0;
         
         while ($retries < self::API_MAX_RETRIES) {
-            // Implement rate limiting
-            static $request_count = 0;
-            static $minute_start = 0;
-            
-            $current_time = time();
-            if ($minute_start === 0 || $current_time - $minute_start >= 60) {
-                $minute_start = $current_time;
-                $request_count = 0;
-            }
-            
-            if ($request_count >= self::API_RATE_LIMIT) {
-                $sleep_time = 60 - ($current_time - $minute_start);
-                if ($sleep_time > 0) {
-                    sleep($sleep_time);
-                }
-                $minute_start = time();
-                $request_count = 0;
-            }
-            
-            $request_count++;
-
             // Retrieve the API key from the settings
             if (empty($api_key)) {
                 $api_key = get_option('rui_speedyindex_api_key');
@@ -242,7 +220,8 @@ class Rapid_URL_Indexer_API {
             $args = array(
                 'headers' => array(
                     'Authorization' => $api_key
-                )
+                ),
+                'timeout' => 30 // Set a 30-second timeout
             );
 
             if ($body !== null) {
@@ -261,7 +240,7 @@ class Rapid_URL_Indexer_API {
                     return false;
             }
 
-            if (is_wp_error($response)) {
+            if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
                 $retries++;
                 if ($retries < self::API_MAX_RETRIES) {
                     sleep(self::API_RETRY_DELAY);
@@ -269,20 +248,7 @@ class Rapid_URL_Indexer_API {
                     return false;
                 }
             } else {
-                $response_code = wp_remote_retrieve_response_code($response);
-                
-                if ($response_code === 429) {
-                    // Rate limit exceeded
-                    $retry_after = wp_remote_retrieve_header($response, 'retry-after');
-                    if ($retry_after) {
-                        sleep($retry_after);
-                    } else {
-                        sleep(self::API_RETRY_DELAY);
-                    }
-                    $retries++;
-                } else {
-                    return $response;
-                }
+                return $response;
             }
         }
 
