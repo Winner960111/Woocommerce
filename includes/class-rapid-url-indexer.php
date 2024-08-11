@@ -852,7 +852,7 @@ class Rapid_URL_Indexer {
                 // Notify user if required
                 if ($notify) {
                     $user_info = get_userdata($user_id);
-                    $subject = sprintf(__('Rapid URL Indexer: Project "%s" Has Been Submitted', 'rapid-url-indexer'), $project->project_name);
+                    $subject = sprintf(__('Project "%s" Has Been Submitted', 'rapid-url-indexer'), $project->project_name);
                     $message = sprintf(__('Your Rapid URL Indexer project "%s" has been submitted and is being processed.', 'rapid-url-indexer'), $project->project_name);
                     wp_mail($user_info->user_email, $subject, $message);
 
@@ -909,7 +909,7 @@ class Rapid_URL_Indexer {
         // Only send email if notifications are enabled for this project
         if ($project->notify) {
             $user_info = get_userdata($project->user_id);
-            $subject = sprintf(__('Rapid URL Indexer: Project "%s" Status Update', 'rapid-url-indexer'), $project->project_name);
+            $subject = sprintf(__('Project "%s" Status Update', 'rapid-url-indexer'), $project->project_name);
             $first_name = trim(explode(' ', $user_info->display_name)[0]);
             $message = sprintf(__('Hey %s,', 'rapid-url-indexer'), $first_name) . "\n\n";
             $message .= sprintf(__('Your Rapid URL Indexer project "%s" has been updated:', 'rapid-url-indexer'), $project->project_name) . "\n\n";
