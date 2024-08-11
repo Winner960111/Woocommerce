@@ -582,7 +582,7 @@ class Rapid_URL_Indexer {
                     Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'system', $project_id);
 
                     // Return a 200 status because the project was created in our database
-                    return new WP_REST_Response(array('message' => 'Project created but API submission pending. It will be retried automatically.', 'project_id' => $project_id), 200);
+                    return new WP_REST_Response(array('message' => 'Project created but processing pending. It will be retried automatically.', 'project_id' => $project_id), 200);
                 }
             } else {
                 return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
