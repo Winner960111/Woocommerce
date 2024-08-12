@@ -143,17 +143,12 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
 
         $credits_to_add = 0;
-        $has_non_virtual = false;
         foreach ($order->get_items() as $item) {
-            $product = $item->get_product();
             $product_id = $item->get_product_id();
             $credits = get_post_meta($product_id, '_credits_amount', true);
-            if ($credits && $product->is_virtual()) {
+            if ($credits) {
                 $quantity = $item->get_quantity();
                 $credits_to_add += $credits * $quantity;
-            }
-            if (!$product->is_virtual()) {
-                $has_non_virtual = true;
             }
         }
 
@@ -168,8 +163,8 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 $order->save();
                 error_log('Order ' . $order_id . ' marked as processed for credits');
 
-                // If the order only contains virtual products, complete it
-                if (!$has_non_virtual && $order->get_status() === 'processing') {
+                // Always complete the order as all products are virtual
+                if ($order->get_status() === 'processing') {
                     $order->update_status('completed', 'Order completed automatically by Rapid URL Indexer.');
                 }
             } catch (Exception $e) {
