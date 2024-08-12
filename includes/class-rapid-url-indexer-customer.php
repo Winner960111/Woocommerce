@@ -11,7 +11,7 @@ class Rapid_URL_Indexer_Customer {
         add_action('wp_ajax_rui_submit_project', array(__CLASS__, 'handle_ajax_project_submission'));
         add_action('wp_ajax_rui_get_project_stats', array(__CLASS__, 'handle_ajax_get_project_stats'));
         add_action('woocommerce_payment_complete', array(__CLASS__, 'handle_order_completed'));
-        add_action('woocommerce_order_status_completed', array(__CLASS__, 'handle_order_completed'));
+        add_action('woocommerce_order_status_changed', array(__CLASS__, 'handle_order_status_changed'), 10, 3);
         add_action('user_register', array(__CLASS__, 'generate_api_key'));
 
         // Add custom endpoints
@@ -130,6 +130,25 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             return;
         }
 
+        self::process_order_credits($order);
+    }
+
+    public static function handle_order_status_changed($order_id, $old_status, $new_status) {
+        if ($new_status === 'completed') {
+            $order = wc_get_order($order_id);
+            
+            // Check if the order has already been processed
+            if ($order->get_meta('_rui_credits_processed')) {
+                error_log('Order ' . $order_id . ' has already been processed for credits. Skipping.');
+                return;
+            }
+
+            self::process_order_credits($order);
+        }
+    }
+
+    private static function process_order_credits($order) {
+        $order_id = $order->get_id();
         $credits_to_add = 0;
         foreach ($order->get_items() as $item) {
             $product_id = $item->get_product_id();
@@ -150,12 +169,6 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 $order->update_meta_data('_rui_credits_processed', true);
                 $order->save();
                 error_log('Order ' . $order_id . ' marked as processed for credits');
-
-                // If the order contains only virtual products, mark it as completed
-                if (self::order_contains_only_virtual_products($order)) {
-                    $order->update_status('completed');
-                    error_log('Order ' . $order_id . ' status updated to completed');
-                }
             } catch (Exception $e) {
                 error_log('Failed to add credits for order ' . $order_id . ': ' . $e->getMessage());
                 wp_mail(
