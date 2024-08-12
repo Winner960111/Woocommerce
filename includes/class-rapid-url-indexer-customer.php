@@ -123,39 +123,39 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
 
     public static function handle_order_completed($order_id) {
         $order = wc_get_order($order_id);
-        
-        // Check if the order has already been processed
-        if ($order->get_meta('_rui_credits_processed')) {
-            error_log('Order ' . $order_id . ' has already been processed for credits. Skipping.');
-            return;
-        }
-
         self::process_order_credits($order);
     }
 
     public static function handle_order_status_changed($order_id, $old_status, $new_status) {
         if ($new_status === 'completed') {
             $order = wc_get_order($order_id);
-            
-            // Check if the order has already been processed
-            if ($order->get_meta('_rui_credits_processed')) {
-                error_log('Order ' . $order_id . ' has already been processed for credits. Skipping.');
-                return;
-            }
-
             self::process_order_credits($order);
         }
     }
 
     private static function process_order_credits($order) {
         $order_id = $order->get_id();
+
+        // Check if the order has already been processed
+        if ($order->get_meta('_rui_credits_processed')) {
+            error_log('Order ' . $order_id . ' has already been processed for credits. Skipping.');
+            return;
+        }
+
         $credits_to_add = 0;
         foreach ($order->get_items() as $item) {
+            $product = $item->get_product();
             $product_id = $item->get_product_id();
             $credits = get_post_meta($product_id, '_credits_amount', true);
             if ($credits) {
                 $quantity = $item->get_quantity();
                 $credits_to_add += $credits * $quantity;
+            }
+
+            // If the product is not virtual, we don't need to process it here
+            if (!$product->is_virtual()) {
+                error_log('Order ' . $order_id . ' contains non-virtual products. Credits will be added when the order is completed.');
+                return;
             }
         }
 
@@ -180,16 +180,6 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         } else {
             error_log('No credits to add for order ' . $order_id);
         }
-    }
-
-    private static function order_contains_only_virtual_products($order) {
-        foreach ($order->get_items() as $item) {
-            $product = $item->get_product();
-            if (!$product || !$product->is_virtual()) {
-                return false;
-            }
-        }
-        return true;
     }
     
     public static function handle_ajax_project_submission() {
