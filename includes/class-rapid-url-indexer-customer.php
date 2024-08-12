@@ -126,6 +126,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         
         // Check if the order has already been processed
         if ($order->get_meta('_rui_credits_processed')) {
+            error_log('Order ' . $order_id . ' has already been processed for credits. Skipping.');
             return;
         }
 
@@ -142,15 +143,18 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         if ($credits_to_add > 0) {
             $user_id = $order->get_user_id();
             try {
+                error_log('Attempting to add ' . $credits_to_add . ' credits for user ' . $user_id . ' on order ' . $order_id);
                 self::update_user_credits($user_id, $credits_to_add, 'purchase', $order_id);
                 
                 // Mark the order as processed
                 $order->update_meta_data('_rui_credits_processed', true);
                 $order->save();
+                error_log('Order ' . $order_id . ' marked as processed for credits');
 
                 // If the order contains only virtual products, mark it as completed
                 if (self::order_contains_only_virtual_products($order)) {
                     $order->update_status('completed');
+                    error_log('Order ' . $order_id . ' status updated to completed');
                 }
             } catch (Exception $e) {
                 error_log('Failed to add credits for order ' . $order_id . ': ' . $e->getMessage());
@@ -160,6 +164,8 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                     'Failed to add ' . $credits_to_add . ' credits for user ' . $user_id . ' on order ' . $order_id . '. Error: ' . $e->getMessage()
                 );
             }
+        } else {
+            error_log('No credits to add for order ' . $order_id);
         }
     }
 
