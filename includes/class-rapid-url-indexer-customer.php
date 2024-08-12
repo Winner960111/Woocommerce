@@ -311,6 +311,9 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
 
             $project_id = $wpdb->insert_id;
 
+            // Deduct credits here
+            self::update_user_credits($user_id, -$credits_needed, 'system', 0, $project_id);
+
             // Process API request immediately instead of scheduling
             $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify, $user_id);
             
