@@ -143,19 +143,17 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
 
         $credits_to_add = 0;
+        $has_non_virtual = false;
         foreach ($order->get_items() as $item) {
             $product = $item->get_product();
             $product_id = $item->get_product_id();
             $credits = get_post_meta($product_id, '_credits_amount', true);
-            if ($credits) {
+            if ($credits && $product->is_virtual()) {
                 $quantity = $item->get_quantity();
                 $credits_to_add += $credits * $quantity;
             }
-
-            // If the product is not virtual, we don't need to process it here
             if (!$product->is_virtual()) {
-                error_log('Order ' . $order_id . ' contains non-virtual products. Credits will be added when the order is completed.');
-                return;
+                $has_non_virtual = true;
             }
         }
 
@@ -165,10 +163,15 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 error_log('Attempting to add ' . $credits_to_add . ' credits for user ' . $user_id . ' on order ' . $order_id);
                 self::update_user_credits($user_id, $credits_to_add, 'purchase', $order_id);
                 
-                // Mark the order as processed
+                // Mark the order as processed for credits
                 $order->update_meta_data('_rui_credits_processed', true);
                 $order->save();
                 error_log('Order ' . $order_id . ' marked as processed for credits');
+
+                // If the order only contains virtual products, complete it
+                if (!$has_non_virtual && $order->get_status() === 'processing') {
+                    $order->update_status('completed', 'Order completed automatically by Rapid URL Indexer.');
+                }
             } catch (Exception $e) {
                 error_log('Failed to add credits for order ' . $order_id . ': ' . $e->getMessage());
                 wp_mail(
