@@ -18,7 +18,7 @@ class Rapid_URL_Indexer_Cron {
         $projects = $wpdb->get_results(
             "SELECT id FROM $projects_table 
             WHERE (status NOT IN ('completed', 'failed', 'refunded') 
-            OR (status IN ('completed', 'failed', 'refunded') AND updated_at > DATE_SUB(NOW(), INTERVAL 14 DAY)))"
+            OR (status IN ('completed', 'failed', 'refunded') AND created_at > DATE_SUB(NOW(), INTERVAL 14 DAY)))"
         );
 
         foreach ($projects as $project) {
