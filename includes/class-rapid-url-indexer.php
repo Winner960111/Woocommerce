@@ -85,11 +85,13 @@ class Rapid_URL_Indexer {
 
         // Get the project data
         $project = $wpdb->get_row($wpdb->prepare(
-            "SELECT task_id, submitted_links FROM $projects_table WHERE id = %d",
+            "SELECT task_id, submitted_links, status, updated_at FROM $projects_table WHERE id = %d",
             $project_id
         ));
 
-        if ($project && $project->task_id) {
+        if ($project && $project->task_id && 
+            (($project->status !== 'completed' && $project->status !== 'failed' && $project->status !== 'refunded') ||
+            (strtotime($project->updated_at) > strtotime('-14 days')))) {
             // Fetch the latest data from SpeedyIndex API
             $api_key = get_option('rui_speedyindex_api_key');
             $response = Rapid_URL_Indexer_API::get_task_status($api_key, $project->task_id);
