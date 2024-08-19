@@ -109,6 +109,18 @@ class Rapid_URL_Indexer_API {
                 'error_code' => $response->get_error_code(),
                 'error_data' => $response->get_error_data()
             );
+        } elseif (is_array($response) && isset($response['response'])) {
+            $error_details = array(
+                'response_code' => $response['response']['code'],
+                'response_message' => $response['response']['message'],
+                'response_body' => wp_remote_retrieve_body($response)
+            );
+        } else {
+            $error_details = array(
+                'error_message' => 'Unknown error occurred',
+                'response' => $response
+            );
+        }
         } else {
             $error_details = array(
                 'response_code' => wp_remote_retrieve_response_code($response),
