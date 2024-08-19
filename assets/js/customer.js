@@ -13,44 +13,51 @@ jQuery(function($) {
             action: 'rui_submit_project',
             security: $('input[name="security"]').val(),
             project_name: $('#project_name').val(),
-            urls: $('#urls').val(),
+            urls: $('#urls').val().trim(),
             notify: $('#notify').is(':checked') ? 1 : 0
         };
 
-        $.post(ajax_object.ajaxurl, data, function(response) {
-            if (response.success) {
-                // Store success message in sessionStorage
-                sessionStorage.setItem('rui_submission_message', response.data.message);
-                sessionStorage.setItem('rui_submission_status', 'success');
-                
-                // Fire Sendinblue custom event
-                if (typeof sendinblue !== 'undefined' && typeof sendinblue.track === 'function') {
-                    sendinblue.track(
-                        'project_submitted',
-                        { email: response.data.user_email },
-                        { id: 'project:' + response.data.project_id }
-                    );
+        if (data.urls === '') {
+            showError('Please enter at least one URL.');
+            $submitButton.prop('disabled', false).text('Submit');
+            return;
+        }
+
+        $.ajax({
+            url: ajax_object.ajaxurl,
+            type: 'POST',
+            data: data,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    sessionStorage.setItem('rui_submission_message', response.data.message);
+                    sessionStorage.setItem('rui_submission_status', 'success');
+                    
+                    if (typeof sendinblue !== 'undefined' && typeof sendinblue.track === 'function') {
+                        sendinblue.track(
+                            'project_submitted',
+                            { email: response.data.user_email },
+                            { id: 'project:' + response.data.project_id }
+                        );
+                    }
+                    
+                    window.location.reload();
+                } else {
+                    showError(response.data.message || 'An error occurred while submitting the project.');
+                    $submitButton.prop('disabled', false).text('Submit');
                 }
-                
-                // Refresh the page
-                window.location.reload();
-            } else {
-                // Store error message in sessionStorage
-                sessionStorage.setItem('rui_submission_message', response.data.message);
-                sessionStorage.setItem('rui_submission_status', 'error');
-                
-                // Refresh the page
-                window.location.reload();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('AJAX error:', textStatus, errorThrown);
+                showError('An error occurred while submitting the project. Please try again.');
+                $submitButton.prop('disabled', false).text('Submit');
             }
-        }).fail(function() {
-            // Store error message in sessionStorage
-            sessionStorage.setItem('rui_submission_message', 'An error occurred. Please try again.');
-            sessionStorage.setItem('rui_submission_status', 'error');
-            
-            // Refresh the page
-            window.location.reload();
         });
     });
+
+    function showError(message) {
+        $('#rui-submission-response').html('<div class="notice notice-error"><p>' + message + '</p></div>');
+    }
 
     // Check for stored messages on page load
     $(document).ready(function() {

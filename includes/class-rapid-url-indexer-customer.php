@@ -187,13 +187,19 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         $credits = self::get_user_credits($user_id);
 
         $project_name = sanitize_text_field($_POST['project_name']);
+        $urls_input = sanitize_textarea_field($_POST['urls']);
         $urls = array_filter(array_map(function($url) {
             $url = trim($url);
             return filter_var($url, FILTER_SANITIZE_URL);
-        }, explode("\n", sanitize_textarea_field($_POST['urls']))), function($url) {
+        }, explode("\n", $urls_input)), function($url) {
             return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
         });
         $notify = isset($_POST['notify']) ? intval($_POST['notify']) : 0;
+
+        if (empty($urls)) {
+            wp_send_json_error(array('message' => __('No valid URLs provided. Please check your input and try again.', 'rapid-url-indexer')));
+            return;
+        }
 
         if ($credits <= 0 || $credits < count($urls)) {
             self::send_out_of_credits_email($user_id);
@@ -210,18 +216,22 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                     $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify, $user_id);
                     if ($api_response['success']) {
                         $user_email = wp_get_current_user()->user_email;
+                        self::log_submission_attempt($user_id, $project_name, count($urls), 'Success');
                         wp_send_json_success(array(
                             'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
                             'project_id' => $project_id,
                             'user_email' => $user_email
                         ));
                     } else {
+                        self::log_submission_attempt($user_id, $project_name, count($urls), 'API Error: ' . $api_response['error']);
                         wp_send_json_error(array('message' => $api_response['error']));
                     }
                 } else {
+                    self::log_submission_attempt($user_id, $project_name, count($urls), 'Failed to create project');
                     wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
                 }
             } else {
+                self::log_submission_attempt($user_id, $project_name, count($urls), 'Invalid URL count');
                 wp_send_json_error(array('message' => __('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer')));
             }
         }
@@ -479,3 +489,26 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
     }
 }
+    private static function log_submission_attempt($user_id, $project_name, $url_count, $result) {
+        if (!function_exists('write_log')) {
+            function write_log($log) {
+                if (true === WP_DEBUG) {
+                    if (is_array($log) || is_object($log)) {
+                        error_log(print_r($log, true));
+                    } else {
+                        error_log($log);
+                    }
+                }
+            }
+        }
+        
+        $log_message = sprintf(
+            "Project submission attempt - User ID: %d, Project Name: %s, URL Count: %d, Result: %s",
+            $user_id,
+            $project_name,
+            $url_count,
+            $result
+        );
+        
+        write_log($log_message);
+    }
