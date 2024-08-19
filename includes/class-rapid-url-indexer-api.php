@@ -117,12 +117,6 @@ class Rapid_URL_Indexer_API {
             );
         } else {
             $error_details = array(
-                'error_message' => 'Unknown error occurred',
-                'response' => $response
-            );
-        }
-        } else {
-            $error_details = array(
                 'response_code' => wp_remote_retrieve_response_code($response),
                 'response_message' => wp_remote_retrieve_response_message($response),
                 'response_body' => wp_remote_retrieve_body($response)
