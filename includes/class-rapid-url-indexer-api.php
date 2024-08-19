@@ -145,6 +145,25 @@ class Rapid_URL_Indexer_API {
             $body['title'] = $title . ($user_id ? " (CID{$user_id})" : '');
         }
         $response = self::make_api_request('POST', '/v2/task/google/indexer/create', $api_key, $body);
+        
+        if (is_wp_error($response)) {
+            self::log_api_error($response);
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+
+        if ($response_code !== 200) {
+            self::log_api_error($response);
+            return false;
+        }
+
+        if (empty($body) || !isset($body['task_id'])) {
+            self::log_api_error($response);
+            return false;
+        }
+
         return self::handle_api_response($response);
     }
 
