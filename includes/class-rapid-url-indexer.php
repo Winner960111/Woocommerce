@@ -519,8 +519,7 @@ class Rapid_URL_Indexer {
         try {
             $params = $request->get_params();
             $project_name = isset($params['project_name']) ? sanitize_text_field($params['project_name']) : '';
-            $urls = isset($params['urls']) ? (array) $params['urls'] : array();
-            $urls = array_map('esc_url_raw', $urls);
+            $urls_input = isset($params['urls']) ? $params['urls'] : '';
             $notify = isset($params['notify_on_status_change']) ? filter_var($params['notify_on_status_change'], FILTER_VALIDATE_BOOLEAN) : false;
 
             // Validate and process the project submission
@@ -530,6 +529,15 @@ class Rapid_URL_Indexer {
                 return new WP_REST_Response(array('message' => 'Invalid API key'), 403);
             }
             $user_id = $user[0]->ID;
+
+            // Process URLs
+            $urls = is_array($urls_input) ? $urls_input : explode("\n", $urls_input);
+            $urls = array_filter(array_map(function($url) {
+                $url = trim($url);
+                return esc_url_raw($url);
+            }, $urls), function($url) {
+                return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
+            });
 
             // Check if user has enough credits
             $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
@@ -542,7 +550,10 @@ class Rapid_URL_Indexer {
                 return new WP_REST_Response(array('message' => 'No valid URLs provided'), 400);
             }
 
-            if (count($urls) <= 9999) {
+            if (count($urls) > 9999) {
+                return new WP_REST_Response(array('message' => 'Invalid number of URLs. Must be between 1 and 9999.'), 400);
+            }
+
             // Use fallback project name if not provided
             if (empty($project_name)) {
                 $project_name = self::generate_fallback_project_name($urls);
@@ -588,9 +599,6 @@ class Rapid_URL_Indexer {
                 }
             } else {
                 return new WP_REST_Response(array('message' => 'Project creation failed'), 500);
-            }
-            } else {
-                return new WP_REST_Response(array('message' => 'Invalid number of URLs. Must be between 1 and 9999.'), 400);
             }
         } catch (Exception $e) {
             return self::handle_error($e, $user_id);
