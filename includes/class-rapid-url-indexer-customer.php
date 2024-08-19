@@ -488,7 +488,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             wp_send_json_error('Project not found or access denied');
         }
     }
-}
+
     private static function log_submission_attempt($user_id, $project_name, $url_count, $result) {
         if (!function_exists('write_log')) {
             function write_log($log) {
@@ -512,3 +512,4 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         
         write_log($log_message);
     }
+}
