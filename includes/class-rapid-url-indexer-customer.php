@@ -180,6 +180,21 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
     }
     
+    private static function is_valid_url_lenient($url) {
+        // First, check if it's a valid URL using PHP's built-in filter
+        if (filter_var($url, FILTER_VALIDATE_URL)) {
+            return true;
+        }
+        
+        // If not, it might be due to non-ASCII characters. Let's check with a more lenient regex
+        $regex = '#^(https?://)?([a-z0-9\x{00a1}-\x{ffff}]([a-z0-9\x{00a1}-\x{ffff}.-]{0,61}[a-z0-9\x{00a1}-\x{ffff}])?\.)+[a-z]{2,63}(/.*)?$#iu';
+        if (preg_match($regex, $url)) {
+            return true;
+        }
+        
+        return false;
+    }
+
     public static function handle_ajax_project_submission() {
         check_ajax_referer('rui_project_submission', 'security');
     
@@ -189,10 +204,9 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         $project_name = sanitize_text_field($_POST['project_name']);
         $urls_input = sanitize_textarea_field($_POST['urls']);
         $urls = array_filter(array_map(function($url) {
-            $url = trim($url);
-            return filter_var($url, FILTER_SANITIZE_URL);
+            return trim($url);
         }, explode("\n", $urls_input)), function($url) {
-            return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
+            return !empty($url) && self::is_valid_url_lenient($url);
         });
         $notify = isset($_POST['notify']) ? intval($_POST['notify']) : 0;
 
