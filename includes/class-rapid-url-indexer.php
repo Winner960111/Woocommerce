@@ -533,10 +533,9 @@ class Rapid_URL_Indexer {
             // Process URLs
             $urls = is_array($urls_input) ? $urls_input : explode("\n", $urls_input);
             $urls = array_filter(array_map(function($url) {
-                $url = trim($url);
-                return esc_url_raw($url);
+                return trim($url);
             }, $urls), function($url) {
-                return !empty($url) && filter_var($url, FILTER_VALIDATE_URL);
+                return !empty($url) && Rapid_URL_Indexer_Customer::is_valid_url_lenient($url);
             });
 
             // Check if user has enough credits
