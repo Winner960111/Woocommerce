@@ -48,9 +48,16 @@ class Rapid_URL_Indexer {
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
             dbDelta($sql);
             error_log("Created $projects_table table");
-        } elseif ($wpdb->get_var("SHOW COLUMNS FROM $projects_table LIKE '$column_name'") != $column_name) {
-            $wpdb->query("ALTER TABLE $projects_table ADD $column_name VARCHAR(32)");
-            error_log("Added project_name_hash column to $projects_table table");
+        } else {
+            // Check if project_name_hash column exists and its length
+            $column = $wpdb->get_row("SHOW COLUMNS FROM $projects_table LIKE '$column_name'");
+            if (!$column) {
+                $wpdb->query("ALTER TABLE $projects_table ADD $column_name VARCHAR(40)");
+                error_log("Added project_name_hash column to $projects_table table");
+            } elseif ($column->Type !== 'varchar(40)') {
+                $wpdb->query("ALTER TABLE $projects_table MODIFY $column_name VARCHAR(40)");
+                error_log("Modified project_name_hash column in $projects_table table to VARCHAR(40)");
+            }
         }
 
         // Add other table creations or updates here if needed
