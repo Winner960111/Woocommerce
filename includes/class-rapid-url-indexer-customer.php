@@ -319,7 +319,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                                 $user_email = wp_get_current_user()->user_email;
                                 self::log_submission_attempt($user_id, $project_name, count($urls), 'Success');
                                 $response = array(
-                                    'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
+                                    'message' => sprintf(__('Project submitted successfully. %d valid URLs submitted, %d credits deducted.', 'rapid-url-indexer'), count($urls), count($urls)),
                                     'project_id' => $project_id,
                                     'user_email' => $user_email,
                                     'project_name' => $sanitized_project_name
