@@ -312,61 +312,57 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 if (count($urls) > 0 && count($urls) <= 9999) {
                     $api_key = get_option('rui_speedyindex_api_key');
                     try {
-                        $project_id = self::submit_project($project_name, $urls, $notify, $user_id);
-                        if ($project_id) {
-                            $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify, $user_id);
-                            if ($api_response['success']) {
-                                $user_email = wp_get_current_user()->user_email;
-                                self::log_submission_attempt($user_id, $project_name, count($urls), 'Success');
-                                $response = array(
-                                    'message' => sprintf(__('Project submitted successfully. %d valid URLs submitted, %d credits deducted.', 'rapid-url-indexer'), count($urls), count($urls)),
-                                    'project_id' => $project_id,
-                                    'user_email' => $user_email,
-                                    'project_name' => $sanitized_project_name
-                                );
-                                if (!empty($warnings)) {
-                                    // Convert newlines to <br> tags for proper HTML rendering
-                                    if (isset($warnings['project_name'])) {
-                                        $warnings['project_name'] = array_map(function($msg) {
-                                            return str_replace("\n", "<br>", $msg);
-                                        }, $warnings['project_name']);
-                                    }
-                                    if (isset($warnings['invalid_urls'])) {
-                                        $warnings['invalid_urls']['message'] = str_replace("\n", "<br>", $warnings['invalid_urls']['message']);
-                                    }
-                                    $response['warnings'] = $warnings;
+                        $project_id = self::submit_project($sanitized_project_name, $urls, $notify, $user_id);
+                        $api_response = Rapid_URL_Indexer::process_api_request($project_id, $urls, $notify, $user_id);
+                        if ($api_response['success']) {
+                            $user_email = wp_get_current_user()->user_email;
+                            self::log_submission_attempt($user_id, $sanitized_project_name, count($urls), 'Success');
+                            $response = array(
+                                'message' => sprintf(__('Project submitted successfully. %d valid URLs submitted, %d credits deducted.', 'rapid-url-indexer'), count($urls), count($urls)),
+                                'project_id' => $project_id,
+                                'user_email' => $user_email,
+                                'project_name' => $sanitized_project_name
+                            );
+                            if (!empty($warnings)) {
+                                // Convert newlines to <br> tags for proper HTML rendering
+                                if (isset($warnings['project_name'])) {
+                                    $warnings['project_name'] = array_map(function($msg) {
+                                        return str_replace("\n", "<br>", $msg);
+                                    }, $warnings['project_name']);
                                 }
-                                wp_send_json_success($response);
-                            } else {
-                                global $wpdb;
-                                $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-                                // Update project status to 'pending'
-                                $wpdb->update($table_name, array('status' => 'pending'), array('id' => $project_id));
-                                // Log the detailed error for admin
-                                self::log_submission_attempt($user_id, $project_name, count($urls), 'API Error: ' . $api_response['error']);
-                                // Send generic message to customer
-                                wp_send_json_success(array(
-                                    'message' => __('Project created but processing pending. It will be retried automatically.', 'rapid-url-indexer'),
-                                    'project_id' => $project_id,
-                                    'user_email' => wp_get_current_user()->user_email
-                                ));
+                                if (isset($warnings['invalid_urls'])) {
+                                    $warnings['invalid_urls']['message'] = str_replace("\n", "<br>", $warnings['invalid_urls']['message']);
+                                }
+                                $response['warnings'] = $warnings;
                             }
+                            wp_send_json_success($response);
                         } else {
-                            throw new Exception('Failed to create project');
+                            global $wpdb;
+                            $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+                            // Update project status to 'pending'
+                            $wpdb->update($table_name, array('status' => 'pending'), array('id' => $project_id));
+                            // Log the detailed error for admin
+                            self::log_submission_attempt($user_id, $sanitized_project_name, count($urls), 'API Error: ' . $api_response['error']);
+                            // Send generic message to customer
+                            wp_send_json_success(array(
+                                'message' => __('Project created but processing pending. It will be retried automatically.', 'rapid-url-indexer'),
+                                'project_id' => $project_id,
+                                'user_email' => wp_get_current_user()->user_email
+                            ));
                         }
                     } catch (Exception $e) {
-                        self::log_submission_attempt($user_id, $project_name, count($urls), 'Exception: ' . $e->getMessage());
+                        self::log_submission_attempt($user_id, $sanitized_project_name, count($urls), 'Exception: ' . $e->getMessage());
                         wp_send_json_error(array('message' => __('Failed to submit project. Please try again.', 'rapid-url-indexer')));
                     }
                 } else {
-                    self::log_submission_attempt($user_id, $project_name, count($urls), 'Invalid URL count');
+                    self::log_submission_attempt($user_id, $sanitized_project_name, count($urls), 'Invalid URL count');
                     wp_send_json_error(array('message' => __('Invalid number of URLs. Must be between 1 and 9999.', 'rapid-url-indexer')));
                 }
             }
         } catch (Exception $e) {
             $error_message = 'Rapid URL Indexer - Exception in project submission: ' . $e->getMessage();
             error_log($error_message);
-            self::log_submission_attempt($user_id, $project_name, count($urls), 'Exception: ' . $e->getMessage());
+            self::log_submission_attempt($user_id, $sanitized_project_name, count($urls), 'Exception: ' . $e->getMessage());
             
             // Check if the user is an admin
             if (current_user_can('manage_options')) {
@@ -457,7 +453,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 'user_id' => $user_id,
                 'project_name' => $sanitized_project_name,
                 'project_name_hash' => $project_name_hash,
-                'urls' => json_encode($urls),
+                'urls' => wp_json_encode($urls),
                 'status' => 'pending',
                 'submitted_links' => count($urls),
                 'notify' => $notify ? 1 : 0,
@@ -470,7 +466,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 $error_message = sprintf(
                     __('Failed to create project. MySQL Error: %s. Data: %s', 'rapid-url-indexer'),
                     $wpdb->last_error,
-                    json_encode($data)
+                    wp_json_encode($data)
                 );
                 error_log($error_message);
                 throw new Exception($error_message);
@@ -487,7 +483,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             $wpdb->query('ROLLBACK');
             error_log('Project submission failed: ' . $e->getMessage());
             self::log_submission_attempt($user_id, $project_name, count($urls), 'Exception: ' . $e->getMessage());
-            return false;
+            throw $e; // Re-throw the exception to be caught by the caller
         }
     }
 
