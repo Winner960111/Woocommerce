@@ -29,7 +29,7 @@ class Rapid_URL_Indexer {
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 user_id mediumint(9) NOT NULL,
                 project_name varchar(255) NOT NULL,
-                project_name_hash varchar(32) NOT NULL,
+                project_name_hash varchar(40) NOT NULL,
                 urls longtext NOT NULL,
                 task_id varchar(255) DEFAULT NULL,
                 status varchar(50) DEFAULT 'pending',
