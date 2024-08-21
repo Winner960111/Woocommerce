@@ -443,7 +443,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             $sanitized_project_name = self::sanitize_project_name($project_name);
 
             // Generate project name hash
-            $project_name_hash = md5(uniqid($sanitized_project_name, true));
+            $project_name_hash = hash('sha1', uniqid($sanitized_project_name, true));
 
             $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
             $result = $wpdb->insert($table_name, array(
