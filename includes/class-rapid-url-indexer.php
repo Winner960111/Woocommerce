@@ -17,18 +17,6 @@ class Rapid_URL_Indexer {
         register_activation_hook(RUI_PLUGIN_FILE, array(__CLASS__, 'activate'));
     }
 
-    public static function init() {
-        add_action('init', array(__CLASS__, 'initialize_plugin'));
-        add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
-        
-        // Add WooCommerce hooks for credits field
-        add_action('woocommerce_product_options_general_product_data', array(__CLASS__, 'add_credits_field'));
-        add_action('woocommerce_process_product_meta', array(__CLASS__, 'save_credits_field'));
-
-        // Add action for database update
-        add_action('plugins_loaded', array(__CLASS__, 'update_database'));
-    }
-
     public static function update_database() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
