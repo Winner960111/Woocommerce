@@ -445,7 +445,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             // Sanitize project name
             $sanitized_project_name = self::sanitize_project_name($project_name);
 
-            // Generate project name hash
+            // Generate project name hash (full 64-character SHA-256)
             $project_name_hash = hash('sha256', uniqid($sanitized_project_name, true));
 
             $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
