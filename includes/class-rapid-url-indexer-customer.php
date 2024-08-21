@@ -364,9 +364,16 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 }
             }
         } catch (Exception $e) {
-            error_log('Rapid URL Indexer - Unhandled exception in project submission: ' . $e->getMessage());
-            self::log_submission_attempt($user_id, $project_name, count($urls), 'Unhandled Exception: ' . $e->getMessage());
-            wp_send_json_error(array('message' => __('An unexpected error occurred. Please try again.', 'rapid-url-indexer')));
+            $error_message = 'Rapid URL Indexer - Exception in project submission: ' . $e->getMessage();
+            error_log($error_message);
+            self::log_submission_attempt($user_id, $project_name, count($urls), 'Exception: ' . $e->getMessage());
+            
+            // Check if the user is an admin
+            if (current_user_can('manage_options')) {
+                wp_send_json_error(array('message' => $error_message));
+            } else {
+                wp_send_json_error(array('message' => __('An unexpected error occurred. Please try again or contact support if the problem persists.', 'rapid-url-indexer')));
+            }
         }
     }
 
@@ -443,10 +450,10 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             $sanitized_project_name = self::sanitize_project_name($project_name);
 
             // Generate project name hash
-            $project_name_hash = substr(hash('sha256', uniqid($sanitized_project_name, true)), 0, 40);
+            $project_name_hash = hash('sha256', uniqid($sanitized_project_name, true));
 
             $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-            $result = $wpdb->insert($table_name, array(
+            $data = array(
                 'user_id' => $user_id,
                 'project_name' => $sanitized_project_name,
                 'project_name_hash' => $project_name_hash,
@@ -455,10 +462,18 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 'submitted_links' => count($urls),
                 'notify' => $notify ? 1 : 0,
                 'created_at' => current_time('mysql')
-            ));
+            );
+            $format = array('%d', '%s', '%s', '%s', '%s', '%d', '%d', '%s');
+            $result = $wpdb->insert($table_name, $data, $format);
 
             if ($result === false) {
-                throw new Exception(__('Failed to create project: ' . $wpdb->last_error, 'rapid-url-indexer'));
+                $error_message = sprintf(
+                    __('Failed to create project. MySQL Error: %s. Data: %s', 'rapid-url-indexer'),
+                    $wpdb->last_error,
+                    json_encode($data)
+                );
+                error_log($error_message);
+                throw new Exception($error_message);
             }
 
             $project_id = $wpdb->insert_id;

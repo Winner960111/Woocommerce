@@ -29,7 +29,7 @@ class Rapid_URL_Indexer {
                 id mediumint(9) NOT NULL AUTO_INCREMENT,
                 user_id mediumint(9) NOT NULL,
                 project_name varchar(255) NOT NULL,
-                project_name_hash varchar(40) NOT NULL,
+                project_name_hash varchar(64) NOT NULL,
                 urls longtext NOT NULL,
                 task_id varchar(255) DEFAULT NULL,
                 status varchar(50) DEFAULT 'pending',
@@ -52,11 +52,11 @@ class Rapid_URL_Indexer {
             // Check if project_name_hash column exists and its length
             $column = $wpdb->get_row("SHOW COLUMNS FROM $projects_table LIKE '$column_name'");
             if (!$column) {
-                $wpdb->query("ALTER TABLE $projects_table ADD $column_name VARCHAR(40)");
+                $wpdb->query("ALTER TABLE $projects_table ADD $column_name VARCHAR(64)");
                 error_log("Added project_name_hash column to $projects_table table");
-            } elseif ($column->Type !== 'varchar(40)') {
-                $wpdb->query("ALTER TABLE $projects_table MODIFY $column_name VARCHAR(40)");
-                error_log("Modified project_name_hash column in $projects_table table to VARCHAR(40)");
+            } elseif ($column->Type !== 'varchar(64)') {
+                $wpdb->query("ALTER TABLE $projects_table MODIFY $column_name VARCHAR(64)");
+                error_log("Modified project_name_hash column in $projects_table table to VARCHAR(64)");
             }
         }
 
