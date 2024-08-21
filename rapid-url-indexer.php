@@ -38,6 +38,15 @@ function rapid_url_indexer_init() {
 }
 add_action('plugins_loaded', 'rapid_url_indexer_init');
 
+// Ensure database is updated on plugin update
+function rapid_url_indexer_update_db_check() {
+    if (get_site_option('rapid_url_indexer_db_version') != RUI_DB_VERSION) {
+        Rapid_URL_Indexer::update_database();
+        update_site_option('rapid_url_indexer_db_version', RUI_DB_VERSION);
+    }
+}
+add_action('plugins_loaded', 'rapid_url_indexer_update_db_check');
+
 register_activation_hook(__FILE__, 'rui_flush_rewrite_rules');
 function rui_flush_rewrite_rules() {
     Rapid_URL_Indexer_Customer::add_my_account_endpoints();
