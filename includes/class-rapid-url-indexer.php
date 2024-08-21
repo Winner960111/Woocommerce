@@ -12,6 +12,9 @@ class Rapid_URL_Indexer {
 
         // Add action for database update
         add_action('plugins_loaded', array(__CLASS__, 'update_database'));
+
+        // Register activation hook
+        register_activation_hook(RUI_PLUGIN_FILE, array(__CLASS__, 'activate'));
     }
 
     public static function update_database() {
@@ -21,7 +24,12 @@ class Rapid_URL_Indexer {
 
         if($wpdb->get_var("SHOW COLUMNS FROM $table_name LIKE '$column_name'") != $column_name) {
             $wpdb->query("ALTER TABLE $table_name ADD $column_name VARCHAR(32)");
+            error_log("Added project_name_hash column to $table_name table");
         }
+    }
+
+    public static function activate() {
+        self::update_database();
     }
 
     public static function initialize_plugin() {
