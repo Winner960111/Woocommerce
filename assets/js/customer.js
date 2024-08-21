@@ -30,7 +30,17 @@ jQuery(function($) {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    sessionStorage.setItem('rui_submission_message', response.data.message);
+                    let message = response.data.message;
+                    if (response.data.warnings) {
+                        message += '\n\nWarnings:';
+                        if (response.data.warnings.project_name) {
+                            message += '\n- ' + response.data.warnings.project_name.join('\n- ');
+                        }
+                        if (response.data.warnings.invalid_urls) {
+                            message += '\n- Some URLs were invalid and were not submitted.';
+                        }
+                    }
+                    sessionStorage.setItem('rui_submission_message', message);
                     sessionStorage.setItem('rui_submission_status', 'success');
                     
                     if (typeof sendinblue !== 'undefined' && typeof sendinblue.track === 'function') {
@@ -43,7 +53,7 @@ jQuery(function($) {
                     
                     window.location.reload();
                 } else {
-                    handleErrors(response.data.errors || {'general': [response.data.message || 'An error occurred while submitting the project.']});
+                    handleErrors({'general': [response.data.message || 'An error occurred while submitting the project.']});
                     $submitButton.prop('disabled', false).text('Submit');
                 }
             },
