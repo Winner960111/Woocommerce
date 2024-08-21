@@ -196,7 +196,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return ['valid' => $valid_urls, 'invalid' => $invalid_urls];
     }
 
-    private static function is_valid_url_lenient($url) {
+    public static function is_valid_url_lenient($url) {
         // Normalize the URL
         $url = trim($url);
         
