@@ -133,9 +133,9 @@ class Rapid_URL_Indexer_API {
 
         error_log('SpeedyIndex API Error for Project ID ' . $project_id . ': ' . json_encode($error_details));
     }
-    public static function create_task($api_key, $urls, $project_name, $project_name_hash) {
+    public static function create_task($api_key, $urls, $task_name) {
         $body = array('urls' => $urls);
-        $body['title'] = $project_name_hash;
+        $body['title'] = $task_name;
         $response = self::make_api_request('POST', '/v2/task/google/indexer/create', $api_key, $body);
         
         if (is_wp_error($response)) {
