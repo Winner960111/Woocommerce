@@ -37,12 +37,12 @@ jQuery(function($) {
                     if (response.data.warnings) {
                         message += '\n\nWarnings:';
                         if (response.data.warnings.project_name) {
-                            message += '\n- ' + response.data.warnings.project_name.join('\n- ');
+                            message += '\n- ' + response.data.warnings.project_name.join('\n- ') + '\n';
                         }
                         if (response.data.warnings.invalid_urls) {
-                            message += '\n- ' + response.data.warnings.invalid_urls.message;
+                            message += '\n- ' + response.data.warnings.invalid_urls.message + '\n';
                             response.data.warnings.invalid_urls.urls.forEach(function(invalidUrl) {
-                                message += '\n  Line ' + invalidUrl.line + ': ' + invalidUrl.url;
+                                message += '  Line ' + invalidUrl.line + ': ' + invalidUrl.url + '\n';
                             });
                         }
                     }
