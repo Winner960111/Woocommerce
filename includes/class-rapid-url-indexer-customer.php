@@ -269,17 +269,21 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
 
             $project_name = sanitize_text_field($_POST['project_name']);
             $original_project_name = $project_name;
-            $project_name = self::sanitize_project_name($project_name);
+            $sanitized_project_name = self::sanitize_project_name($project_name);
 
-            $project_name_errors = self::validate_project_name($project_name);
+            $project_name_errors = self::validate_project_name($sanitized_project_name);
             $urls_input = sanitize_textarea_field($_POST['urls']);
             $url_validation_result = self::validate_urls($urls_input);
             $notify = isset($_POST['notify']) ? intval($_POST['notify']) : 0;
 
             $warnings = [];
 
+            if ($sanitized_project_name !== $original_project_name) {
+                $warnings['project_name'] = [__('Project name has been adjusted to meet requirements.', 'rapid-url-indexer')];
+            }
+
             if (!empty($project_name_errors)) {
-                $warnings['project_name'] = $project_name_errors;
+                $warnings['project_name'] = array_merge($warnings['project_name'] ?? [], $project_name_errors);
             }
 
             if (empty($url_validation_result['valid'])) {
@@ -288,7 +292,10 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             }
 
             if (!empty($url_validation_result['invalid'])) {
-                $warnings['invalid_urls'] = $url_validation_result['invalid'];
+                $warnings['invalid_urls'] = [
+                    'message' => __('Some URLs were invalid and were not submitted:', 'rapid-url-indexer'),
+                    'urls' => $url_validation_result['invalid']
+                ];
             }
 
             $urls = $url_validation_result['valid'];
@@ -314,7 +321,8 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                                 $response = array(
                                     'message' => __('Project submitted successfully.', 'rapid-url-indexer'),
                                     'project_id' => $project_id,
-                                    'user_email' => $user_email
+                                    'user_email' => $user_email,
+                                    'project_name' => $sanitized_project_name
                                 );
                                 if (!empty($warnings)) {
                                     $response['warnings'] = $warnings;

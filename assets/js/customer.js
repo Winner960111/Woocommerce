@@ -31,13 +31,19 @@ jQuery(function($) {
             success: function(response) {
                 if (response.success) {
                     let message = response.data.message;
+                    if (response.data.project_name) {
+                        message += '\n\nProject Name: ' + response.data.project_name;
+                    }
                     if (response.data.warnings) {
                         message += '\n\nWarnings:';
                         if (response.data.warnings.project_name) {
                             message += '\n- ' + response.data.warnings.project_name.join('\n- ');
                         }
                         if (response.data.warnings.invalid_urls) {
-                            message += '\n- Some URLs were invalid and were not submitted.';
+                            message += '\n- ' + response.data.warnings.invalid_urls.message;
+                            response.data.warnings.invalid_urls.urls.forEach(function(invalidUrl) {
+                                message += '\n  Line ' + invalidUrl.line + ': ' + invalidUrl.url;
+                            });
                         }
                     }
                     sessionStorage.setItem('rui_submission_message', message);
