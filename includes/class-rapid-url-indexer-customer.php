@@ -181,17 +181,37 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
     }
     
     private static function is_valid_url_lenient($url) {
-        // First, check if it's a valid URL using PHP's built-in filter
-        if (filter_var($url, FILTER_VALIDATE_URL)) {
+        // Normalize the URL
+        $url = trim($url);
+        
+        // If the URL doesn't start with a scheme, add http://
+        if (!preg_match('~^(?:f|ht)tps?://~i', $url)) {
+            $url = 'http://' . $url;
+        }
+        
+        // Parse the URL
+        $parsed_url = parse_url($url);
+        
+        // Check if we have at least a host
+        if (empty($parsed_url['host'])) {
+            return false;
+        }
+        
+        // Validate the host
+        $host = $parsed_url['host'];
+        
+        // Allow IP addresses (both IPv4 and IPv6)
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
             return true;
         }
         
-        // If not, it might be due to non-ASCII characters. Let's check with a more lenient regex
-        $regex = '#^(https?://)?([a-z0-9\x{00a1}-\x{ffff}]([a-z0-9\x{00a1}-\x{ffff}.-]{0,61}[a-z0-9\x{00a1}-\x{ffff}])?\.)+[a-z]{2,63}(/.*)?$#iu';
-        if (preg_match($regex, $url)) {
+        // Validate domain name (including IDN and punycode)
+        $domain_regex = '/^(xn--)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z0-9-]{2,}$/i';
+        if (preg_match($domain_regex, idn_to_ascii($host, 0, INTL_IDNA_VARIANT_UTS46))) {
             return true;
         }
         
+        // If we've reached here, the URL is not valid
         return false;
     }
 
