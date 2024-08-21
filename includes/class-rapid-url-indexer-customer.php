@@ -301,8 +301,14 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                                     'user_email' => $user_email
                                 ));
                             } else {
-                                self::log_submission_attempt($user_id, $project_name, count($urls), 'API Error: ' . $api_response['error']);
-                                wp_send_json_error(array('message' => $api_response['error']));
+                                // Update project status to 'pending'
+                                $wpdb->update($table_name, array('status' => 'pending'), array('id' => $project_id));
+                                self::log_submission_attempt($user_id, $project_name, count($urls), 'API Error: Pending retry');
+                                wp_send_json_success(array(
+                                    'message' => __('Project created but processing pending. It will be retried automatically.', 'rapid-url-indexer'),
+                                    'project_id' => $project_id,
+                                    'user_email' => wp_get_current_user()->user_email
+                                ));
                             }
                         } else {
                             throw new Exception('Failed to create project');
