@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) exit;
 define('RUI_PLUGIN_FILE', __FILE__);
 define('RUI_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('RUI_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('RUI_DB_VERSION', '1.0');
+define('RUI_DB_VERSION', '1.1');
 
 // Include required files
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-activator.php';
