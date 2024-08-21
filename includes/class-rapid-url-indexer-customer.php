@@ -442,10 +442,14 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             // Sanitize project name
             $sanitized_project_name = self::sanitize_project_name($project_name);
 
+            // Generate project name hash
+            $project_name_hash = md5(uniqid($sanitized_project_name, true));
+
             $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
             $result = $wpdb->insert($table_name, array(
                 'user_id' => $user_id,
                 'project_name' => $sanitized_project_name,
+                'project_name_hash' => $project_name_hash,
                 'urls' => json_encode($urls),
                 'status' => 'pending',
                 'submitted_links' => count($urls),

@@ -17,6 +17,7 @@
                 <tr>
                     <th>Project ID</th>
                     <th>Project Name</th>
+                    <th>Project Name Hash</th>
                     <th>Task ID</th>
                     <th>User ID</th>
                     <th>Email</th>
@@ -34,6 +35,7 @@
                     <tr>
                         <td><?php echo esc_html($project->id); ?></td>
                         <td><?php echo esc_html($project->project_name); ?></td>
+                        <td><?php echo esc_html($project->project_name_hash); ?></td>
                         <td><?php echo esc_html($project->task_id); ?></td>
                         <td><?php echo esc_html($project->user_id); ?></td>
                         <td><?php echo esc_html($project->user_email); ?></td>

@@ -9,6 +9,19 @@ class Rapid_URL_Indexer {
         // Add WooCommerce hooks for credits field
         add_action('woocommerce_product_options_general_product_data', array(__CLASS__, 'add_credits_field'));
         add_action('woocommerce_process_product_meta', array(__CLASS__, 'save_credits_field'));
+
+        // Add action for database update
+        add_action('plugins_loaded', array(__CLASS__, 'update_database'));
+    }
+
+    public static function update_database() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $column_name = 'project_name_hash';
+
+        if($wpdb->get_var("SHOW COLUMNS FROM $table_name LIKE '$column_name'") != $column_name) {
+            $wpdb->query("ALTER TABLE $table_name ADD $column_name VARCHAR(32)");
+        }
     }
 
     public static function initialize_plugin() {
