@@ -532,26 +532,42 @@ class Rapid_URL_Indexer {
 
             // Process URLs
             $urls = is_array($urls_input) ? $urls_input : explode("\n", $urls_input);
-            $urls = array_filter(array_map(function($url) {
-                return trim($url);
-            }, $urls), function($url) {
-                return !empty($url) && Rapid_URL_Indexer_Customer::is_valid_url_lenient($url);
-            });
+            $valid_urls = array();
+            $invalid_urls = array();
+            foreach ($urls as $url) {
+                $url = trim($url);
+                if (!empty($url)) {
+                    if (Rapid_URL_Indexer_Customer::is_valid_url_lenient($url)) {
+                        $valid_urls[] = $url;
+                    } else {
+                        $invalid_urls[] = $url;
+                    }
+                }
+            }
 
             // Check if user has enough credits
             $credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
-            if ($credits < count($urls)) {
+            if ($credits < count($valid_urls)) {
                 self::send_out_of_credits_email($user[0]);
                 return new WP_REST_Response(array('message' => 'Insufficient credits'), 400);
             }
 
-            if (empty($urls)) {
-                return new WP_REST_Response(array('message' => 'No valid URLs provided'), 400);
+            if (empty($valid_urls)) {
+                $error_message = 'No valid URLs provided. ';
+                if (!empty($invalid_urls)) {
+                    $error_message .= 'Invalid URLs: ' . implode(', ', array_slice($invalid_urls, 0, 5));
+                    if (count($invalid_urls) > 5) {
+                        $error_message .= ' and ' . (count($invalid_urls) - 5) . ' more.';
+                    }
+                }
+                return new WP_REST_Response(array('message' => $error_message), 400);
             }
 
-            if (count($urls) > 9999) {
+            if (count($valid_urls) > 9999) {
                 return new WP_REST_Response(array('message' => 'Invalid number of URLs. Must be between 1 and 9999.'), 400);
             }
+
+            $urls = $valid_urls;
 
             // Use fallback project name if not provided
             if (empty($project_name)) {
