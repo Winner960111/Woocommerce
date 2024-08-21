@@ -61,6 +61,8 @@ class Rapid_URL_Indexer {
         }
 
         // Add other table creations or updates here if needed
+
+        // Add other table creations or updates here if needed
     }
 
     public static function initialize_plugin() {
