@@ -460,6 +460,10 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 'created_at' => current_time('mysql')
             );
             $format = array('%d', '%s', '%s', '%s', '%s', '%d', '%d', '%s');
+            
+            // Log the data before insertion
+            error_log('Attempting to insert project with data: ' . wp_json_encode($data));
+            
             $result = $wpdb->insert($table_name, $data, $format);
 
             if ($result === false) {
@@ -471,6 +475,9 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 error_log($error_message);
                 throw new Exception($error_message);
             }
+            
+            // Log successful insertion
+            error_log('Project inserted successfully. Project ID: ' . $wpdb->insert_id);
 
             $project_id = $wpdb->insert_id;
 
