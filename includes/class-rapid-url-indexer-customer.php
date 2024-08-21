@@ -180,6 +180,22 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
     }
     
+    private static function validate_urls($urls_input) {
+        $urls = array_filter(array_map('trim', explode("\n", $urls_input)));
+        $valid_urls = [];
+        $invalid_urls = [];
+
+        foreach ($urls as $index => $url) {
+            if (self::is_valid_url_lenient($url)) {
+                $valid_urls[] = $url;
+            } else {
+                $invalid_urls[] = ['line' => $index + 1, 'url' => $url];
+            }
+        }
+
+        return ['valid' => $valid_urls, 'invalid' => $invalid_urls];
+    }
+
     private static function is_valid_url_lenient($url) {
         // Normalize the URL
         $url = trim($url);
@@ -232,17 +248,19 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
     }
 
     private static function validate_project_name($name) {
-        // Check if the name is not empty and meets the length requirement
-        if (empty($name) || strlen($name) > 50) {
-            return false;
+        $errors = [];
+        
+        if (empty($name)) {
+            $errors[] = __('Project name cannot be empty.', 'rapid-url-indexer');
+        } elseif (strlen($name) > 50) {
+            $errors[] = __('Project name must be 50 characters or less.', 'rapid-url-indexer');
         }
         
-        // Check if the name contains only allowed characters
         if (!preg_match('/^[a-zA-Z0-9\-_]+$/', $name)) {
-            return false;
+            $errors[] = __('Project name can only contain letters, numbers, hyphens, and underscores.', 'rapid-url-indexer');
         }
         
-        return true;
+        return $errors;
     }
 
     private static function generate_fallback_project_name() {
@@ -257,25 +275,35 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
             $credits = self::get_user_credits($user_id);
 
             $project_name = sanitize_text_field($_POST['project_name']);
+            $original_project_name = $project_name;
             $project_name = self::sanitize_project_name($project_name);
 
-            if (!self::validate_project_name($project_name)) {
-                $project_name = self::generate_fallback_project_name();
-            }
-
+            $project_name_errors = self::validate_project_name($project_name);
             $urls_input = sanitize_textarea_field($_POST['urls']);
-            $urls = array_filter(array_map(function($url) {
-                return trim($url);
-            }, explode("\n", $urls_input)), function($url) {
-                return !empty($url) && self::is_valid_url_lenient($url);
-            });
+            $url_validation_result = self::validate_urls($urls_input);
             $notify = isset($_POST['notify']) ? intval($_POST['notify']) : 0;
 
-            if (empty($urls)) {
-                self::log_submission_attempt($user_id, $project_name, 0, 'No valid URLs provided');
-                wp_send_json_error(array('message' => __('No valid URLs provided. Please check your input and try again.', 'rapid-url-indexer')));
+            $errors = [];
+
+            if (!empty($project_name_errors)) {
+                $errors['project_name'] = $project_name_errors;
+            }
+
+            if (empty($url_validation_result['valid'])) {
+                $errors['urls'] = __('No valid URLs provided. Please check your input and try again.', 'rapid-url-indexer');
+            }
+
+            if (!empty($url_validation_result['invalid'])) {
+                $errors['invalid_urls'] = $url_validation_result['invalid'];
+            }
+
+            if (!empty($errors)) {
+                self::log_submission_attempt($user_id, $original_project_name, count($url_validation_result['valid']), 'Validation errors: ' . json_encode($errors));
+                wp_send_json_error(['errors' => $errors]);
                 return;
             }
+
+            $urls = $url_validation_result['valid'];
 
             if ($credits <= 0 || $credits < count($urls)) {
                 self::send_out_of_credits_email($user_id);
@@ -301,6 +329,8 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                                     'user_email' => $user_email
                                 ));
                             } else {
+                                global $wpdb;
+                                $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
                                 // Update project status to 'pending'
                                 $wpdb->update($table_name, array('status' => 'pending'), array('id' => $project_id));
                                 // Log the detailed error for admin

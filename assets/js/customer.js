@@ -43,20 +43,51 @@ jQuery(function($) {
                     
                     window.location.reload();
                 } else {
-                    showError(response.data.message || 'An error occurred while submitting the project.');
+                    handleErrors(response.data.errors || {'general': [response.data.message || 'An error occurred while submitting the project.']});
                     $submitButton.prop('disabled', false).text('Submit');
                 }
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error('AJAX error:', textStatus, errorThrown);
-                showError('An error occurred while submitting the project. Please try again.');
+                handleErrors({'general': ['An error occurred while submitting the project. Please try again.']});
                 $submitButton.prop('disabled', false).text('Submit');
             }
         });
     });
 
-    function showError(message) {
-        $('#rui-submission-response').html('<div class="notice notice-error"><p>' + message + '</p></div>');
+    function handleErrors(errors) {
+        var errorHtml = '<div class="notice notice-error">';
+        
+        if (errors.project_name) {
+            errorHtml += '<p><strong>Project Name Errors:</strong></p><ul>';
+            errors.project_name.forEach(function(error) {
+                errorHtml += '<li>' + error + '</li>';
+            });
+            errorHtml += '</ul>';
+        }
+        
+        if (errors.urls) {
+            errorHtml += '<p><strong>URL Errors:</strong></p><p>' + errors.urls + '</p>';
+        }
+        
+        if (errors.invalid_urls) {
+            errorHtml += '<p><strong>Invalid URLs:</strong></p><ul>';
+            errors.invalid_urls.forEach(function(invalidUrl) {
+                errorHtml += '<li>Line ' + invalidUrl.line + ': ' + invalidUrl.url + '</li>';
+            });
+            errorHtml += '</ul>';
+        }
+        
+        if (errors.general) {
+            errorHtml += '<p><strong>General Errors:</strong></p><ul>';
+            errors.general.forEach(function(error) {
+                errorHtml += '<li>' + error + '</li>';
+            });
+            errorHtml += '</ul>';
+        }
+        
+        errorHtml += '</div>';
+        $('#rui-submission-response').html(errorHtml);
     }
 
     // Check for stored messages on page load
