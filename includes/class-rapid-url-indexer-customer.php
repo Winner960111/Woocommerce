@@ -430,16 +430,13 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 throw new Exception(__('Insufficient credits', 'rapid-url-indexer'));
             }
 
-            // Sanitize and validate project name
-            $project_name = self::sanitize_project_name($project_name);
-            if (!self::validate_project_name($project_name)) {
-                $project_name = self::generate_fallback_project_name();
-            }
+            // Sanitize project name
+            $sanitized_project_name = self::sanitize_project_name($project_name);
 
             $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
             $result = $wpdb->insert($table_name, array(
                 'user_id' => $user_id,
-                'project_name' => $project_name,
+                'project_name' => $sanitized_project_name,
                 'urls' => json_encode($urls),
                 'status' => 'pending',
                 'submitted_links' => count($urls),
