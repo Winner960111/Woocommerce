@@ -325,6 +325,15 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                                     'project_name' => $sanitized_project_name
                                 );
                                 if (!empty($warnings)) {
+                                    // Convert newlines to <br> tags for proper HTML rendering
+                                    if (isset($warnings['project_name'])) {
+                                        $warnings['project_name'] = array_map(function($msg) {
+                                            return str_replace("\n", "<br>", $msg);
+                                        }, $warnings['project_name']);
+                                    }
+                                    if (isset($warnings['invalid_urls'])) {
+                                        $warnings['invalid_urls']['message'] = str_replace("\n", "<br>", $warnings['invalid_urls']['message']);
+                                    }
                                     $response['warnings'] = $warnings;
                                 }
                                 wp_send_json_success($response);

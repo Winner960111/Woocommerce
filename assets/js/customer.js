@@ -35,14 +35,14 @@ jQuery(function($) {
                         message += '\n\nProject Name: ' + response.data.project_name;
                     }
                     if (response.data.warnings) {
-                        message += '\n\nWarnings:';
+                        message += '<br><br><strong>Warnings:</strong><br>';
                         if (response.data.warnings.project_name) {
-                            message += '\n- ' + response.data.warnings.project_name.join('\n- ') + '\n';
+                            message += '- ' + response.data.warnings.project_name.join('<br>- ') + '<br>';
                         }
                         if (response.data.warnings.invalid_urls) {
-                            message += '\n- ' + response.data.warnings.invalid_urls.message + '\n';
+                            message += '- ' + response.data.warnings.invalid_urls.message + '<br>';
                             response.data.warnings.invalid_urls.urls.forEach(function(invalidUrl) {
-                                message += '  Line ' + invalidUrl.line + ': ' + invalidUrl.url + '\n';
+                                message += '&nbsp;&nbsp;Line ' + invalidUrl.line + ': ' + invalidUrl.url + '<br>';
                             });
                         }
                     }
@@ -114,6 +114,8 @@ jQuery(function($) {
         if (message) {
             var noticeClass = status === 'success' ? 'notice-success' : 'notice-error';
             $('#rui-submission-response').html('<div class="notice ' + noticeClass + '"><p>' + message + '</p></div>');
+            // Convert newline characters to <br> tags
+            $('#rui-submission-response .notice p').html($('#rui-submission-response .notice p').html().replace(/\n/g, '<br>'));
             
             // Clear the stored message and status
             sessionStorage.removeItem('rui_submission_message');
