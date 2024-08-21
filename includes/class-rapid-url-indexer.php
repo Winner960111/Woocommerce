@@ -19,13 +19,41 @@ class Rapid_URL_Indexer {
 
     public static function update_database() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
         $column_name = 'project_name_hash';
 
-        if($wpdb->get_var("SHOW COLUMNS FROM $table_name LIKE '$column_name'") != $column_name) {
-            $wpdb->query("ALTER TABLE $table_name ADD $column_name VARCHAR(32)");
-            error_log("Added project_name_hash column to $table_name table");
+        if ($wpdb->get_var("SHOW TABLES LIKE '$projects_table'") != $projects_table) {
+            $sql = "CREATE TABLE $projects_table (
+                id mediumint(9) NOT NULL AUTO_INCREMENT,
+                user_id mediumint(9) NOT NULL,
+                project_name varchar(255) NOT NULL,
+                project_name_hash varchar(32) NOT NULL,
+                urls longtext NOT NULL,
+                task_id varchar(255) DEFAULT NULL,
+                status varchar(50) DEFAULT 'pending',
+                submitted_links int DEFAULT 0,
+                indexed_links int DEFAULT 0,
+                triggered_by varchar(255) DEFAULT NULL,
+                created_at datetime DEFAULT CURRENT_TIMESTAMP,
+                auto_refund_processed tinyint(1) DEFAULT 0,
+                updated_at datetime DEFAULT CURRENT_TIMESTAMP,
+                notify tinyint(1) DEFAULT 0,
+                refunded_credits int DEFAULT 0,
+                initial_report_sent tinyint(1) DEFAULT 0,
+                PRIMARY KEY  (id)
+            ) $charset_collate;";
+
+            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+            dbDelta($sql);
+            error_log("Created $projects_table table");
+        } elseif ($wpdb->get_var("SHOW COLUMNS FROM $projects_table LIKE '$column_name'") != $column_name) {
+            $wpdb->query("ALTER TABLE $projects_table ADD $column_name VARCHAR(32)");
+            error_log("Added project_name_hash column to $projects_table table");
         }
+
+        // Add other table creations or updates here if needed
     }
 
     public static function initialize_plugin() {

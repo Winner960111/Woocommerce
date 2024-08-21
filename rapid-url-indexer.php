@@ -14,6 +14,7 @@ if (!defined('ABSPATH')) exit;
 define('RUI_PLUGIN_FILE', __FILE__);
 define('RUI_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('RUI_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('RUI_DB_VERSION', '1.0');
 
 // Include required files
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-activator.php';
@@ -41,9 +42,10 @@ add_action('plugins_loaded', 'rapid_url_indexer_init');
 
 // Ensure database is updated on plugin update
 function rapid_url_indexer_update_db_check() {
-    if (get_site_option('rapid_url_indexer_db_version') != RUI_DB_VERSION) {
+    $current_db_version = get_option('rapid_url_indexer_db_version', '0');
+    if (version_compare($current_db_version, RUI_DB_VERSION, '<')) {
         Rapid_URL_Indexer::update_database();
-        update_site_option('rapid_url_indexer_db_version', RUI_DB_VERSION);
+        update_option('rapid_url_indexer_db_version', RUI_DB_VERSION);
     }
 }
 add_action('plugins_loaded', 'rapid_url_indexer_update_db_check');
