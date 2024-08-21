@@ -44,8 +44,10 @@ add_action('plugins_loaded', 'rapid_url_indexer_init');
 function rapid_url_indexer_update_db_check() {
     $current_db_version = get_option('rapid_url_indexer_db_version', '0');
     if (version_compare($current_db_version, RUI_DB_VERSION, '<')) {
+        error_log('Updating Rapid URL Indexer database from version ' . $current_db_version . ' to ' . RUI_DB_VERSION);
         Rapid_URL_Indexer::update_database();
         update_option('rapid_url_indexer_db_version', RUI_DB_VERSION);
+        error_log('Rapid URL Indexer database update completed');
     }
 }
 add_action('plugins_loaded', 'rapid_url_indexer_update_db_check');
