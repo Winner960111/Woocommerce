@@ -14,7 +14,7 @@ class Rapid_URL_Indexer {
         add_action('plugins_loaded', array(__CLASS__, 'update_database'));
 
         // Register activation hook
-        register_activation_hook(RUI_PLUGIN_FILE, array(__CLASS__, 'activate'));
+        register_activation_hook(RUI_PLUGIN_DIR . 'rapid-url-indexer.php', array(__CLASS__, 'activate'));
     }
 
     public static function update_database() {
