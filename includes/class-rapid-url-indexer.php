@@ -890,6 +890,8 @@ class Rapid_URL_Indexer {
                     $user_info = get_userdata($user_id);
                     $subject = sprintf(__('Project "%s" Has Been Submitted', 'rapid-url-indexer'), $project->project_name);
                     $message = sprintf(__('Your Rapid URL Indexer project "%s" has been submitted and is being processed.', 'rapid-url-indexer'), $project->project_name);
+                    $message .= "\n\n";
+                    $message .= sprintf(__('Number of submitted URLs: %d', 'rapid-url-indexer'), count($urls));
                     wp_mail($user_info->user_email, $subject, $message);
 
                     // Log the email notification
