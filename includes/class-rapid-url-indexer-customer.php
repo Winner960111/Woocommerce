@@ -303,7 +303,9 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                             } else {
                                 // Update project status to 'pending'
                                 $wpdb->update($table_name, array('status' => 'pending'), array('id' => $project_id));
-                                self::log_submission_attempt($user_id, $project_name, count($urls), 'API Error: Pending retry');
+                                // Log the detailed error for admin
+                                self::log_submission_attempt($user_id, $project_name, count($urls), 'API Error: ' . $api_response['error']);
+                                // Send generic message to customer
                                 wp_send_json_success(array(
                                     'message' => __('Project created but processing pending. It will be retried automatically.', 'rapid-url-indexer'),
                                     'project_id' => $project_id,
