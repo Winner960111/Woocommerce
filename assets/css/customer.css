@@ -35,8 +35,17 @@
 }
 
 .rui-project-submission input[type="text"]::placeholder,
-.rui-project-submission textarea::placeholder {
+.rui-project-submission input[type="text"]::-webkit-input-placeholder,
+.rui-project-submission input[type="text"]::-moz-placeholder,
+.rui-project-submission input[type="text"]:-ms-input-placeholder,
+.rui-project-submission input[type="text"]:-moz-placeholder,
+.rui-project-submission textarea::placeholder,
+.rui-project-submission textarea::-webkit-input-placeholder,
+.rui-project-submission textarea::-moz-placeholder,
+.rui-project-submission textarea:-ms-input-placeholder,
+.rui-project-submission textarea:-moz-placeholder {
     color: #767676 !important;
+    opacity: 1 !important;
 }
 
 .rui-table-wrapper {
