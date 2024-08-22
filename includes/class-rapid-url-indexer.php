@@ -158,7 +158,7 @@ class Rapid_URL_Indexer {
                 self::log_cron_execution('API data retrieved for Project ID: ' . $project_id . '. Processed: ' . $processed_count . ', Indexed: ' . $indexed_count);
 
                 // Update the project table
-                $wpdb->update(
+                $update_result = $wpdb->update(
                     $projects_table,
                     array(
                         'processed_links' => $processed_count,
@@ -167,6 +167,12 @@ class Rapid_URL_Indexer {
                     ),
                     array('id' => $project_id)
                 );
+
+                if ($update_result === false) {
+                    self::log_cron_execution('Error updating project table for Project ID: ' . $project_id . '. MySQL Error: ' . $wpdb->last_error);
+                } else {
+                    self::log_cron_execution('Project table updated successfully for Project ID: ' . $project_id . '. Indexed: ' . $indexed_count);
+                }
 
                 // Update the daily stats table
                 $result = $wpdb->replace(

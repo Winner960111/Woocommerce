@@ -167,11 +167,13 @@ class Rapid_URL_Indexer_API {
         if (self::is_api_response_success($response)) {
             $data = json_decode(wp_remote_retrieve_body($response), true);
             if (isset($data['result'])) {
-                return array(
-                    'processed_count' => isset($data['result']['processed_count']) ? $data['result']['processed_count'] : 0,
-                    'indexed_count' => isset($data['result']['indexed_count']) ? $data['result']['indexed_count'] : 0,
-                    'submitted_count' => isset($data['result']['size']) ? $data['result']['size'] : 0
+                $result = array(
+                    'processed_count' => isset($data['result']['processed_count']) ? intval($data['result']['processed_count']) : 0,
+                    'indexed_count' => isset($data['result']['indexed_count']) ? intval($data['result']['indexed_count']) : 0,
+                    'submitted_count' => isset($data['result']['size']) ? intval($data['result']['size']) : 0
                 );
+                error_log('API Response for task ' . $task_id . ': ' . json_encode($result));
+                return $result;
             }
         }
         self::log_api_error($response);
