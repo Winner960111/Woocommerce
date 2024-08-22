@@ -34,6 +34,11 @@
     color: var(--wp--preset--color--inputtext);
 }
 
+.rui-project-submission input[type="text"]::placeholder,
+.rui-project-submission textarea::placeholder {
+    color: #767676 !important;
+}
+
 .rui-table-wrapper {
     overflow-x: auto;
     max-width: 100%;
