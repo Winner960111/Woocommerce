@@ -139,7 +139,7 @@ class Rapid_URL_Indexer {
 
         // Get the project data
         $project = $wpdb->get_row($wpdb->prepare(
-            "SELECT task_id, submitted_links, status, updated_at FROM $projects_table WHERE id = %d",
+            "SELECT task_id, submitted_links, indexed_links, status, updated_at FROM $projects_table WHERE id = %d",
             $project_id
         ));
 
@@ -153,16 +153,19 @@ class Rapid_URL_Indexer {
             if ($response && isset($response['processed_count']) && isset($response['indexed_count'])) {
                 $processed_count = $response['processed_count'];
                 $indexed_count = $response['indexed_count'];
+                $current_indexed_links = $project->indexed_links;
+                $new_indexed_links = max(0, $indexed_count - $current_indexed_links);
+                $total_indexed_links = $current_indexed_links + $new_indexed_links;
                 $unindexed_count = $processed_count - $indexed_count;
 
-                self::log_cron_execution('API data retrieved for Project ID: ' . $project_id . '. Processed: ' . $processed_count . ', Indexed: ' . $indexed_count);
+                self::log_cron_execution('API data retrieved for Project ID: ' . $project_id . '. Processed: ' . $processed_count . ', Indexed: ' . $indexed_count . ', Current Indexed Links: ' . $current_indexed_links . ', New Indexed Links: ' . $new_indexed_links);
 
                 // Update the project table
                 $update_result = $wpdb->update(
                     $projects_table,
                     array(
                         'processed_links' => $processed_count,
-                        'indexed_links' => $indexed_count,
+                        'indexed_links' => $total_indexed_links,
                         'updated_at' => current_time('mysql')
                     ),
                     array('id' => $project_id)
@@ -171,7 +174,7 @@ class Rapid_URL_Indexer {
                 if ($update_result === false) {
                     self::log_cron_execution('Error updating project table for Project ID: ' . $project_id . '. MySQL Error: ' . $wpdb->last_error);
                 } else {
-                    self::log_cron_execution('Project table updated successfully for Project ID: ' . $project_id . '. Indexed: ' . $indexed_count);
+                    self::log_cron_execution('Project table updated successfully for Project ID: ' . $project_id . '. Total Indexed: ' . $total_indexed_links);
                 }
 
                 // Update the daily stats table
@@ -180,7 +183,7 @@ class Rapid_URL_Indexer {
                     array(
                         'project_id' => $project_id,
                         'date' => $date,
-                        'indexed_count' => $indexed_count,
+                        'indexed_count' => $new_indexed_links,
                         'unindexed_count' => $unindexed_count
                     ),
                     array('%d', '%s', '%d', '%d')
@@ -189,7 +192,7 @@ class Rapid_URL_Indexer {
                 if ($result === false) {
                     self::log_cron_execution('Error updating daily stats for Project ID: ' . $project_id . '. MySQL Error: ' . $wpdb->last_error);
                 } else {
-                    self::log_cron_execution('Daily stats updated successfully for Project ID: ' . $project_id . '. Indexed: ' . $indexed_count . ', Unindexed: ' . $unindexed_count);
+                    self::log_cron_execution('Daily stats updated successfully for Project ID: ' . $project_id . '. New Indexed: ' . $new_indexed_links . ', Unindexed: ' . $unindexed_count);
                 }
             } else {
                 self::log_cron_execution('Failed to retrieve API data for Project ID: ' . $project_id);
@@ -768,6 +771,16 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Twice Daily Cron Job Started');
 
         try {
+            // Update daily stats for all active projects
+            self::log_cron_execution('Starting update_daily_stats for all active projects');
+            global $wpdb;
+            $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
+            $active_projects = $wpdb->get_col("SELECT id FROM $projects_table WHERE status NOT IN ('completed', 'failed', 'refunded') OR updated_at > DATE_SUB(NOW(), INTERVAL 14 DAY)");
+            foreach ($active_projects as $project_id) {
+                self::update_daily_stats($project_id);
+            }
+            self::log_cron_execution('Finished update_daily_stats for all active projects');
+
             // Update project status
             self::log_cron_execution('Starting update_project_status');
             self::update_project_status();
