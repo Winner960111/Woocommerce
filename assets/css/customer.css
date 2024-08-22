@@ -48,6 +48,21 @@
     opacity: 1 !important;
 }
 
+/* Increase specificity and force the color */
+body .rui-project-submission input[type="text"]::placeholder,
+body .rui-project-submission input[type="text"]::-webkit-input-placeholder,
+body .rui-project-submission input[type="text"]::-moz-placeholder,
+body .rui-project-submission input[type="text"]:-ms-input-placeholder,
+body .rui-project-submission input[type="text"]:-moz-placeholder,
+body .rui-project-submission textarea::placeholder,
+body .rui-project-submission textarea::-webkit-input-placeholder,
+body .rui-project-submission textarea::-moz-placeholder,
+body .rui-project-submission textarea:-ms-input-placeholder,
+body .rui-project-submission textarea:-moz-placeholder {
+    color: #767676 !important;
+    opacity: 1 !important;
+}
+
 .rui-table-wrapper {
     overflow-x: auto;
     max-width: 100%;

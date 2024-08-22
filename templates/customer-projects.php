@@ -29,11 +29,28 @@ $projects = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE u
     <script>
         // Clear form fields after page load (which happens after form submission)
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('project_name').value = '';
-            document.getElementById('project_name').placeholder = 'My Project';
-            document.getElementById('urls').value = '';
-            document.getElementById('urls').placeholder = 'https://example.com/some-page/\nhttps://example.org/another-page/\n...';
+            var projectNameInput = document.getElementById('project_name');
+            var urlsTextarea = document.getElementById('urls');
+            
+            projectNameInput.value = '';
+            projectNameInput.placeholder = 'My Project';
+            projectNameInput.style.setProperty('--placeholder-color', '#767676', 'important');
+            
+            urlsTextarea.value = '';
+            urlsTextarea.placeholder = 'https://example.com/some-page/\nhttps://example.org/another-page/\n...';
+            urlsTextarea.style.setProperty('--placeholder-color', '#767676', 'important');
+            
             document.getElementById('notify').checked = false;
+
+            // Apply placeholder color using CSS custom property
+            var style = document.createElement('style');
+            style.textContent = `
+                .rui-project-submission input::placeholder,
+                .rui-project-submission textarea::placeholder {
+                    color: var(--placeholder-color) !important;
+                }
+            `;
+            document.head.appendChild(style);
         });
     </script>
     <div class="rui-credits-display">
