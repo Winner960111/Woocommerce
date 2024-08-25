@@ -352,7 +352,8 @@ class Rapid_URL_Indexer {
                 if ($old_status === 'submitted' && $days_since_creation >= 13) {
                     $new_status = 'completed';
                     self::log_cron_execution("Project {$project->id} marked as completed after 13 days");
-                    self::send_status_change_email($project, $new_status, $processed_links, $indexed_links);
+                    $refunded_credits = $new_status === 'refunded' ? ($project->submitted_links - $indexed_links) : 0;
+                    self::send_status_change_email($project, $new_status, $processed_links, $indexed_links, $refunded_credits);
                 }
 
                 $update_data = array(
@@ -467,7 +468,7 @@ class Rapid_URL_Indexer {
                     ));
 
                     // Send refund notification
-                    self::send_status_change_email($project, 'refunded', $processed_count, $indexed_count);
+                    self::send_status_change_email($project, 'refunded', $processed_count, $indexed_count, $refunded_credits);
                 } else {
                     // If all submitted URLs were indexed, just mark as processed
                     $wpdb->update($table_name, array(
@@ -1013,7 +1014,7 @@ class Rapid_URL_Indexer {
         }
     }
 
-    private static function send_status_change_email($project, $status, $processed_links, $indexed_links) {
+    private static function send_status_change_email($project, $status, $processed_links, $indexed_links, $refunded_credits = 0) {
         // Log the notification attempt
         self::log_action($project->id, 'Email Notification Attempt', json_encode(array(
             'status' => $status,
@@ -1050,7 +1051,6 @@ class Rapid_URL_Indexer {
             } elseif ($status === 'failed') {
                 $message .= "\n" . __('Unfortunately, your project has failed. All credits used for this project have been refunded to your account.', 'rapid-url-indexer') . "\n";
             } elseif ($status === 'refunded') {
-                $refunded_credits = intval($project->refunded_credits);
                 $message .= "\n" . sprintf(__('%d credit(s) have been automatically refunded to your account for URLs that were not indexed within 14 days.', 'rapid-url-indexer'), $refunded_credits) . "\n";
             }
 
