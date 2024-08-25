@@ -838,7 +838,7 @@ class Rapid_URL_Indexer {
     private static function retry_failed_submissions() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
-        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending' AND task_id IS NULL AND created_at <= DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+        $projects = $wpdb->get_results("SELECT * FROM $table_name WHERE status = 'pending' AND (task_id IS NULL OR task_id = '') AND created_at <= DATE_SUB(NOW(), INTERVAL 1 HOUR)");
 
         foreach ($projects as $project) {
             $api_key = get_option('rui_speedyindex_api_key');
@@ -986,17 +986,23 @@ class Rapid_URL_Indexer {
                 $error_details = is_wp_error($response) ? $response->get_error_message() : json_encode($response);
                 error_log('Rapid URL Indexer API Error: ' . $error_details);
                 
+                // Update project status to 'pending' instead of 'failed'
+                $wpdb->update($table_name, array(
+                    'status' => 'pending',
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $project_id));
+
                 $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
                     'user_id' => $user_id,
                     'project_id' => $project_id,
-                    'action' => 'API Error',
+                    'action' => 'API Error - Marked as Pending',
                     'details' => $error_details,
                     'created_at' => current_time('mysql')
                 ));
 
                 return array(
                     'success' => false,
-                    'error' => __('An error occurred while submitting the project. It will be retried automatically.', 'rapid-url-indexer')
+                    'error' => __('An error occurred while submitting the project. It has been marked as pending and will be retried automatically.', 'rapid-url-indexer')
                 );
             }
         } else {
