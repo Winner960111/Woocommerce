@@ -130,6 +130,11 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Purge Projects Completed');
     }
 
+    /**
+     * Update daily stats for a single project.
+     * This method is called by Rapid_URL_Indexer_Cron::update_daily_stats() for each relevant project.
+     * It can also be called directly if needed for a specific project.
+     */
     public static function update_daily_stats($project_id) {
         self::log_cron_execution('Update Daily Stats Started for Project ID: ' . $project_id);
         global $wpdb;
