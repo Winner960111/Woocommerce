@@ -987,46 +987,24 @@ class Rapid_URL_Indexer {
                 $error_details = is_wp_error($response) ? $response->get_error_message() : json_encode($response);
                 error_log('Rapid URL Indexer API Error: ' . $error_details);
             
-                // Check if the error is due to insufficient credits
-                if (strpos($error_details, 'Insufficient credits') !== false) {
-                    // Update project status to 'pending'
-                    $wpdb->update($table_name, array(
-                        'status' => 'pending',
-                        'updated_at' => current_time('mysql')
-                    ), array('id' => $project_id));
+                // Update project status to 'pending' for any API error
+                $wpdb->update($table_name, array(
+                    'status' => 'pending',
+                    'updated_at' => current_time('mysql')
+                ), array('id' => $project_id));
 
-                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                        'user_id' => $user_id,
-                        'project_id' => $project_id,
-                        'action' => 'API Error - Insufficient Credits',
-                        'details' => $error_details,
-                        'created_at' => current_time('mysql')
-                    ));
+                $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                    'user_id' => $user_id,
+                    'project_id' => $project_id,
+                    'action' => 'API Error - Marked as Pending',
+                    'details' => $error_details,
+                    'created_at' => current_time('mysql')
+                ));
 
-                    return array(
-                        'success' => false,
-                        'error' => __('Insufficient credits to submit the project. It has been marked as pending and will be retried automatically.', 'rapid-url-indexer')
-                    );
-                } else {
-                    // For other errors, keep the existing behavior
-                    $wpdb->update($table_name, array(
-                        'status' => 'pending',
-                        'updated_at' => current_time('mysql')
-                    ), array('id' => $project_id));
-
-                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
-                        'user_id' => $user_id,
-                        'project_id' => $project_id,
-                        'action' => 'API Error - Marked as Pending',
-                        'details' => $error_details,
-                        'created_at' => current_time('mysql')
-                    ));
-
-                    return array(
-                        'success' => false,
-                        'error' => __('An error occurred while submitting the project. It has been marked as pending and will be retried automatically.', 'rapid-url-indexer')
-                    );
-                }
+                return array(
+                    'success' => false,
+                    'error' => __('An error occurred while submitting the project. It has been marked as pending and will be retried automatically.', 'rapid-url-indexer')
+                );
             }
         } else {
             return array(
