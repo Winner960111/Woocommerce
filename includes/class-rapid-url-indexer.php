@@ -15,6 +15,9 @@ class Rapid_URL_Indexer {
 
         // Register activation hook
         register_activation_hook(RUI_PLUGIN_DIR . 'rapid-url-indexer.php', array(__CLASS__, 'activate'));
+
+        // Remove any lingering references to the old daily stats update
+        remove_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
     }
 
     public static function update_database() {
