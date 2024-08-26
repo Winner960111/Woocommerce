@@ -132,7 +132,7 @@ class Rapid_URL_Indexer {
 
     /**
      * Update daily stats for a single project.
-     * This method is called by Rapid_URL_Indexer_Cron::update_daily_stats() for each relevant project.
+     * This method is called by process_cron_jobs() twice daily for each relevant project.
      * It can also be called directly if needed for a specific project.
      */
     public static function update_daily_stats($project_id) {
@@ -507,7 +507,6 @@ class Rapid_URL_Indexer {
     }
 
     private static function define_hooks() {
-        add_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
         add_action('rui_process_api_request', array(__CLASS__, 'process_api_request'), 10, 3);
         add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
         add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));

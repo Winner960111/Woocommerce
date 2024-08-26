@@ -1,10 +1,7 @@
 <?php
 class Rapid_URL_Indexer_Cron {
     public static function init() {
-        if (!wp_next_scheduled('rui_daily_stats_update')) {
-            $timestamp = strtotime('tomorrow 00:05:00 UTC');
-            wp_schedule_event($timestamp, 'daily', 'rui_daily_stats_update');
-        }
+        // This method can remain empty or be removed if not needed for other purposes
     }
 
     private static function log_cron_execution($action) {

@@ -52,15 +52,10 @@ function rui_update_routine() {
     $new_version = '1.1'; // Update this with your new version number
 
     if (version_compare($current_version, $new_version, '<')) {
-        // Clear the old cron job
+        // Clear the old cron job if it exists
         $timestamp = wp_next_scheduled('rui_daily_stats_update');
         if ($timestamp) {
             wp_unschedule_event($timestamp, 'rui_daily_stats_update');
-        }
-
-        // Reschedule the cron job
-        if (!wp_next_scheduled('rui_daily_stats_update')) {
-            wp_schedule_event(time(), 'daily', 'rui_daily_stats_update');
         }
 
         // Update the stored version number
@@ -111,8 +106,7 @@ function rui_schedule_cron_jobs() {
         'rui_cron_job' => 'twicedaily',
         'rui_check_abuse' => 'daily',
         'rui_purge_logs' => 'daily',
-        'rui_purge_projects' => 'daily',
-        'rui_daily_stats_update' => 'daily'
+        'rui_purge_projects' => 'daily'
     );
 
     foreach ($cron_jobs as $job => $recurrence) {
