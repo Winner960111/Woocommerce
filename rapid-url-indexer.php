@@ -37,12 +37,6 @@ function rapid_url_indexer_init() {
     Rapid_URL_Indexer_Customer::init();
     Rapid_URL_Indexer_Cron::init();
     Rapid_URL_Indexer_Admin::init();
-    
-    // Clear the old cron job
-    $timestamp = wp_next_scheduled('rui_daily_stats_update');
-    if ($timestamp) {
-        wp_unschedule_event($timestamp, 'rui_daily_stats_update');
-    }
 }
 add_action('plugins_loaded', 'rapid_url_indexer_init');
 
@@ -113,6 +107,12 @@ function rui_schedule_cron_jobs() {
         if (!wp_next_scheduled($job)) {
             wp_schedule_event(time(), $recurrence, $job);
         }
+    }
+
+    // Ensure the old cron job is removed
+    $timestamp = wp_next_scheduled('rui_daily_stats_update');
+    if ($timestamp) {
+        wp_unschedule_event($timestamp, 'rui_daily_stats_update');
     }
 }
 

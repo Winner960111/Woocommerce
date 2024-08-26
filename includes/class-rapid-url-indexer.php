@@ -17,6 +17,14 @@ class Rapid_URL_Indexer {
         register_activation_hook(RUI_PLUGIN_DIR . 'rapid-url-indexer.php', array(__CLASS__, 'activate'));
 
         // Remove any lingering references to the old daily stats update
+        self::remove_old_cron_job();
+    }
+
+    private static function remove_old_cron_job() {
+        $timestamp = wp_next_scheduled('rui_daily_stats_update');
+        if ($timestamp) {
+            wp_unschedule_event($timestamp, 'rui_daily_stats_update');
+        }
         remove_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
     }
 
