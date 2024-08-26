@@ -507,7 +507,7 @@ class Rapid_URL_Indexer {
     }
 
     private static function define_hooks() {
-        // Removed redundant hook for daily stats update
+        add_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
         add_action('rui_process_api_request', array(__CLASS__, 'process_api_request'), 10, 3);
         add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
         add_action('wp_ajax_rui_search_logs', array('Rapid_URL_Indexer_Admin', 'ajax_search_logs'));

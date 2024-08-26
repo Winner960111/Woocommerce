@@ -37,8 +37,37 @@ function rapid_url_indexer_init() {
     Rapid_URL_Indexer_Customer::init();
     Rapid_URL_Indexer_Cron::init();
     Rapid_URL_Indexer_Admin::init();
+    
+    // Clear the old cron job
+    $timestamp = wp_next_scheduled('rui_daily_stats_update');
+    if ($timestamp) {
+        wp_unschedule_event($timestamp, 'rui_daily_stats_update');
+    }
 }
 add_action('plugins_loaded', 'rapid_url_indexer_init');
+
+// Add an update routine
+function rui_update_routine() {
+    $current_version = get_option('rui_version', '0');
+    $new_version = '1.1'; // Update this with your new version number
+
+    if (version_compare($current_version, $new_version, '<')) {
+        // Clear the old cron job
+        $timestamp = wp_next_scheduled('rui_daily_stats_update');
+        if ($timestamp) {
+            wp_unschedule_event($timestamp, 'rui_daily_stats_update');
+        }
+
+        // Reschedule the cron job
+        if (!wp_next_scheduled('rui_daily_stats_update')) {
+            wp_schedule_event(time(), 'daily', 'rui_daily_stats_update');
+        }
+
+        // Update the stored version number
+        update_option('rui_version', $new_version);
+    }
+}
+add_action('plugins_loaded', 'rui_update_routine');
 
 // Ensure database is updated on plugin update
 function rapid_url_indexer_update_db_check() {
