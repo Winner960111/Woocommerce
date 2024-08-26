@@ -138,7 +138,7 @@ class Rapid_URL_Indexer {
      * This method is called by process_cron_jobs() twice daily for each relevant project.
      * It can also be called directly if needed for a specific project.
      */
-    private static function update_daily_stats($project_id) {
+    public static function update_daily_stats($project_id) {
         self::log_cron_execution('Update Daily Stats Started for Project ID: ' . $project_id);
         global $wpdb;
         $projects_table = $wpdb->prefix . 'rapid_url_indexer_projects';
