@@ -723,7 +723,7 @@ class Rapid_URL_Indexer {
                 'project_id' => $project_id,
                 'project_name' => $project->project_name,
                 'status' => $project->status,
-                'submitted_links' => count(json_decode($project->urls)),
+                'submitted_links' => $project->submitted_links,
                 'processed_links' => $project->processed_links,
                 'indexed_links' => $project->indexed_links,
                 'created_at' => $project->created_at,
