@@ -43,7 +43,7 @@ add_action('plugins_loaded', 'rapid_url_indexer_init');
 // Add an update routine
 function rui_update_routine() {
     $current_version = get_option('rui_version', '0');
-    $new_version = '1.1'; // Update this with your new version number
+    $new_version = '1.2'; // Update this with your new version number
 
     if (version_compare($current_version, $new_version, '<')) {
         // Clear the old cron job if it exists
