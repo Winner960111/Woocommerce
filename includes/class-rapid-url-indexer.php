@@ -650,8 +650,18 @@ class Rapid_URL_Indexer {
                     $wpdb->update($table_name, array(
                         'task_id' => $response['task_id'],
                         'status' => 'submitted',
-                        'submitted_links' => count($urls)
+                        'submitted_links' => count($urls),
+                        'updated_at' => current_time('mysql')
                     ), array('id' => $project_id));
+
+                    // Log the API request action
+                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                        'user_id' => $user_id,
+                        'project_id' => $project_id,
+                        'action' => 'API Request',
+                        'details' => json_encode($response),
+                        'created_at' => current_time('mysql')
+                    ));
 
                     // Deduct credits
                     Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'system', $project_id);
@@ -664,8 +674,18 @@ class Rapid_URL_Indexer {
                     // Update project status to 'pending' instead of 'submitted'
                     $wpdb->update($table_name, array(
                         'status' => 'pending',
-                        'submitted_links' => count($urls)
+                        'submitted_links' => count($urls),
+                        'updated_at' => current_time('mysql')
                     ), array('id' => $project_id));
+
+                    // Log the API error
+                    $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
+                        'user_id' => $user_id,
+                        'project_id' => $project_id,
+                        'action' => 'API Error - Marked as Pending',
+                        'details' => json_encode($response),
+                        'created_at' => current_time('mysql')
+                    ));
 
                     // Deduct credits (we still create the project, so we deduct credits)
                     Rapid_URL_Indexer_Customer::update_user_credits($user_id, -count($urls), 'system', $project_id);
