@@ -110,11 +110,20 @@ function rui_schedule_cron_jobs() {
     }
 
     // Ensure the old cron job is removed
-    $timestamp = wp_next_scheduled('rui_daily_stats_update');
-    if ($timestamp) {
-        wp_unschedule_event($timestamp, 'rui_daily_stats_update');
-    }
+    wp_clear_scheduled_hook('rui_daily_stats_update');
 }
+
+// Function to remove old cron job
+function rui_remove_old_cron_job() {
+    wp_clear_scheduled_hook('rui_daily_stats_update');
+}
+
+// Run this function on plugin activation and deactivation
+register_activation_hook(__FILE__, 'rui_remove_old_cron_job');
+register_deactivation_hook(__FILE__, 'rui_remove_old_cron_job');
+
+// Also run it on every page load to ensure it's removed
+add_action('init', 'rui_remove_old_cron_job');
 
 // Reschedule cron jobs after plugin update
 add_action('upgrader_process_complete', 'rui_reschedule_cron_jobs', 10, 2);
