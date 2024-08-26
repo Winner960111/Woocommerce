@@ -845,17 +845,6 @@ class Rapid_URL_Indexer {
             $api_key = get_option('rui_speedyindex_api_key');
             $urls = json_decode($project->urls, true);
             
-            // Check if user has enough credits
-            $user_credits = Rapid_URL_Indexer_Customer::get_user_credits($project->user_id);
-            if ($user_credits < count($urls)) {
-                $wpdb->update($table_name, array(
-                    'status' => 'failed',
-                    'updated_at' => current_time('mysql')
-                ), array('id' => $project->id));
-                self::log_action($project->id, 'Submission Failed', 'Insufficient credits');
-                continue;
-            }
-
             $response = Rapid_URL_Indexer_API::create_task($api_key, $urls, $project->project_name_hash, $project->user_id);
 
             if ($response && isset($response['task_id'])) {
@@ -864,9 +853,6 @@ class Rapid_URL_Indexer {
                     'status' => 'submitted',
                     'updated_at' => current_time('mysql')
                 ), array('id' => $project->id));
-
-                // Deduct credits
-                Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, -count($urls), 'system', $project->id);
 
                 // Log the successful submission
                 self::log_action($project->id, 'Retry Submission Successful', json_encode($response));
@@ -885,8 +871,9 @@ class Rapid_URL_Indexer {
                     self::log_action($project->id, 'Submission Failed', 'Failed after 24 hours of retries');
 
                     // Refund credits to the user
-                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, count($urls), 'system', $project->id);
-                    self::log_action($project->id, 'Credits Refunded', 'Refunded ' . count($urls) . ' credits due to submission failure');
+                    $refund_credits = count($urls);
+                    Rapid_URL_Indexer_Customer::update_user_credits($project->user_id, $refund_credits, 'system', $project->id);
+                    self::log_action($project->id, 'Credits Refunded', "Refunded $refund_credits credits due to submission failure");
                 }
             }
         }
