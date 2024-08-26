@@ -433,7 +433,7 @@ class Rapid_URL_Indexer {
                 $processed_count = $response['processed_count'] ?? 0;
 
                 // Use submitted_count, fallback to processed_count if submitted_count is 0
-                $total_count = $submitted_count > 0 ? $submitted_count : $processed_count;
+                $total_count = $project->submitted_links;
                 $refund_credits = $total_count - $indexed_count;
 
                 if ($refund_credits > 0) {
@@ -928,7 +928,7 @@ class Rapid_URL_Indexer {
         // Check if the project already has a task ID to prevent double submission
         if (empty($project->task_id)) {
             // Check if user has enough credits
-            $credits_needed = count($urls);
+            $credits_needed = $project->submitted_links;
             $available_credits = Rapid_URL_Indexer_Customer::get_user_credits($user_id);
 
             if ($available_credits < $credits_needed) {

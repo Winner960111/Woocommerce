@@ -455,7 +455,7 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
                 'project_name_hash' => $project_name_hash,
                 'urls' => wp_json_encode($urls),
                 'status' => 'pending',
-                'submitted_links' => count($urls),
+                'submitted_links' => count($valid_urls),
                 'notify' => $notify ? 1 : 0,
                 'created_at' => current_time('mysql')
             );
