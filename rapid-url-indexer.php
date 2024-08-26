@@ -122,8 +122,6 @@ function rui_remove_old_cron_job() {
 register_activation_hook(__FILE__, 'rui_remove_old_cron_job');
 register_deactivation_hook(__FILE__, 'rui_remove_old_cron_job');
 
-// Also run it on every page load to ensure it's removed
-add_action('init', 'rui_remove_old_cron_job');
 
 // Reschedule cron jobs after plugin update
 add_action('upgrader_process_complete', 'rui_reschedule_cron_jobs', 10, 2);
