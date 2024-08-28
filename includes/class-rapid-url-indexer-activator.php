@@ -56,7 +56,7 @@ class Rapid_URL_Indexer_Activator {
             date date NOT NULL,
             indexed_count int NOT NULL,
             unindexed_count int NOT NULL,
-            PRIMARY KEY  (id),
+            PRIMARY KEY  ~(id),
             UNIQUE KEY project_date (project_id, date)
         ) $charset_collate;";
 
