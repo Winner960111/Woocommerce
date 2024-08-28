@@ -1,5 +1,14 @@
 <?php
+/**
+ * Class responsible for handling customer-related functionalities.
+ * 
+ * This class manages customer account endpoints, handles project submissions, and manages credits
+ * for users.
+ */
 class Rapid_URL_Indexer_Customer {
+    /**
+     * Initializes the customer functionalities by setting up hooks and actions.
+     */
     public static function init() {
         add_action('init', array(__CLASS__, 'add_my_account_endpoints'), 10);
         add_action('woocommerce_account_menu_items', array(__CLASS__, 'add_my_account_menu_items'), 10);
@@ -24,6 +33,11 @@ class Rapid_URL_Indexer_Customer {
         add_action('template_redirect', array(__CLASS__, 'handle_download_report'));
     }
 
+    /**
+     * Sends an email notification to the user when they run out of credits.
+     * 
+     * @param int $user_id The ID of the user.
+     */
     private static function send_out_of_credits_email($user_id) {
         $user = get_user_by('id', $user_id);
         if (!$user) {
@@ -48,6 +62,12 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         wp_mail($to, $subject, $message, $headers);
     }
 
+    /**
+     * Handles the download of project reports for customers.
+     * 
+     * This function checks for the 'download_report' GET parameter and generates a CSV report
+     * for the specified project if the user has permission.
+     */
     public static function handle_download_report() {
         if (isset($_GET['download_report'])) {
             $project_id = intval($_GET['download_report']);
@@ -81,6 +101,13 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
     }
 
+    /**
+     * Replaces the title on the My Account page for custom endpoints.
+     * 
+     * @param string $title The original title.
+     * @param int $id The ID of the page.
+     * @return string The modified title.
+     */
     public static function replace_my_account_title($title, $id) {
         if (is_account_page()) {
             global $wp;
@@ -94,17 +121,30 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
     }
 
 
+    /**
+     * Adds custom endpoints to the My Account page.
+     */
     public static function add_my_account_endpoints() {
         add_rewrite_endpoint('rui-buy-credits', EP_ROOT | EP_PAGES);
         add_rewrite_endpoint('rui-projects', EP_ROOT | EP_PAGES);
     }
 
 
+    /**
+     * Generates and stores an API key for a new user.
+     * 
+     * @param int $user_id The ID of the user.
+     */
     public static function generate_api_key($user_id) {
         $api_key = wp_generate_password(32, false);
         update_user_meta($user_id, 'rui_api_key', $api_key);
     }
 
+    /**
+     * Displays the API key for the logged-in user.
+     * 
+     * @return string The HTML output displaying the API key.
+     */
     public static function api_key_display() {
         if (!is_user_logged_in()) {
             return;
@@ -121,11 +161,23 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return '<div class="rui-api-key-display"><strong>Your API Key:</strong> <code>' . esc_html($api_key) . '</code></div>';
     }
 
+    /**
+     * Handles the completion of an order and processes credits.
+     * 
+     * @param int $order_id The ID of the completed order.
+     */
     public static function handle_order_completed($order_id) {
         $order = wc_get_order($order_id);
         self::process_order_credits($order);
     }
 
+    /**
+     * Handles changes in order status and processes credits if the order is completed.
+     * 
+     * @param int $order_id The ID of the order.
+     * @param string $old_status The old status of the order.
+     * @param string $new_status The new status of the order.
+     */
     public static function handle_order_status_changed($order_id, $old_status, $new_status) {
         if ($new_status === 'completed') {
             $order = wc_get_order($order_id);
@@ -133,6 +185,11 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
     }
 
+    /**
+     * Processes credits for a completed order.
+     * 
+     * @param WC_Order $order The WooCommerce order object.
+     */
     private static function process_order_credits($order) {
         $order_id = $order->get_id();
 
@@ -180,6 +237,12 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
     }
     
+    /**
+     * Validates a list of URLs, separating them into valid and invalid categories.
+     * 
+     * @param string $urls_input The input string containing URLs.
+     * @return array An array containing valid and invalid URLs.
+     */
     private static function validate_urls($urls_input) {
         $urls = array_filter(array_map('trim', explode("\n", $urls_input)));
         $valid_urls = [];
@@ -196,6 +259,12 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return ['valid' => $valid_urls, 'invalid' => $invalid_urls];
     }
 
+    /**
+     * Validates a URL with lenient rules, allowing for missing schemes and IP addresses.
+     * 
+     * @param string $url The URL to validate.
+     * @return bool True if the URL is valid, false otherwise.
+     */
     public static function is_valid_url_lenient($url) {
         // Normalize the URL
         $url = trim($url);
@@ -231,6 +300,12 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return false;
     }
 
+    /**
+     * Sanitizes a project name by removing invalid characters and limiting its length.
+     * 
+     * @param string $name The project name to sanitize.
+     * @return string The sanitized project name.
+     */
     private static function sanitize_project_name($name) {
         // Remove any non-alphanumeric characters except spaces, hyphens, and underscores
         $name = preg_replace('/[^a-zA-Z0-9 \-_]/', '', $name);
@@ -244,6 +319,12 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return $name;
     }
 
+    /**
+     * Validates a project name, checking for emptiness and length constraints.
+     * 
+     * @param string $name The project name to validate.
+     * @return array An array of error messages, if any.
+     */
     private static function validate_project_name($name) {
         $errors = [];
         
@@ -256,10 +337,21 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return $errors;
     }
 
+    /**
+     * Generates a fallback project name using a unique identifier.
+     * 
+     * @return string The generated fallback project name.
+     */
     private static function generate_fallback_project_name() {
         return 'Project-' . uniqid();
     }
 
+    /**
+     * Handles AJAX requests for project submission.
+     * 
+     * This function validates the project name and URLs, checks user credits, and submits the project
+     * to the API if all conditions are met.
+     */
     public static function handle_ajax_project_submission() {
         try {
             check_ajax_referer('rui_project_submission', 'security');
@@ -372,6 +464,9 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
     }
 
 
+    /**
+     * Adds custom rewrite rules and query vars for the customer menu.
+     */
     public static function customer_menu() {
         add_rewrite_rule('^my-account/projects/?', 'index.php?is_projects_page=1', 'top');
         add_filter('query_vars', array(__CLASS__, 'query_vars'));
@@ -379,11 +474,20 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
     }
 
 
+    /**
+     * Adds custom query variables for the customer menu.
+     * 
+     * @param array $vars The existing query variables.
+     * @return array The modified query variables.
+     */
     public static function query_vars($vars) {
         $vars[] = 'is_projects_page';
         return $vars;
     }
 
+    /**
+     * Redirects to the appropriate template for custom endpoints.
+     */
     public static function template_redirect() {
         if (get_query_var('is_projects_page')) {
             include plugin_dir_path(__FILE__) . '../templates/customer-projects.php';
@@ -392,6 +496,12 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
     }
 
 
+    /**
+     * Displays the user's remaining credits and a button to buy more credits.
+     * 
+     * @param bool $show_button Whether to show the "Buy Credits" button.
+     * @return string The HTML output displaying the credits and button.
+     */
     public static function credits_display($show_button = true) {
         if (!is_user_logged_in()) {
             return;
@@ -407,6 +517,11 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return $output;
     }
 
+    /**
+     * Renders the project submission form.
+     * 
+     * @return string The HTML output of the project submission form.
+     */
     public static function project_submission() {
         ob_start();
         ?>
@@ -428,6 +543,16 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return ob_get_clean();
     }
 
+    /**
+     * Submits a new project to the database and deducts user credits.
+     * 
+     * @param string $project_name The name of the project.
+     * @param array $urls The list of URLs to submit.
+     * @param int $notify Whether to notify the user via email.
+     * @param int $user_id The ID of the user submitting the project.
+     * @return int The ID of the newly created project.
+     * @throws Exception If there are insufficient credits or a database error occurs.
+     */
     public static function submit_project($project_name, $urls, $notify, $user_id) {
         global $wpdb;
         $wpdb->query('START TRANSACTION');
@@ -486,6 +611,13 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
     }
 
+    /**
+     * Handles successful API requests by updating the project status.
+     * 
+     * @param int $project_id The ID of the project.
+     * @param int $user_id The ID of the user.
+     * @param array $urls The list of URLs submitted.
+     */
     public static function handle_api_success($project_id, $user_id, $urls) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
@@ -497,6 +629,16 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         // The credit change was already logged when the project was created
     }
 
+    /**
+     * Updates the user's credits and logs the credit change.
+     * 
+     * @param int $user_id The ID of the user.
+     * @param int $amount The amount of credits to add or deduct.
+     * @param string $triggered_by The reason for the credit change.
+     * @param int $order_id The ID of the order, if applicable.
+     * @param int $project_id The ID of the project, if applicable.
+     * @throws Exception If there are insufficient credits.
+     */
     public static function update_user_credits($user_id, $amount, $triggered_by = 'system', $order_id = 0, $project_id = 0) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
@@ -516,6 +658,15 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         self::log_credit_change($user_id, $amount, $triggered_by, $order_id, $project_id);
     }
 
+    /**
+     * Logs a credit change in the database.
+     * 
+     * @param int $user_id The ID of the user.
+     * @param int $amount The amount of credits changed.
+     * @param string $triggered_by The reason for the credit change.
+     * @param int $order_id The ID of the order, if applicable.
+     * @param int $project_id The ID of the project, if applicable.
+     */
     private static function log_credit_change($user_id, $amount, $triggered_by, $order_id = 0, $project_id = 0) {
         global $wpdb;
         $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';
@@ -539,10 +690,23 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         ));
     }
 
+    /**
+     * Schedules an API request to be processed after a delay.
+     * 
+     * @param int $project_id The ID of the project.
+     * @param array $urls The list of URLs to submit.
+     * @param int $notify Whether to notify the user via email.
+     */
     private static function schedule_api_request($project_id, $urls, $notify) {
         wp_schedule_single_event(time() + 60, 'rui_process_api_request', array($project_id, $urls, $notify));
     }
 
+    /**
+     * Retrieves the number of credits a user has.
+     * 
+     * @param int $user_id The ID of the user.
+     * @return int The number of credits the user has.
+     */
     public static function get_user_credits($user_id) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
@@ -550,6 +714,9 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return $credits ? $credits : 0;
     }
 
+    /**
+     * Enqueues customer scripts and styles for the plugin.
+     */
     public static function enqueue_scripts() {
         wp_enqueue_style('rui-customer-css', RUI_PLUGIN_URL . 'assets/css/customer.css');
         wp_enqueue_script('chart-js', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js', array(), '4.4.1', true);
@@ -561,6 +728,12 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         ));
     }
 
+    /**
+     * Adds custom menu items to the My Account page.
+     * 
+     * @param array $items The existing menu items.
+     * @return array The modified menu items.
+     */
     public static function add_my_account_menu_items($items) {
         $new_items = array();
         $new_items['rui-projects'] = __('My Projects', 'rapid-url-indexer');
@@ -571,14 +744,25 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         return $new_items;
     }
 
+    /**
+     * Displays the content for the "My Projects" endpoint.
+     */
     public static function projects_endpoint_content() {
         include RUI_PLUGIN_DIR . 'templates/customer-projects.php';
     }
 
+    /**
+     * Displays the content for the "Buy Credits" endpoint.
+     */
     public static function buy_credits_endpoint_content() {
         include RUI_PLUGIN_DIR . 'templates/customer-buy-credits.php';
     }
 
+    /**
+     * Handles AJAX requests to retrieve project statistics.
+     * 
+     * This function retrieves daily statistics for a project and returns them as a JSON response.
+     */
     public static function handle_ajax_get_project_stats() {
         check_ajax_referer('rui_ajax_nonce', 'security');
         $project_id = intval($_POST['project_id']);
@@ -628,6 +812,14 @@ Thank you for using Rapid URL Indexer!', 'rapid-url-indexer'),
         }
     }
 
+    /**
+     * Logs a project submission attempt in the database.
+     * 
+     * @param int $user_id The ID of the user.
+     * @param string $project_name The name of the project.
+     * @param int $url_count The number of URLs submitted.
+     * @param string $result The result of the submission attempt.
+     */
     private static function log_submission_attempt($user_id, $project_name, $url_count, $result) {
         global $wpdb;
         $log_table = $wpdb->prefix . 'rapid_url_indexer_logs';

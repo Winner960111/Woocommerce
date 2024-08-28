@@ -1,5 +1,14 @@
 <?php
+/**
+ * Class responsible for plugin activation tasks.
+ * 
+ * This class handles the creation of necessary database tables and checks for missing columns
+ * during the activation of the Rapid URL Indexer plugin.
+ */
 class Rapid_URL_Indexer_Activator {
+    /**
+     * Activates the plugin by creating necessary database tables and checking for missing columns.
+     */
     public static function activate() {
         global $wpdb;
 
@@ -68,6 +77,11 @@ class Rapid_URL_Indexer_Activator {
 
         // Cron jobs are now scheduled in the main plugin file
     }
+    /**
+     * Checks and adds missing columns to existing database tables.
+     * 
+     * This function ensures that the 'triggered_by' column exists in the logs table.
+     */
     private static function check_and_add_missing_columns() {
         global $wpdb;
 

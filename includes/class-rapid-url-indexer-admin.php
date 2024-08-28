@@ -1,7 +1,16 @@
 <?php
 require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer.php';
 
+/**
+ * Class responsible for handling admin-related functionalities.
+ * 
+ * This class manages the admin menu, enqueues scripts, handles AJAX requests, and provides
+ * various admin pages for managing projects, tasks, settings, and logs.
+ */
 class Rapid_URL_Indexer_Admin {
+    /**
+     * Initializes the admin functionalities by setting up hooks and actions.
+     */
     public static function init() {
         add_action('admin_menu', array(__CLASS__, 'admin_menu'));
         add_action('admin_enqueue_scripts', array(__CLASS__, 'enqueue_scripts'));
@@ -16,6 +25,12 @@ class Rapid_URL_Indexer_Admin {
         ));
     }
 
+    /**
+     * Handles the download of project reports.
+     * 
+     * This function checks for the 'download_project_report' GET parameter and generates a CSV report
+     * for the specified project if the user has permission.
+     */
     public static function handle_download_project_report() {
         if (isset($_GET['download_project_report'])) {
             $project_id = intval($_GET['download_project_report']);
@@ -43,6 +58,12 @@ class Rapid_URL_Indexer_Admin {
         }
     }
 
+    /**
+     * Handles AJAX requests to check for potential abuse.
+     * 
+     * This function identifies users with a high refund rate and a large number of submitted URLs,
+     * indicating potential abuse of the system.
+     */
     public static function ajax_check_abuse() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
@@ -88,6 +109,12 @@ class Rapid_URL_Indexer_Admin {
         }
     }
 
+    /**
+     * Displays the admin page for viewing projects.
+     * 
+     * This function retrieves and displays a paginated list of projects, allowing admins to search
+     * and filter projects based on various criteria.
+     */
     public static function view_projects_page() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
@@ -123,6 +150,12 @@ class Rapid_URL_Indexer_Admin {
         include RUI_PLUGIN_DIR . 'templates/admin-projects.php';
     }
 
+    /**
+     * Displays the admin page for viewing tasks.
+     * 
+     * This function retrieves and displays a paginated list of tasks from the API, allowing admins
+     * to search and filter tasks based on various criteria.
+     */
     public static function view_tasks_page() {
         $api_key = get_option('rui_speedyindex_api_key');
         $search = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
@@ -146,15 +179,26 @@ class Rapid_URL_Indexer_Admin {
         include RUI_PLUGIN_DIR . 'templates/admin-tasks.php';
     }
 
+    /**
+     * Renders the checkbox for deleting data on plugin uninstall.
+     */
     public static function delete_data_on_uninstall_callback() {
         $delete_data_on_uninstall = get_option('rui_delete_data_on_uninstall', 0);
         echo '<input type="checkbox" name="rui_delete_data_on_uninstall" value="1" ' . checked(1, $delete_data_on_uninstall, false) . ' />';
     }
 
+    /**
+     * Retrieves the API key from the WordPress options.
+     * 
+     * @return string The API key.
+     */
     private static function get_api_key() {
         return get_option('speedyindex_api_key');
     }
 
+    /**
+     * Adds the admin menu and submenu pages for the plugin.
+     */
     public static function admin_menu() {
         add_menu_page(
             'Rapid URL Indexer',
@@ -211,6 +255,12 @@ class Rapid_URL_Indexer_Admin {
         );
     }
 
+    /**
+     * Displays the main admin dashboard page.
+     * 
+     * This function provides an overview of the plugin's status, including project counts and
+     * available credits.
+     */
     public static function admin_page() {
         global $wpdb;
         
@@ -232,10 +282,18 @@ class Rapid_URL_Indexer_Admin {
         include RUI_PLUGIN_DIR . 'templates/admin-dashboard.php';
     }
 
+    /**
+     * Displays the admin page for managing credits.
+     */
     public static function manage_credits_page() {
         include RUI_PLUGIN_DIR . 'templates/admin-manage-credits.php';
     } 
 
+    /**
+     * Enqueues admin scripts and styles for the plugin.
+     * 
+     * @param string $hook The current admin page hook.
+     */
     public static function enqueue_scripts($hook) {
         $valid_pages = array(
             'toplevel_page_rapid-url-indexer',
@@ -257,6 +315,12 @@ class Rapid_URL_Indexer_Admin {
     }
 
 
+    /**
+     * Retrieves the number of credits a user has.
+     * 
+     * @param int $user_id The ID of the user.
+     * @return int The number of credits the user has.
+     */
     public static function get_user_credits($user_id) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_credits';
@@ -264,6 +328,12 @@ class Rapid_URL_Indexer_Admin {
         return $credits ? $credits : 0;
     }
 
+    /**
+     * Displays the admin settings page and handles form submissions.
+     * 
+     * This function allows admins to update various plugin settings and triggers an abuse check
+     * after saving the settings.
+     */
     public static function settings_page() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             check_admin_referer('rui_settings');
@@ -286,6 +356,9 @@ class Rapid_URL_Indexer_Admin {
         include RUI_PLUGIN_DIR . 'templates/admin-settings.php';
     }
 
+    /**
+     * Registers the plugin settings with WordPress.
+     */
     public static function register_settings() {
         register_setting('rui_settings', 'rui_speedyindex_api_key');
         register_setting('rui_settings', 'rui_delete_data_on_uninstall');
@@ -311,6 +384,12 @@ class Rapid_URL_Indexer_Admin {
         ));
     }
 
+    /**
+     * Displays the admin page for viewing logs.
+     * 
+     * This function retrieves and displays a paginated list of log entries, allowing admins to
+     * search and filter logs based on various criteria.
+     */
     public static function logs_page() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
@@ -359,6 +438,12 @@ class Rapid_URL_Indexer_Admin {
         include RUI_PLUGIN_DIR . 'templates/admin-logs.php';
     }
 
+    /**
+     * Handles AJAX requests to search logs.
+     * 
+     * This function retrieves log entries based on the search criteria and returns them as a JSON
+     * response.
+     */
     public static function ajax_search_logs() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
@@ -392,6 +477,11 @@ class Rapid_URL_Indexer_Admin {
         wp_send_json_success($output);
     }
 
+    /**
+     * Limits the number of log entries by deleting old entries.
+     * 
+     * This function deletes log entries older than the configured age limit.
+     */
     public static function limit_log_entries() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
