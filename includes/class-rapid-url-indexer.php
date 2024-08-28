@@ -1,7 +1,16 @@
 <?php
+/**
+ * Class Rapid_URL_Indexer
+ *
+ * This class handles the core functionality of the Rapid URL Indexer plugin.
+ * It manages the initialization, database updates, cron jobs, and API interactions.
+ */
 class Rapid_URL_Indexer {
     const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
 
+    /**
+     * Initialize the plugin by setting up hooks and actions.
+     */
     public static function init() {
         add_action('init', array(__CLASS__, 'initialize_plugin'));
         add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
@@ -20,11 +29,17 @@ class Rapid_URL_Indexer {
         add_action('init', array(__CLASS__, 'remove_old_cron_job'));
     }
 
+    /**
+     * Remove old cron jobs related to daily stats update.
+     */
     public static function remove_old_cron_job() {
         wp_clear_scheduled_hook('rui_daily_stats_update');
         remove_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
     }
 
+    /**
+     * Update the database schema for the plugin, creating or modifying tables as needed.
+     */
     public static function update_database() {
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
@@ -73,12 +88,18 @@ class Rapid_URL_Indexer {
         // Add other table creations or updates here if needed
     }
 
+    /**
+     * Load dependencies, define hooks, and initialize cron jobs for the plugin.
+     */
     public static function initialize_plugin() {
         self::load_dependencies();
         self::define_hooks();
         self::initialize_cron_jobs();
     }
 
+    /**
+     * Initialize and schedule cron jobs for various plugin tasks.
+     */
     private static function initialize_cron_jobs() {
         $cron_jobs = array(
             'rui_cron_job' => 'twicedaily',
@@ -102,6 +123,9 @@ class Rapid_URL_Indexer {
         add_action('rui_daily_stats_update', array(__CLASS__, 'update_daily_stats'));
     }
 
+    /**
+     * Purge old logs from the database based on the configured age limit.
+     */
     public static function purge_logs() {
         self::log_cron_execution('Purge Logs Started');
 
@@ -117,6 +141,9 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Purge Logs Completed');
     }
 
+    /**
+     * Purge old projects and their associated stats from the database based on the configured age limit.
+     */
     public static function purge_projects() {
         self::log_cron_execution('Purge Projects Started');
 
@@ -142,6 +169,13 @@ class Rapid_URL_Indexer {
      * Update daily stats for a single project.
      * This method is called by process_cron_jobs() twice daily for each relevant project.
      * It can also be called directly if needed for a specific project.
+     */
+    /**
+     * Update daily stats for a single project.
+     * This method is called by process_cron_jobs() twice daily for each relevant project.
+     * It can also be called directly if needed for a specific project.
+     *
+     * @param int $project_id The ID of the project to update stats for.
      */
     public static function update_daily_stats($project_id) {
         self::log_cron_execution('Update Daily Stats Started for Project ID: ' . $project_id);
@@ -213,6 +247,12 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Update Daily Stats Completed for Project ID: ' . $project_id);
     }
 
+    /**
+     * Retrieve the stats for a given project.
+     *
+     * @param int $project_id The ID of the project to retrieve stats for.
+     * @return array The stats for the project.
+     */
     public static function get_project_stats($project_id) {
         self::log_cron_execution('Get Project Stats Started');
 
@@ -252,6 +292,9 @@ class Rapid_URL_Indexer {
     }
 
 
+    /**
+     * Check for potential abuse by users based on their URL submission and refund rates.
+     */
     public static function check_abuse() {
         self::log_cron_execution('Check Abuse Started');
         
@@ -332,6 +375,9 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Check Abuse Completed');
     }
 
+    /**
+     * Update the status of projects based on their current progress and API responses.
+     */
     public static function update_project_status() {
         self::log_cron_execution('Update Project Status Started');
 
@@ -430,6 +476,9 @@ class Rapid_URL_Indexer {
     }
 
 
+    /**
+     * Automatically refund credits for projects that have not been fully indexed within a set period.
+     */
     public static function auto_refund() {
         self::log_cron_execution('Auto Refund Started');
 
@@ -503,18 +552,30 @@ class Rapid_URL_Indexer {
         self::log_cron_execution('Auto Refund Completed');
     }
 
+    /**
+     * Generate a fallback project name based on the URLs provided.
+     *
+     * @param array $urls The URLs to generate a name from.
+     * @return string The generated project name.
+     */
     public static function generate_fallback_project_name($urls) {
         $urls_string = implode('', $urls);
         $hash = md5($urls_string);
         return "noname_" . $hash;
     }
 
+    /**
+     * Load the required dependencies for the plugin.
+     */
     private static function load_dependencies() {
         require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-admin.php';
         require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-customer.php';
         require_once RUI_PLUGIN_DIR . 'includes/class-rapid-url-indexer-api.php';
     }
 
+    /**
+     * Define the hooks and actions used by the plugin.
+     */
     private static function define_hooks() {
         add_action('rui_process_api_request', array(__CLASS__, 'process_api_request'), 10, 3);
         add_action('rest_api_init', array(__CLASS__, 'register_rest_routes'));
@@ -524,6 +585,9 @@ class Rapid_URL_Indexer {
         // Admin notice for SpeedyIndex API issues
     }
     
+    /**
+     * Add a custom field for credits in WooCommerce product options.
+     */
     public static function add_credits_field() {
         global $product_object;
 
@@ -543,11 +607,19 @@ class Rapid_URL_Indexer {
         }
     }
     
+    /**
+     * Save the credits field value when a WooCommerce product is saved.
+     *
+     * @param int $post_id The ID of the product being saved.
+     */
     public static function save_credits_field($post_id) {
         $credits_amount = isset($_POST['_credits_amount']) ? intval($_POST['_credits_amount']) : 0;
         update_post_meta($post_id, '_credits_amount', $credits_amount);
     }
 
+    /**
+     * Register REST API routes for the plugin.
+     */
     public static function register_rest_routes() {
         register_rest_route('api/v1', '/projects', array(
             'methods' => 'POST',
@@ -574,6 +646,12 @@ class Rapid_URL_Indexer {
         ));
     }
 
+    /**
+     * Authenticate API requests using an API key.
+     *
+     * @param WP_REST_Request $request The request object.
+     * @return bool|WP_Error True if authenticated, WP_Error otherwise.
+     */
     public static function authenticate_api_request($request) {
         $api_key = $request->get_header('X-API-Key');
         if (!$api_key) {
@@ -588,6 +666,12 @@ class Rapid_URL_Indexer {
         return true;
     }
 
+    /**
+     * Handle the submission of a new project via the REST API.
+     *
+     * @param WP_REST_Request $request The request object.
+     * @return WP_REST_Response The response object.
+     */
     public static function handle_project_submission($request) {
         try {
             $params = $request->get_params();
@@ -713,6 +797,12 @@ class Rapid_URL_Indexer {
         }
     }
     
+    /**
+     * Get the status of a project via the REST API.
+     *
+     * @param WP_REST_Request $request The request object.
+     * @return WP_REST_Response|WP_Error The response object or WP_Error on failure.
+     */
     public static function get_project_status($request) {
         $project_id = intval($request['id']);
         $api_key = $request->get_header('X-API-Key');
@@ -746,6 +836,12 @@ class Rapid_URL_Indexer {
         }
     }
 
+    /**
+     * Download the report for a project via the REST API.
+     *
+     * @param WP_REST_Request $request The request object.
+     * @return WP_REST_Response|WP_Error The response object or WP_Error on failure.
+     */
     public static function download_project_report($request) {
         $project_id = intval($request['id']);
         $api_key = $request->get_header('X-API-Key');
@@ -780,6 +876,12 @@ class Rapid_URL_Indexer {
         return new WP_REST_Response($report_csv, 200, array('Content-Type' => 'text/csv', 'Content-Disposition' => 'attachment; filename="project-report.csv"'));
     }
 
+    /**
+     * Get the credits balance for a user via the REST API.
+     *
+     * @param WP_REST_Request $request The request object.
+     * @return WP_REST_Response|WP_Error The response object or WP_Error on failure.
+     */
     public static function get_credits_balance($request) {
         $api_key = $request->get_header('X-API-Key');
         if (!$api_key) {
@@ -797,6 +899,9 @@ class Rapid_URL_Indexer {
         return new WP_REST_Response(array('credits' => $credits), 200);
     }
 
+    /**
+     * Process scheduled cron jobs for the plugin.
+     */
     public static function process_cron_jobs() {
         self::log_cron_execution('Twice Daily Cron Job Started');
 
@@ -833,6 +938,11 @@ class Rapid_URL_Indexer {
         }
     }
 
+    /**
+     * Log the execution of a cron job.
+     *
+     * @param string $action The action being logged.
+     */
     private static function log_cron_execution($action) {
         global $wpdb;
         $result = $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
@@ -851,6 +961,13 @@ class Rapid_URL_Indexer {
         }
     }
 
+    /**
+     * Log a specific action related to a project.
+     *
+     * @param int $project_id The ID of the project.
+     * @param string $action The action being logged.
+     * @param string $details Additional details about the action.
+     */
     private static function log_action($project_id, $action, $details) {
         global $wpdb;
         $result = $wpdb->insert($wpdb->prefix . 'rapid_url_indexer_logs', array(
@@ -868,6 +985,9 @@ class Rapid_URL_Indexer {
     }
 
 
+    /**
+     * Retry submissions for projects that have failed to submit to the API.
+     */
     private static function retry_failed_submissions() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_projects';
@@ -912,6 +1032,15 @@ class Rapid_URL_Indexer {
     }
 
 
+    /**
+     * Process an API request to submit a project.
+     *
+     * @param int $project_id The ID of the project.
+     * @param array $urls The URLs to be submitted.
+     * @param bool $notify Whether to notify the user.
+     * @param int $user_id The ID of the user submitting the project.
+     * @return array The result of the API request.
+     */
     public static function process_api_request($project_id, $urls, $notify, $user_id) {
         global $wpdb;
 
@@ -1033,6 +1162,15 @@ class Rapid_URL_Indexer {
         }
     }
 
+    /**
+     * Send an email notification to the user about a change in project status.
+     *
+     * @param object $project The project object.
+     * @param string $status The new status of the project.
+     * @param int $processed_links The number of processed links.
+     * @param int $indexed_links The number of indexed links.
+     * @param int $refunded_credits The number of credits refunded, if any.
+     */
     private static function send_status_change_email($project, $status, $processed_links, $indexed_links, $refunded_credits = 0) {
         // Log the notification attempt
         self::log_action($project->id, 'Email Notification Attempt', json_encode(array(
@@ -1095,6 +1233,13 @@ class Rapid_URL_Indexer {
         }
     }
 
+    /**
+     * Handle errors that occur during API requests or other operations.
+     *
+     * @param Exception $error The exception object.
+     * @param int $user_id The ID of the user involved in the error.
+     * @return WP_REST_Response The response object with error details.
+     */
     private static function handle_error($error, $user_id) {
         $error_message = 'Rapid URL Indexer Error: ' . $error->getMessage();
         error_log($error_message);
