@@ -1,9 +1,19 @@
 <?php
+/**
+ * Class responsible for interacting with the SpeedyIndex API.
+ * It handles API requests, error logging, and notifications.
+ */
 class Rapid_URL_Indexer_API {
     const API_BASE_URL = 'https://api.speedyindex.com';
     const API_RETRY_DELAY = 5; // Delay in seconds before retrying a failed API request 
     const API_MAX_RETRIES = 3; // Maximum number of retries for a failed API request
 
+    /**
+     * Retrieves the account balance from the SpeedyIndex API.
+     *
+     * @param string $api_key The API key for authentication.
+     * @return array|false The account balance data or false on failure.
+     */
     public static function get_account_balance($api_key) {
         $response = self::make_api_request('GET', '/v2/account', $api_key);
         
@@ -17,6 +27,14 @@ class Rapid_URL_Indexer_API {
         }
     }
 
+    /**
+     * Retrieves tasks from the SpeedyIndex API.
+     *
+     * @param string $api_key The API key for authentication.
+     * @param int $page The page number for pagination.
+     * @param string $search Optional search term to filter tasks.
+     * @return array|false The list of tasks or false on failure.
+     */
     public static function get_tasks($api_key, $page = 0, $search = '') {
         $endpoint = "/v2/task/google/indexer/list/$page";
         if (!empty($search)) {
@@ -48,6 +66,13 @@ class Rapid_URL_Indexer_API {
         }
     }
 
+    /**
+     * Retrieves the total number of tasks from the SpeedyIndex API.
+     *
+     * @param string $api_key The API key for authentication.
+     * @param string $search Optional search term to filter tasks.
+     * @return int The total number of tasks.
+     */
     public static function get_total_tasks($api_key, $search = '') {
         $endpoint = "/v2/task/google/indexer/count";
         if (!empty($search)) {
@@ -64,6 +89,11 @@ class Rapid_URL_Indexer_API {
         }
     }
 
+    /**
+     * Checks if the account balance is below a certain threshold and notifies the admin if necessary.
+     *
+     * @param int $balance The current account balance.
+     */
     private static function check_low_balance($balance) {
         $low_balance_threshold = get_option('rui_low_balance_threshold', 100000);
         if ($balance < $low_balance_threshold) {
@@ -88,6 +118,12 @@ class Rapid_URL_Indexer_API {
         }
     }
 
+    /**
+     * Sends a notification email to the admin.
+     *
+     * @param string $subject The subject of the email.
+     * @param string $message The message body of the email.
+     */
     private static function notify_admin($subject, $message = '') {
         if (empty($message)) {
             $message = $subject; // Use the subject as the message if no message is provided
@@ -95,10 +131,22 @@ class Rapid_URL_Indexer_API {
         wp_mail(get_option('admin_email'), $subject, $message);
     }
 
+    /**
+     * Checks if the API response indicates a successful request.
+     *
+     * @param array|WP_Error $response The API response.
+     * @return bool True if the response is successful, false otherwise.
+     */
     private static function is_api_response_success($response) {
         return wp_remote_retrieve_response_code($response) === 200;
     }
 
+    /**
+     * Logs an API error to the database and error log.
+     *
+     * @param array|WP_Error $response The API response or error.
+     * @param int $project_id The ID of the project associated with the error.
+     */
     private static function log_api_error($response, $project_id = 0) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'rapid_url_indexer_logs';
@@ -133,6 +181,15 @@ class Rapid_URL_Indexer_API {
 
         error_log('SpeedyIndex API Error for Project ID ' . $project_id . ': ' . json_encode($error_details));
     }
+    /**
+     * Creates a new task in the SpeedyIndex API.
+     *
+     * @param string $api_key The API key for authentication.
+     * @param array $urls The list of URLs to be indexed.
+     * @param string|null $title Optional title for the task.
+     * @param int|null $user_id Optional user ID for tracking.
+     * @return array|false The API response data or false on failure.
+     */
     public static function create_task($api_key, $urls, $title = null, $user_id = null) {
         $body = array('urls' => $urls);
         if ($title !== null) {
@@ -161,6 +218,13 @@ class Rapid_URL_Indexer_API {
         return self::handle_api_response($response);
     }
 
+    /**
+     * Retrieves the status of a specific task from the SpeedyIndex API.
+     *
+     * @param string $api_key The API key for authentication.
+     * @param string $task_id The ID of the task.
+     * @return array|false The task status data or false on failure.
+     */
     public static function get_task_status($api_key, $task_id) {
         $response = self::make_api_request('POST', '/v2/task/google/indexer/status', $api_key, array('task_id' => $task_id));
         
@@ -181,6 +245,12 @@ class Rapid_URL_Indexer_API {
     }
 
 
+    /**
+     * Handles the API response, logging errors and notifying the admin if necessary.
+     *
+     * @param array|WP_Error $response The API response.
+     * @return array|false The response data or false on error.
+     */
     private static function handle_api_response($response) {
         if (is_wp_error($response)) {
             $error_message = $response->get_error_message();
@@ -230,6 +300,15 @@ class Rapid_URL_Indexer_API {
     }
 
 
+    /**
+     * Makes an API request to the SpeedyIndex API.
+     *
+     * @param string $method The HTTP method (GET or POST).
+     * @param string $endpoint The API endpoint.
+     * @param string $api_key The API key for authentication.
+     * @param array|null $body Optional request body for POST requests.
+     * @return array|WP_Error The API response or WP_Error on failure.
+     */
     private static function make_api_request($method, $endpoint, $api_key, $body = null) {
         $retries = 0;
         
@@ -284,6 +363,13 @@ class Rapid_URL_Indexer_API {
 
 
 
+    /**
+     * Downloads the report for a specific task from the SpeedyIndex API.
+     *
+     * @param string $api_key The API key for authentication.
+     * @param string $task_id The ID of the task.
+     * @return string|false The CSV report data or false on failure.
+     */
     public static function download_task_report($api_key, $task_id) {
         $response = self::make_api_request('POST', '/v2/task/google/indexer/report', $api_key, array('task_id' => $task_id));
         
@@ -306,6 +392,12 @@ class Rapid_URL_Indexer_API {
         }
     }
 
+    /**
+     * Generates a CSV string from an array of data.
+     *
+     * @param array $data The data to be converted into CSV format.
+     * @return string The generated CSV string.
+     */
     public static function generate_csv($data) {
         $output = fopen('php://temp', 'w'); 
         foreach ($data as $row) {
